@@ -1,327 +1,128 @@
-<!-- FILE: index.html (WhoAI | 研究統合＋多言語 | public/assets/stage1/*)
-  ✅ 画像パスは public/assets/stage1/ に統一
-  ✅ preload 削除（警告回避）+ fetchpriority
-  ✅ favicon 404対策（データURI）
-  ✅ スクリプトのカッコ/セミコロン整備（SyntaxError防止）
--->
 <!DOCTYPE html>
-<html lang="ja" data-theme="dark">
+<html lang="ja">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>WhoAI</title>
   <meta name="color-scheme" content="dark light" />
-  <!-- 404回避用の最小favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>">
   <style>
-    :root{--bg:#000;--fg:#fff;--muted:rgba(255,255,255,.72);--panel:rgba(255,255,255,.08);--accent:#7cc1ff;--ok:#8ee78e}
+    :root{
+      --bg:#000;--fg:#fff;--muted:rgba(255,255,255,.8);--glass:rgba(255,255,255,.08);
+      --border:rgba(255,255,255,.2);--accent:#f5a3b6;--shadow:0 24px 80px rgba(0,0,0,.45)
+    }
+    *{box-sizing:border-box}
     html,body{height:100%;margin:0}
-    body{font-family:"Noto Sans JP",system-ui,-apple-system,Segoe UI,Roboto,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif;color:var(--fg);
-      background:#000 url('public/assets/stage1/space_background.png') center/cover fixed no-repeat}
-    .wrap{min-height:100%;backdrop-filter: blur(2px);background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.6))}
-    header{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 16px}
-    .brand{display:flex;gap:10px;align-items:center}
-    .brand .dot{width:10px;height:10px;background:var(--accent);border-radius:50%;box-shadow:0 0 10px var(--accent)}
-    .tagline{font-size:12px;color:var(--muted)}
-    .tray{display:flex;gap:8px;align-items:center}
-    select,button,input{color:var(--fg);background:var(--panel);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px 10px}
-    button.primary{background:var(--accent);color:#001018;border:none}
-    button.ghost{background:transparent;border:1px solid rgba(255,255,255,.25)}
-    .container{width:min(960px,92vw);margin:0 auto;padding:8px 0 40px}
-    .hero{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;align-items:center;margin-top:18px;position:relative}
-    .card{background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px}
-    .grid{display:grid;gap:12px}
-    .grid.cols2{grid-template-columns:1fr 1fr}
-    .grid.cols3{grid-template-columns:1fr 1fr 1fr}
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.25);font-size:12px}
-    .muted{color:var(--muted);font-size:12px}
-    .hidden{display:none!important}
-    .tabs{display:flex;gap:6px;margin:12px 0}
-    .tabs button.active{background:rgba(255,255,255,.16)}
-    .progress{height:8px;background:rgba(255,255,255,.15);border-radius:999px;overflow:hidden}
-    .progress>i{display:block;height:100%;background:var(--ok);width:0%}
-    /* cover art */
-    .artCard{display:flex;align-items:center;justify-content:center;min-height:320px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.12);border-radius:16px}
-    .heroArt{width:min(340px,38vw);max-width:420px;height:auto;filter:drop-shadow(0 10px 24px rgba(0,0,0,.6)) drop-shadow(0 0 14px rgba(124,193,255,.55));animation:bob 4.5s ease-in-out infinite}
-    @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-    .bigCopy{font-size:28px;line-height:1.25}
-    /* chips */
-    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-    .chip{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:74px;padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);cursor:pointer}
-    .chip.selected{background:var(--accent);color:#001018;border-color:transparent}
-    .chip .emoji{font-size:22px;line-height:1}
-    .chip .label{font-size:12px;opacity:.95}
-    .star{position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 8px #fff;opacity:.9;animation:fly 800ms ease-out forwards}
-    @keyframes fly{0%{transform:translate(0,0) scale(1)}100%{transform:translate(160px,-220px) scale(.6);opacity:0}}
+    body{
+      font-family: "Noto Sans JP", system-ui, -apple-system, Segoe UI, Roboto, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      color:var(--fg);
+      background:#000 url('public/assets/stage1/space_background.png') center/cover fixed no-repeat;
+    }
+    .overlay{position:fixed;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.55))}
+    .wrap{min-height:100%;display:grid;place-items:center;padding:32px}
+    .panel{
+      width:min(980px,96vw); padding:32px 22px 26px; text-align:center; border-radius:28px;
+      background:var(--glass); border:1px solid var(--border); box-shadow:var(--shadow);
+      backdrop-filter:saturate(130%) blur(4px);
+    }
+    .heroImg{width:min(320px,60vw); max-width:360px; height:auto; border-radius:12px; background:#fff;
+      box-shadow:0 14px 36px rgba(0,0,0,.35); image-rendering:auto;
+    }
+    h1{font-size: clamp(28px, 6vw, 56px); margin:18px 0 10px; letter-spacing:.02em}
+    .lead{font-size: clamp(14px, 2.4vw, 20px); color:var(--muted); margin:0 auto 18px; max-width:780px; line-height:1.7}
+    .cta{display:flex; justify-content:center; margin: 10px 0 8px}
+    .btn{
+      background:var(--accent); color:#2a0c14; border:none; border-radius:14px; padding:14px 20px; font-weight:800;
+      box-shadow:0 10px 30px rgba(245,163,182,.35); cursor:pointer; font-size:16px;
+    }
+    .lang{margin-top:12px; font-size:14px}
+    .lang a{color:#fff; opacity:.95; text-decoration:underline; cursor:pointer; margin:0 6px}
+    .hint{opacity:.65; font-size:12px; margin-top:6px}
+    footer{position:fixed; inset:auto 0 8px 0; display:flex; justify-content:center; pointer-events:none}
   </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div class="brand">
-      <div class="dot"></div>
-      <div>
-        <div style="font-weight:700">WhoAI</div>
-        <div class="tagline" data-i18n="tagline">朝30秒・夜3秒。小さな約束が物語を進める。</div>
+  <div class="overlay" aria-hidden="true"></div>
+  <div class="wrap">
+    <main class="panel" role="main">
+      <img src="public/assets/stage1/miwacchi_open.png" alt="companion" class="heroImg" loading="eager" decoding="async" fetchpriority="high" />
+      <h1 data-i18n="welcome_title">WhoAIへようこそ</h1>
+      <p class="lead" data-i18n="welcome_body">
+        まずはタネのタイプを選んで、名前を付けてから育てよう。ポイントが貯まるとマカロンで進化！
+      </p>
+      <div class="cta">
+        <button class="btn" id="btnStart" data-i18n="start_seed">はじめる（タネを選ぶ）</button>
       </div>
-    </div>
-    <div class="tray">
-      <span class="pill" id="themePill"><span>●</span><span id="themeText">Blue = Focus</span></span>
-      <select id="langSelect" title="Language">
-        <option value="ja">日本語</option>
-        <option value="en">English</option>
-        <option value="zh-Hans">简体中文</option>
-        <option value="zh-Hant">繁體中文</option>
-        <option value="ko">한국어</option>
-      </select>
-      <button class="ghost" id="btnExport" data-i18n="export_csv">CSV書き出し</button>
-      <button class="ghost" id="btnReset" data-i18n="reset">リセット</button>
-    </div>
-  </header>
-
-  <main class="container">
-    <!-- INDEX -->
-    <section id="view-index" class="hero">
-      <div class="card grid">
-        <div style="font-weight:700;font-size:14px;letter-spacing:.08em;color:var(--muted)">WHOAI</div>
-        <h1 class="bigCopy" data-i18n="index_h1">朝30秒・夜3秒。あなたの小さな約束が、物語を進める。</h1>
-        <p class="muted" data-i18n="index_p">7日続けると、名前と見た目が解禁されます。最初の1週間は“関係”づくりに集中します。</p>
-        <div style="display:flex;gap:8px">
-          <button class="primary" id="btnStart" data-i18n="start">はじめる</button>
-          <button class="ghost" id="btnContinue" data-i18n="continue">前回の続き</button>
-        </div>
-        <div class="muted" style="opacity:.8;font-size:11px" data-i18n="research_hint">※ 研究目的で匿名ログを保存します。設定からオプトアウトできます。</div>
+      <div class="lang">
+        <a data-lang="ja">日本語</a> ｜
+        <a data-lang="en">English</a> ｜
+        <a data-lang="zh-Hans">简体</a> ｜
+        <a data-lang="zh-Hant">繁體</a> ｜
+        <a data-lang="ko">한국어</a>
       </div>
-      <div class="artCard">
-        <img src="public/assets/stage1/miwacchi_open.png" alt="Miwa companion opening" class="heroArt" loading="eager" decoding="async" fetchpriority="high" width="420" height="420" />
-      </div>
-    </section>
-
-    <!-- GUIDE -->
-    <section id="view-guide" class="card hidden">
-      <div class="grid">
-        <h2 data-i18n="guide_h2">体験のながれ</h2>
-        <ol>
-          <li data-i18n="guide_1">朝：合言葉→“今日のひとくち”を選ぶ</li>
-          <li data-i18n="guide_2">日中：1分実行→ワンタップ報告</li>
-          <li data-i18n="guide_3">夜：3秒ふりかえり→1コマ進む</li>
-        </ol>
-        <div style="display:flex;justify-content:flex-end"><button class="primary" id="btnGuideNext" data-i18n="guide_next">理解した／はじめる</button></div>
-      </div>
-    </section>
-
-    <!-- WEEK PLEDGE -->
-    <section id="view-week" class="card hidden">
-      <h2 data-i18n="pledge_title">今週の約束</h2>
-      <div class="grid cols3">
-        <label><div class="muted" data-i18n="pledge_days">目標日数</div>
-          <select id="selDays"><option value="3">3</option><option value="4">4</option><option value="5" selected>5</option></select>
-        </label>
-        <label><div class="muted" data-i18n="pledge_xp">XP前払</div>
-          <select id="selXP"><option value="100">100</option><option value="200" selected>200</option><option value="300">300</option></select>
-        </label>
-        <label><div class="muted" data-i18n="pledge_theme">今週のテーマ</div>
-          <select id="selTheme"><option value="blue">青=集中</option><option value="green">緑=整える</option><option value="pink">桃=休息</option><option value="purple">紫=創造</option></select>
-        </label>
-      </div>
-      <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="primary" id="btnPledge" data-i18n="pledge_go">今週はこれでいく</button></div>
-      <div class="muted" data-i18n="pledge_note">達成分のXPは週末に返却されます（未達は焼却）。</div>
-    </section>
-
-    <!-- TODAY (tabs) -->
-    <section id="view-today" class="hidden">
-      <div class="tabs"><button data-tab="today" class="active" data-i18n="tab_today">今日</button><button data-tab="diary" data-i18n="tab_diary">台帳</button><button data-tab="settings" data-i18n="tab_settings">設定</button></div>
-
-      <div id="tab-today" class="grid">
-        <!-- Morning -->
-        <div id="panel-morning" class="card">
-          <div class="muted" style="letter-spacing:.02em" data-i18n="morning_title">朝（5–10時）</div>
-          <div>
-            <div class="muted" data-i18n="mantra_select">今日の合言葉（選択）</div>
-            <div class="chips" id="mantraChips">
-              <div class="chip" data-code="focus" role="button" tabindex="0"><div class="emoji">⭐</div><div class="label" data-i18n="m_focus">集中</div></div>
-              <div class="chip" data-code="rest" role="button" tabindex="0"><div class="emoji">🌿</div><div class="label" data-i18n="m_rest">休息</div></div>
-              <div class="chip" data-code="balance" role="button" tabindex="0"><div class="emoji">🧹</div><div class="label" data-i18n="m_balance">整える</div></div>
-              <div class="chip" data-code="create" role="button" tabindex="0"><div class="emoji">🎨</div><div class="label" data-i18n="m_create">創造</div></div>
-            </div>
-            <div class="muted" data-i18n="mantra_note">※ 未選択の場合は今週のテーマが自動で選ばれます。</div>
-          </div>
-          <div class="grid cols3" style="margin-top:6px">
-            <label><input type="radio" name="quest" value="breath" checked /> <span data-i18n="q_breath">深呼吸×5</span></label>
-            <label><input type="radio" name="quest" value="stretch" /> <span data-i18n="q_stretch">1分ストレッチ</span></label>
-            <label><input type="radio" name="quest" value="water" /> <span data-i18n="q_water">水をコップ1杯</span></label>
-          </div>
-          <div style="display:flex;gap:8px"><button class="primary" id="btnDoNow" data-i18n="do_now">いま実行</button><button class="ghost" id="btnLater" data-i18n="later">あとで</button></div>
-        </div>
-
-        <!-- Daytime -->
-        <div id="panel-day" class="card hidden">
-          <div class="muted" data-i18n="day_title">日中（10–20時）</div>
-          <div style="display:flex;gap:8px"><button class="primary" id="btnComplete" data-i18n="complete_quest">今日のひとくち完了</button><button class="ghost" id="btnTimer" data-i18n="start_3min">3分だけ集中する</button></div>
-          <div id="timerView" class="muted" style="margin-top:6px"></div>
-        </div>
-
-        <!-- Night -->
-        <div id="panel-night" class="card hidden">
-          <div class="muted" data-i18n="night_title">夜（20–24時）</div>
-          <div style="display:flex;gap:12px"><label><input type="radio" name="mood" value="good" checked /> <span>✔</span></label><label><input type="radio" name="mood" value="ok" /> <span>→</span></label><label><input type="radio" name="mood" value="bad" /> <span>✖</span></label></div>
-          <input id="nightNote" placeholder="一言メモ（任意）" />
-          <div style="display:flex;gap:8px"><button class="primary" id="btnSleep" data-i18n="good_night">おやすみ</button></div>
-        </div>
-
-        <!-- Progress strip -->
-        <div class="card">
-          <div class="grid cols3"><div><div class="muted" data-i18n="streak">連続日数</div><div id="streakVal2">0</div></div><div><div class="muted" data-i18n="week_goal">今週の達成</div><div id="weekVal2">0/0</div></div><div><div class="muted">XP</div><div id="xpVal">0</div></div></div>
-        </div>
-      </div>
-
-      <!-- Diary Tab -->
-      <div id="tab-diary" class="hidden"><div class="card"><div class="muted" data-i18n="diary_title">物語台帳（1日=1コマ）</div><div id="diaryGrid" class="grid cols3"></div></div></div>
-
-      <!-- Settings Tab -->
-      <div id="tab-settings" class="hidden">
-        <div class="card grid">
-          <h3 data-i18n="settings_title">設定</h3>
-          <label><div class="muted" data-i18n="morph_mode">体型変化</div>
-            <select id="selMorph"><option value="off" selected>Off（完全固定）</option><option value="soft">やわらか（±8%）</option><option value="dynamic">ダイナミック（±12%）</option></select>
-            <div class="muted" data-i18n="morph_note">オフにすると体型は変わりません。進捗は星や背景で表します。</div>
-          </label>
-          <label><div class="muted" data-i18n="privacy">プライバシー</div><div style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="optOut" /> <span data-i18n="opt_out">匿名研究ログを提供しない（オプトアウト）</span></div></label>
-        </div>
-      </div>
-    </section>
-
-    <!-- DAY7 -->
-    <section id="view-day7" class="card hidden">
-      <h2 data-i18n="unlock_title">約束を果たしたね。名前と見た目を選ぼう。</h2>
-      <div class="grid cols3">
-        <label><div class="muted" data-i18n="name_label">名前</div><input id="nameInput" maxlength="12" placeholder="ネムクーク" /></label>
-        <label><div class="muted" data-i18n="skin_label">見た目</div>
-          <select id="selSkin"><option value="blue">Blue</option><option value="green">Green</option><option value="pink">Pink</option><option value="purple">Purple</option></select>
-        </label>
-        <label><div class="muted" data-i18n="morph_mode">体型変化</div>
-          <select id="selMorph2"><option value="off" selected>Off</option><option value="soft">Soft</option><option value="dynamic">Dynamic</option></select>
-        </label>
-      </div>
-      <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="primary" id="btnUnlockGo" data-i18n="unlock_go">決定して次の章へ</button></div>
-    </section>
-
-    <!-- RESULT -->
-    <section id="view-result" class="card hidden">
-      <h2 data-i18n="result_title">今週の結果</h2>
-      <div id="resultText" class="grid"></div>
-      <div style="display:flex;justify-content:flex-end"><button class="primary" id="btnNextWeek" data-i18n="next_week">次の週の約束へ</button></div>
-    </section>
-
-  </main>
-
-  <!-- Consent Modal -->
-  <div id="consentModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:50">
-    <div class="card" style="width:min(720px,92vw)">
-      <h3 data-i18n="consent_title">研究へのご協力のお願い</h3>
-      <p class="muted" data-i18n="consent_body">本アプリは体験改善と学術研究のため、匿名の行動ログ（日時、ボタン操作、選択肢など）を端末内に保存します。［同意する］を押すと保存を開始します。設定からいつでもオプトアウト可能です。</p>
-      <div style="display:flex;justify-content:flex-end"><button id="btnConsent" class="primary" data-i18n="consent_agree">同意する</button></div>
-    </div>
+      <div class="hint" data-i18n="lang_hint">言語設定は次回アクセス時も保存されます。</div>
+    </main>
   </div>
+  <footer><small class="hint">© WhoAI</small></footer>
 
-</div>
+  <script>
+    // --- i18n dictionary ---
+    const I18N = {
+      ja:{
+        welcome_title:'WhoAIへようこそ',
+        welcome_body:'まずはタネのタイプを選んで、名前を付けてから育てよう。ポイントが貯まるとマカロンで進化！',
+        start_seed:'はじめる（タネを選ぶ）',
+        lang_hint:'言語設定は次回アクセス時も保存されます。'
+      },
+      en:{
+        welcome_title:'Welcome to WhoAI',
+        welcome_body:'Choose your seed type, give it a name, and start nurturing. Earn points and evolve with macarons!',
+        start_seed:'Get Started (Choose Seed)',
+        lang_hint:'Your language will be saved for next visits.'
+      },
+      'zh-Hans':{
+        welcome_title:'欢迎来到 WhoAI',
+        welcome_body:'先选择种子类型，取个名字再培养。积分累积后可用马卡龙进化！',
+        start_seed:'开始（选择种子）',
+        lang_hint:'语言设置会在下次访问时保存。'
+      },
+      'zh-Hant':{
+        welcome_title:'歡迎來到 WhoAI',
+        welcome_body:'先選擇種子類型，命名後開始培育。累積點數可用馬卡龍進化！',
+        start_seed:'開始（選擇種子）',
+        lang_hint:'語言設定會在下次造訪時保存。'
+      },
+      ko:{
+        welcome_title:'WhoAI에 오신 것을 환영해요',
+        welcome_body:'씨앗 타입을 고르고 이름을 지어 키워 보세요. 포인트가 쌓이면 마카롱으로 진화!',
+        start_seed:'시작하기 (씨앗 선택)',
+        lang_hint:'언어 설정은 다음 방문에도 유지됩니다.'
+      }
+    };
 
-<script>
-// ================= I18N =================
-const I18N={
-  ja:{tagline:"朝30秒・夜3秒。小さな約束が物語を進める。",export_csv:"CSV書き出し",reset:"リセット",today_stats:"今日の指標",streak:"連続日数",week_goal:"今週の達成",language:"言語",index_h1:"朝30秒・夜3秒。あなたの小さな約束が、物語を進める。",index_p:"7日続けると、名前と見た目が解禁されます。最初の1週間は“関係”づくりに集中します。",start:"はじめる",continue:"前回の続き",research_hint:"※ 研究目的で匿名ログを保存します。設定からオプトアウトできます。",guide_h2:"体験のながれ",guide_1:"朝：合言葉→“今日のひとくち”を選ぶ",guide_2:"日中：1分実行→ワンタップ報告",guide_3:"夜：3秒ふりかえり→1コマ進む",guide_next:"理解した／はじめる",pledge_title:"今週の約束",pledge_days:"目標日数",pledge_xp:"XP前払",pledge_theme:"今週のテーマ",pledge_go:"今週はこれでいく",pledge_note:"達成分のXPは週末に返却されます（未達は焼却）。",tab_today:"今日",tab_diary:"台帳",tab_settings:"設定",morning_title:"朝（5–10時）",mantra_select:"今日の合言葉（選択）",mantra_note:"※ 未選択の場合は今週のテーマが自動で選ばれます。",m_focus:"集中",m_rest:"休息",m_balance:"整える",m_create:"創造",q_breath:"深呼吸×5",q_stretch:"1分ストレッチ",q_water:"水をコップ1杯",do_now:"いま実行",later:"あとで",day_title:"日中（10–20時）",complete_quest:"今日のひとくち完了",start_3min:"3分だけ集中する",night_title:"夜（20–24時）",good_night:"おやすみ",diary_title:"物語台帳（1日=1コマ）",settings_title:"設定",morph_mode:"体型変化",morph_note:"オフにすると体型は変わりません。進捗は星や背景で表します。",privacy:"プライバシー",opt_out:"匿名研究ログを提供しない（オプトアウト）",unlock_title:"約束を果たしたね。名前と見た目を選ぼう。",name_label:"名前",skin_label:"見た目",unlock_go:"決定して次の章へ",result_title:"今週の結果",next_week:"次の週の約束へ",consent_title:"研究へのご協力のお願い",consent_body:"本アプリは体験改善と学術研究のため、匿名の行動ログ（日時、ボタン操作、選択肢など）を端末内に保存します。［同意する］を押すと保存を開始します。設定からいつでもオプトアウト可能です。",consent_agree:"同意する"},
-  en:{tagline:"30s in the morning, 3s at night. Tiny commitments move the story.",export_csv:"Export CSV",reset:"Reset",today_stats:"Today's Stats",streak:"Streak",week_goal:"This Week",language:"Language",index_h1:"30 seconds in the morning, 3 seconds at night. Your small pledge moves the story.",index_p:"After 7 days, naming and appearance unlock. In week 1 we focus on the relationship.",start:"Start",continue:"Continue",research_hint:"Anonymous logs are stored for research. You can opt out in Settings.",guide_h2:"How it works",guide_1:"Morning: mantra → choose today's micro action",guide_2:"Daytime: do it in 1 min → one-tap report",guide_3:"Night: 3-second reflection → one frame forward",guide_next:"Got it / Start",pledge_title:"This Week's Pledge",pledge_days:"Target days",pledge_xp:"XP escrow",pledge_theme:"Theme",pledge_go:"Go with this",pledge_note:"Completed XP is returned at weekend (unmet is burned).",tab_today:"Today",tab_diary:"Diary",tab_settings:"Settings",morning_title:"Morning (5–10)",mantra_select:"Choose your mantra",mantra_note:"If you skip, this week's theme will be used automatically.",m_focus:"Focus",m_rest:"Rest",m_balance:"Balance",m_create:"Create",q_breath:"5 deep breaths",q_stretch:"1-min stretch",q_water:"A glass of water",do_now:"Do now",later:"Later",day_title:"Daytime (10–20)",complete_quest:"Mark micro action done",start_3min:"Focus for 3 min",night_title:"Night (20–24)",good_night:"Good night",diary_title:"Story Ledger (1 day = 1 frame)",settings_title:"Settings",morph_mode:"Body change",morph_note:"OFF keeps the shape fixed. Progress is shown with stars/background.",privacy:"Privacy",opt_out:"Opt out of anonymous research logging",unlock_title:"You kept your pledge. Choose name and appearance.",name_label:"Name",skin_label:"Appearance",unlock_go:"Decide and go to next chapter",result_title:"This Week's Result",next_week:"Pledge next week",consent_title:"Research Consent",consent_body:"For product improvement and research, we store anonymous action logs (timestamps, clicks, choices) locally. Tap [Agree] to start logging. You can opt out anytime in Settings.",consent_agree:"Agree"}
-};
+    function setLang(lang){ if(!I18N[lang]) lang='ja';
+      localStorage.setItem('whoai.lang', lang);
+      document.documentElement.lang = lang.startsWith('zh') ? 'zh' : lang;
+      const dict = I18N[lang];
+      document.querySelectorAll('[data-i18n]').forEach(el=>{
+        const k = el.getAttribute('data-i18n');
+        if(dict[k]) el.textContent = dict[k];
+      });
+    }
 
-// ================= State helpers =================
-const S={
-  get k(){return{lang:'whoai.lang',consent:'whoai.consent',step:'whoai.step',contract:'whoai.contract.week',streak:'whoai.streakDays',xp:'whoai.xp',today:'whoai.today',events:'whoai.events',settings:'whoai.settings',optout:'whoai.optout'};},
-  read(k,def=null){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def;}catch(e){return def;}},
-  write(k,v){localStorage.setItem(k,JSON.stringify(v));},
-  nowISO(){return new Date().toISOString();},
-  todayKey(){return new Date().toISOString().slice(0,10);},
-  weekStartISO(){const d=new Date();const day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);d.setHours(0,0,0,0);return d.toISOString();}
-};
-
-function setLang(lang){if(!I18N[lang]) lang='ja';S.write(S.k.lang,lang);document.documentElement.lang=lang.startsWith('zh')?'zh':lang;const dict=I18N[lang];document.querySelectorAll('[data-i18n]').forEach(el=>{const key=el.getAttribute('data-i18n');if(dict[key]) el.textContent=dict[key];});document.getElementById('langVal')&& (document.getElementById('langVal').textContent=lang);} 
-
-function logEvent(type,payload={}){if(S.read(S.k.optout,false)) return;const arr=S.read(S.k.events,[]);arr.push({ts:S.nowISO(),type,lang:S.read(S.k.lang,'ja'),...payload});S.write(S.k.events,arr);} 
-
-function computeAS(){const streak=Number(S.read(S.k.streak,0));const today=S.read(S.k.today,{});const morning=today?.morning?1:0;const night=today?.night?1:0;const activeRate=Math.min(1,(morning+night)/2);const as=Math.round(30*activeRate+45*Math.min(1,streak/7)+25*(today?.questDone?1:0));return Math.max(0,Math.min(100,as));}
-
-function show(id){['view-index','view-guide','view-week','view-today','view-day7','view-result'].forEach(v=>{const el=document.getElementById(v);if(el) el.classList.add('hidden');});document.getElementById(id).classList.remove('hidden');S.write(S.k.step,id);} 
-
-function updateHeaderStats(){const streak=Number(S.read(S.k.streak,0));const contract=S.read(S.k.contract,{targetDays:0,done:0});const as=computeAS();const asBar=document.getElementById('asBar');if(asBar) asBar.style.width=as+'%';const asText=document.getElementById('asText');if(asText) asText.textContent='Attachment Score: '+as;const s1=document.getElementById('streakVal2');if(s1) s1.textContent=streak;const w1=document.getElementById('weekVal2');if(w1) w1.textContent=(contract.done||0)+'/'+(contract.targetDays||0);const xp=document.getElementById('xpVal');if(xp) xp.textContent=S.read(S.k.xp,0);} 
-
-function setPanelsByTime(){const now=new Date();const h=now.getHours();const mPanel=document.getElementById('panel-morning');const dPanel=document.getElementById('panel-day');const nPanel=document.getElementById('panel-night');if(mPanel) mPanel.classList.toggle('hidden',!(h>=5&&h<10));if(dPanel) dPanel.classList.toggle('hidden',!(h>=10&&h<20));if(nPanel) nPanel.classList.toggle('hidden',!(h>=20&&h<24));if(!window._chipsInit){const el=document.getElementById('mantraChips');if(el){setupMantraChips();window._chipsInit=true;}}} 
-
-function renderDiary(){const grid=document.getElementById('diaryGrid');if(!grid) return;grid.innerHTML='';const contract=S.read(S.k.contract,{startISO:S.weekStartISO()});const start=new Date(contract.startISO||S.weekStartISO());for(let i=0;i<14;i++){const d=new Date(start);d.setDate(d.getDate()+i);const key=d.toISOString().slice(0,10);const today=S.read(S.k.today+':'+key,null);const div=document.createElement('div');div.className='card';const status=today?.questDone?'★':'・';div.innerHTML=`<div class="muted">${key}</div><div style="font-size:20px">${status}</div>`;grid.appendChild(div);} } 
-
-function exportCSV(){
-  const rows = S.read(S.k.events, []);
-  if(rows.length === 0){ alert('No logs'); return; }
-  const keys = Array.from(new Set(rows.flatMap(r => Object.keys(r))));
-  const header = keys.join(',');
-  const body = rows
-    .map(r => keys.map(k => JSON.stringify(r[k] ?? '')).join(','))
-    .join('
-');
-  const csv = header + '
-' + body;
-  const blob = new Blob([csv], {type:'text/csv'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'whoai_logs.csv';
-  a.click();
-}
-
-// Chips
-function setupMantraChips(){document.querySelectorAll('#mantraChips .chip').forEach(ch=>{ch.addEventListener('click',()=>{document.querySelectorAll('#mantraChips .chip').forEach(x=>x.classList.remove('selected'));ch.classList.add('selected');});ch.addEventListener('keydown',(ev)=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();ch.click();}});});const def=getSelectedMantraCode();const el=document.querySelector(`#mantraChips .chip[data-code="${def}"]`);if(el) el.classList.add('selected');}
-function getSelectedMantraCode(){const sel=document.querySelector('#mantraChips .chip.selected');if(sel) return sel.getAttribute('data-code');const theme=(S.read(S.k.contract,{theme:'blue'}).theme)||'blue';const map={blue:'focus',green:'balance',pink:'rest',purple:'create'};return map[theme]||'focus';}
-
-// Timer
-let timerInt=null,timerEnd=0;function start3min(){timerEnd=Date.now()+3*60*1000;updateTimerView();if(timerInt) clearInterval(timerInt);timerInt=setInterval(()=>{if(Date.now()>=timerEnd){clearInterval(timerInt);const tv=document.getElementById('timerView');if(tv) tv.textContent='Done';logEvent('tb.done');}else{updateTimerView();}},200);logEvent('tb.start');}
-function updateTimerView(){const remain=Math.max(0,Math.floor((timerEnd-Date.now())/1000));const tv=document.getElementById('timerView');if(tv) tv.textContent='⏳ '+remain+'s';}
-
-// Star
-function starPop(anchor){const rect=anchor.getBoundingClientRect();const s=document.createElement('div');s.className='star';s.style.left=(rect.left+rect.width/2)+'px';s.style.top=(rect.top)+'px';document.body.appendChild(s);setTimeout(()=>s.remove(),900);} 
-
-// ================= Init =================
-(function init(){
-  // Lang
-  const lang=S.read(S.k.lang,navigator.language.startsWith('ja')?'ja':'en');setLang(lang);document.getElementById('langSelect').value=lang;document.getElementById('langSelect').addEventListener('change',(e)=>{setLang(e.target.value);logEvent('lang.change',{lang:e.target.value});});
-  // Consent
-  const consent=S.read(S.k.consent,null);if(!consent){document.getElementById('consentModal').classList.remove('hidden');}
-  document.getElementById('btnConsent').addEventListener('click',()=>{S.write(S.k.consent,{at:S.nowISO()});document.getElementById('consentModal').classList.add('hidden');logEvent('consent.accept');});
-  // Index buttons
-  document.getElementById('btnStart').addEventListener('click',()=>{show('view-guide');logEvent('start');});
-  document.getElementById('btnContinue').addEventListener('click',()=>{const step=S.read(S.k.step,'view-index');show(step);});
-  document.getElementById('btnGuideNext').addEventListener('click',()=>{show('view-week');logEvent('guide.done');});
-  // Pledge
-  document.getElementById('btnPledge').addEventListener('click',()=>{const targetDays=Number(document.getElementById('selDays').value);const pledgedXP=Number(document.getElementById('selXP').value);const theme=document.getElementById('selTheme').value;const contract={startISO:S.weekStartISO(),targetDays,pledgedXP,done:0,theme};S.write(S.k.contract,contract);S.write(S.k.xp,(S.read(S.k.xp,0)-pledgedXP));document.getElementById('themeText').textContent=themeLabel(theme);show('view-today');setPanelsByTime();renderDiary();updateHeaderStats();logEvent('week.pledge',{targetDays,pledgedXP,theme});});
-  // Tabs
-  document.querySelectorAll('.tabs button').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');['tab-today','tab-diary','tab-settings'].forEach(id=>{const el=document.getElementById(id);if(el) el.classList.add('hidden');});document.getElementById('tab-'+b.getAttribute('data-tab')).classList.remove('hidden');if(b.getAttribute('data-tab')==='diary') renderDiary();});});
-  // Morning
-  document.getElementById('btnDoNow').addEventListener('click',(e)=>{const mantraCode=getSelectedMantraCode();const quest=(document.querySelector('input[name="quest"]:checked')||{}).value;const tk=S.todayKey();const today=S.read(S.k.today+':'+tk,{})||{};today.morning={mantraCode,quest,at:S.nowISO()};S.write(S.k.today+':'+tk,today);S.write(S.k.today,today);starPop(e.target);logEvent('morning.select',{mantraCode,quest});updateHeaderStats();});
-  document.getElementById('btnLater').addEventListener('click',()=>{logEvent('morning.later');});
-  // Day
-  document.getElementById('btnComplete').addEventListener('click',(e)=>{const tk=S.todayKey();const today=S.read(S.k.today+':'+tk,{})||{};today.questDone=true;today.questDoneAt=S.nowISO();if(!today.streakCounted){const prevStreak=Number(S.read(S.k.streak,0));S.write(S.k.streak,prevStreak+1);today.streakCounted=true;}S.write(S.k.today+':'+tk,today);S.write(S.k.today,today);const c=S.read(S.k.contract,{});c.done=(c.done||0)+1;S.write(S.k.contract,c);S.write(S.k.xp,Number(S.read(S.k.xp,0))+20);starPop(e.target);logEvent('quest.done');updateHeaderStats();});
-  document.getElementById('btnTimer').addEventListener('click',()=>{start3min();});
-  // Night
-  document.getElementById('btnSleep').addEventListener('click',()=>{const mood=(document.querySelector('input[name="mood"]:checked')||{}).value;const note=document.getElementById('nightNote').value||'';const tk=S.todayKey();const today=S.read(S.k.today+':'+tk,{})||{};today.night={mood,note,at:S.nowISO()};S.write(S.k.today+':'+tk,today);S.write(S.k.today,today);logEvent('night.checkin',{mood,hasNote:!!note});updateHeaderStats();const c=S.read(S.k.contract,{});if((c.done||0)>=7){show('view-day7');}});
-  // Unlock
-  document.getElementById('btnUnlockGo').addEventListener('click',()=>{const name=document.getElementById('nameInput').value||'';const skin=document.getElementById('selSkin').value;const morph=document.getElementById('selMorph2').value;S.write('whoai.avatar',{name,skin,morph});const st=S.read(S.k.settings,{});S.write(S.k.settings,{...st,morphMode:morph});logEvent('unlock.set',{name_len:name.length,skin,morph});show('view-today');});
-  // Settings
-  document.getElementById('selMorph').addEventListener('change',(e)=>{const settings={...S.read(S.k.settings,{}),morphMode:e.target.value};S.write(S.k.settings,settings);logEvent('settings.morph',{mode:e.target.value});});
-  document.getElementById('optOut').addEventListener('change',(e)=>{S.write(S.k.optout,!!e.target.checked);});
-  // Export / Reset
-  document.getElementById('btnExport').addEventListener('click',exportCSV);
-  document.getElementById('btnReset').addEventListener('click',()=>{if(confirm('Reset all local data?')){localStorage.clear();location.reload();}});
-  // Start
-  show('view-index');updateHeaderStats();setPanelsByTime();setInterval(setPanelsByTime,60*1000);
-})();
-
-function themeLabel(code){switch(code){case 'blue':return 'Blue = Focus';case 'green':return 'Green = Balance';case 'pink':return 'Pink = Rest';case 'purple':return 'Purple = Create';default:return 'Theme';}}
-</script>
+    // init language
+    (function(){
+      const saved = localStorage.getItem('whoai.lang') || (navigator.language||'ja').slice(0,2);
+      setLang(saved);
+      document.querySelectorAll('.lang a').forEach(a=>{
+        a.addEventListener('click',()=> setLang(a.getAttribute('data-lang')) );
+      });
+      document.getElementById('btnStart').addEventListener('click',()=>{
+        // 次の画面がまだ無い場合の仮アクション
+        // 実装後は location.href = 'seed.html' 等に置換
+        alert('スタート！ 次の画面（タネ選択）へ遷移させてください。');
+      });
+    })();
+  </script>
 </body>
 </html>
