@@ -1,29 +1,34 @@
-<!-- FILE: /whoai_research_i18n_starter.html -->
+<!-- FILE: index.html (WhoAI | 研究統合＋多言語 | public/assets/stage1/*)
+  ✅ 画像パスは public/assets/stage1/ に統一
+  ✅ preload 削除（警告回避）+ fetchpriority
+  ✅ favicon 404対策（データURI）
+  ✅ スクリプトのカッコ/セミコロン整備（SyntaxError防止）
+-->
 <!DOCTYPE html>
 <html lang="ja" data-theme="dark">
-<head><meta charset="UTF-8" />
+<head>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WhoAI | 研究統合＆多言語スターター</title>
+  <title>WhoAI</title>
   <meta name="color-scheme" content="dark light" />
+  <!-- 404回避用の最小favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>">
   <style>
-    :root{
-      --bg:#000;--fg:#fff;--muted:rgba(255,255,255,.72);--panel:rgba(255,255,255,.08);
-      --accent:#7cc1ff;--ok:#8ee78e;--warn:#ffd36b;--bad:#ff7a7a;
-    }
+    :root{--bg:#000;--fg:#fff;--muted:rgba(255,255,255,.72);--panel:rgba(255,255,255,.08);--accent:#7cc1ff;--ok:#8ee78e}
     html,body{height:100%;margin:0}
-    body{font-family:"Noto Sans JP", system-ui, -apple-system, Segoe UI, Roboto, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif; color:var(--fg);
-      background:#000 url("public/assets/stage1/space_background.png") center/cover fixed no-repeat;}
-    .wrap{min-height:100%;backdrop-filter: blur(2px);background:linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.6));}
+    body{font-family:"Noto Sans JP",system-ui,-apple-system,Segoe UI,Roboto,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif;color:var(--fg);
+      background:#000 url('public/assets/stage1/space_background.png') center/cover fixed no-repeat}
+    .wrap{min-height:100%;backdrop-filter: blur(2px);background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.6))}
     header{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 16px}
     .brand{display:flex;gap:10px;align-items:center}
     .brand .dot{width:10px;height:10px;background:var(--accent);border-radius:50%;box-shadow:0 0 10px var(--accent)}
     .tagline{font-size:12px;color:var(--muted)}
     .tray{display:flex;gap:8px;align-items:center}
-    select, button, input, textarea{color:var(--fg);background:var(--panel);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px 10px}
+    select,button,input{color:var(--fg);background:var(--panel);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px 10px}
     button.primary{background:var(--accent);color:#001018;border:none}
     button.ghost{background:transparent;border:1px solid rgba(255,255,255,.25)}
     .container{width:min(960px,92vw);margin:0 auto;padding:8px 0 40px}
-    .hero{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;align-items:center;margin-top:18px}
+    .hero{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;align-items:center;margin-top:18px;position:relative}
     .card{background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px}
     .grid{display:grid;gap:12px}
     .grid.cols2{grid-template-columns:1fr 1fr}
@@ -32,36 +37,22 @@
     .muted{color:var(--muted);font-size:12px}
     .hidden{display:none!important}
     .tabs{display:flex;gap:6px;margin:12px 0}
-    .tabs button{padding:8px 12px;border-radius:10px}
     .tabs button.active{background:rgba(255,255,255,.16)}
     .progress{height:8px;background:rgba(255,255,255,.15);border-radius:999px;overflow:hidden}
     .progress>i{display:block;height:100%;background:var(--ok);width:0%}
-    .star{position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 8px #fff;opacity:.9;animation:fly 800ms ease-out forwards}
-    @keyframes fly{0%{transform:translate(0,0) scale(1)}100%{transform:translate(160px,-220px) scale(.6);opacity:0}}
-    /* Simple modal */
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:50}
-    .modal>.panel{width:min(720px,92vw)}
-    .sep{height:1px;background:rgba(255,255,255,.12);margin:8px 0}
-    .right{display:flex;justify-content:flex-end}
-    .row{display:flex;gap:8px;align-items:center}
-    .kicker{font-size:12px;color:var(--muted);letter-spacing:.08em}
-    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
-    .footer{opacity:.8;font-size:11px;margin-top:24px}
-      /* chips for selectable mantra */
-    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-    .chip{padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);cursor:pointer;user-select:none}
-    .chip.selected{background:var(--accent);color:#001018;border-color:transparent}
-      /* emoji label chips */
-    .chip{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:74px;padding:8px 10px}
-    .chip .emoji{font-size:22px;line-height:1}
-    .chip .label{font-size:12px;opacity:.95}
-      /* cover art */
-    .hero{position:relative}
-    .artCard{display:flex;align-items:center;justify-content:center;min-height:320px;background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.12);border-radius:16px}
+    /* cover art */
+    .artCard{display:flex;align-items:center;justify-content:center;min-height:320px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.12);border-radius:16px}
     .heroArt{width:min(340px,38vw);max-width:420px;height:auto;filter:drop-shadow(0 10px 24px rgba(0,0,0,.6)) drop-shadow(0 0 14px rgba(124,193,255,.55));animation:bob 4.5s ease-in-out infinite}
     @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
     .bigCopy{font-size:28px;line-height:1.25}
-    .brandline{font-weight:700;font-size:14px;letter-spacing:.08em;color:var(--muted)}
+    /* chips */
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+    .chip{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:74px;padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);cursor:pointer}
+    .chip.selected{background:var(--accent);color:#001018;border-color:transparent}
+    .chip .emoji{font-size:22px;line-height:1}
+    .chip .label{font-size:12px;opacity:.95}
+    .star{position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 8px #fff;opacity:.9;animation:fly 800ms ease-out forwards}
+    @keyframes fly{0%{transform:translate(0,0) scale(1)}100%{transform:translate(160px,-220px) scale(.6);opacity:0}}
   </style>
 </head>
 <body>
@@ -89,25 +80,24 @@
   </header>
 
   <main class="container">
-
-    <!-- VIEW: INDEX -->
+    <!-- INDEX -->
     <section id="view-index" class="hero">
       <div class="card grid">
-        <div class="brandline">WHOAI</div>
+        <div style="font-weight:700;font-size:14px;letter-spacing:.08em;color:var(--muted)">WHOAI</div>
         <h1 class="bigCopy" data-i18n="index_h1">朝30秒・夜3秒。あなたの小さな約束が、物語を進める。</h1>
         <p class="muted" data-i18n="index_p">7日続けると、名前と見た目が解禁されます。最初の1週間は“関係”づくりに集中します。</p>
-        <div class="row">
+        <div style="display:flex;gap:8px">
           <button class="primary" id="btnStart" data-i18n="start">はじめる</button>
           <button class="ghost" id="btnContinue" data-i18n="continue">前回の続き</button>
         </div>
-        <div class="footer" data-i18n="research_hint">※ 研究目的で匿名ログを保存します。設定からオプトアウトできます。</div>
+        <div class="muted" style="opacity:.8;font-size:11px" data-i18n="research_hint">※ 研究目的で匿名ログを保存します。設定からオプトアウトできます。</div>
       </div>
       <div class="artCard">
         <img src="public/assets/stage1/miwacchi_open.png" alt="Miwa companion opening" class="heroArt" loading="eager" decoding="async" fetchpriority="high" width="420" height="420" />
       </div>
     </section>
 
-    <!-- VIEW: GUIDE (3 slides simplified) -->
+    <!-- GUIDE -->
     <section id="view-guide" class="card hidden">
       <div class="grid">
         <h2 data-i18n="guide_h2">体験のながれ</h2>
@@ -116,629 +106,206 @@
           <li data-i18n="guide_2">日中：1分実行→ワンタップ報告</li>
           <li data-i18n="guide_3">夜：3秒ふりかえり→1コマ進む</li>
         </ol>
-        <div class="row right">
-          <button class="primary" id="btnGuideNext" data-i18n="guide_next">理解した／はじめる</button>
-        </div>
+        <div style="display:flex;justify-content:flex-end"><button class="primary" id="btnGuideNext" data-i18n="guide_next">理解した／はじめる</button></div>
       </div>
     </section>
 
-    <!-- VIEW: WEEK PLEDGE -->
+    <!-- WEEK PLEDGE -->
     <section id="view-week" class="card hidden">
       <h2 data-i18n="pledge_title">今週の約束</h2>
       <div class="grid cols3">
-        <label>
-          <div class="kicker" data-i18n="pledge_days">目標日数</div>
-          <select id="selDays">
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5" selected>5</option>
-          </select>
+        <label><div class="muted" data-i18n="pledge_days">目標日数</div>
+          <select id="selDays"><option value="3">3</option><option value="4">4</option><option value="5" selected>5</option></select>
         </label>
-        <label>
-          <div class="kicker" data-i18n="pledge_xp">XP前払</div>
-          <select id="selXP">
-            <option value="100">100</option>
-            <option value="200" selected>200</option>
-            <option value="300">300</option>
-          </select>
+        <label><div class="muted" data-i18n="pledge_xp">XP前払</div>
+          <select id="selXP"><option value="100">100</option><option value="200" selected>200</option><option value="300">300</option></select>
         </label>
-        <label>
-          <div class="kicker" data-i18n="pledge_theme">今週のテーマ</div>
-          <select id="selTheme">
-            <option value="blue">青=集中</option>
-            <option value="green">緑=整える</option>
-            <option value="pink">桃=休息</option>
-            <option value="purple">紫=創造</option>
-          </select>
+        <label><div class="muted" data-i18n="pledge_theme">今週のテーマ</div>
+          <select id="selTheme"><option value="blue">青=集中</option><option value="green">緑=整える</option><option value="pink">桃=休息</option><option value="purple">紫=創造</option></select>
         </label>
       </div>
-      <div class="row right" style="margin-top:8px">
-        <button class="primary" id="btnPledge" data-i18n="pledge_go">今週はこれでいく</button>
-      </div>
-      <div class="footer" data-i18n="pledge_note">達成分のXPは週末に返却されます（未達は焼却）。</div>
+      <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="primary" id="btnPledge" data-i18n="pledge_go">今週はこれでいく</button></div>
+      <div class="muted" data-i18n="pledge_note">達成分のXPは週末に返却されます（未達は焼却）。</div>
     </section>
 
-    <!-- VIEW: TODAY (morning/day/night switching) -->
+    <!-- TODAY (tabs) -->
     <section id="view-today" class="hidden">
-      <div class="tabs">
-        <button data-tab="today" class="active" data-i18n="tab_today">今日</button>
-        <button data-tab="diary" data-i18n="tab_diary">台帳</button>
-        <button data-tab="settings" data-i18n="tab_settings">設定</button>
-      </div>
+      <div class="tabs"><button data-tab="today" class="active" data-i18n="tab_today">今日</button><button data-tab="diary" data-i18n="tab_diary">台帳</button><button data-tab="settings" data-i18n="tab_settings">設定</button></div>
 
       <div id="tab-today" class="grid">
         <!-- Morning -->
         <div id="panel-morning" class="card">
-          <div class="kicker" data-i18n="morning_title">朝（5–10時）</div>
+          <div class="muted" style="letter-spacing:.02em" data-i18n="morning_title">朝（5–10時）</div>
           <div>
             <div class="muted" data-i18n="mantra_select">今日の合言葉（選択）</div>
             <div class="chips" id="mantraChips">
-              <div class="chip" data-code="focus" role="button" tabindex="0">
-                <div class="emoji">⭐</div>
-                <div class="label" data-i18n="m_focus">集中</div>
-              </div>
-              <div class="chip" data-code="rest" role="button" tabindex="0">
-                <div class="emoji">🌿</div>
-                <div class="label" data-i18n="m_rest">休息</div>
-              </div>
-              <div class="chip" data-code="balance" role="button" tabindex="0">
-                <div class="emoji">🧹</div>
-                <div class="label" data-i18n="m_balance">整える</div>
-              </div>
-              <div class="chip" data-code="create" role="button" tabindex="0">
-                <div class="emoji">🎨</div>
-                <div class="label" data-i18n="m_create">創造</div>
-              </div>
-            </div>
-              <div class="chip" data-code="rest" data-i18n="m_rest">休息</div>
-              <div class="chip" data-code="balance" data-i18n="m_balance">整える</div>
-              <div class="chip" data-code="create" data-i18n="m_create">創造</div>
+              <div class="chip" data-code="focus" role="button" tabindex="0"><div class="emoji">⭐</div><div class="label" data-i18n="m_focus">集中</div></div>
+              <div class="chip" data-code="rest" role="button" tabindex="0"><div class="emoji">🌿</div><div class="label" data-i18n="m_rest">休息</div></div>
+              <div class="chip" data-code="balance" role="button" tabindex="0"><div class="emoji">🧹</div><div class="label" data-i18n="m_balance">整える</div></div>
+              <div class="chip" data-code="create" role="button" tabindex="0"><div class="emoji">🎨</div><div class="label" data-i18n="m_create">創造</div></div>
             </div>
             <div class="muted" data-i18n="mantra_note">※ 未選択の場合は今週のテーマが自動で選ばれます。</div>
           </div>
-          <div class="grid cols3">
+          <div class="grid cols3" style="margin-top:6px">
             <label><input type="radio" name="quest" value="breath" checked /> <span data-i18n="q_breath">深呼吸×5</span></label>
             <label><input type="radio" name="quest" value="stretch" /> <span data-i18n="q_stretch">1分ストレッチ</span></label>
             <label><input type="radio" name="quest" value="water" /> <span data-i18n="q_water">水をコップ1杯</span></label>
           </div>
-          <div class="row">
-            <button class="primary" id="btnDoNow" data-i18n="do_now">いま実行</button>
-            <button class="ghost" id="btnLater" data-i18n="later">あとで</button>
-          </div>
+          <div style="display:flex;gap:8px"><button class="primary" id="btnDoNow" data-i18n="do_now">いま実行</button><button class="ghost" id="btnLater" data-i18n="later">あとで</button></div>
         </div>
 
         <!-- Daytime -->
         <div id="panel-day" class="card hidden">
-          <div class="kicker" data-i18n="day_title">日中（10–20時）</div>
-          <div class="row">
-            <button class="primary" id="btnComplete" data-i18n="complete_quest">今日のひとくち完了</button>
-            <button class="ghost" id="btnTimer" data-i18n="start_3min">3分だけ集中する</button>
-          </div>
-          <div id="timerView" class="muted"></div>
+          <div class="muted" data-i18n="day_title">日中（10–20時）</div>
+          <div style="display:flex;gap:8px"><button class="primary" id="btnComplete" data-i18n="complete_quest">今日のひとくち完了</button><button class="ghost" id="btnTimer" data-i18n="start_3min">3分だけ集中する</button></div>
+          <div id="timerView" class="muted" style="margin-top:6px"></div>
         </div>
 
         <!-- Night -->
         <div id="panel-night" class="card hidden">
-          <div class="kicker" data-i18n="night_title">夜（20–24時）</div>
-          <div class="row">
-            <label><input type="radio" name="mood" value="good" checked /> <span>✔</span></label>
-            <label><input type="radio" name="mood" value="ok" /> <span>→</span></label>
-            <label><input type="radio" name="mood" value="bad" /> <span>✖</span></label>
-          </div>
+          <div class="muted" data-i18n="night_title">夜（20–24時）</div>
+          <div style="display:flex;gap:12px"><label><input type="radio" name="mood" value="good" checked /> <span>✔</span></label><label><input type="radio" name="mood" value="ok" /> <span>→</span></label><label><input type="radio" name="mood" value="bad" /> <span>✖</span></label></div>
           <input id="nightNote" placeholder="一言メモ（任意）" />
-          <div class="row">
-            <button class="primary" id="btnSleep" data-i18n="good_night">おやすみ</button>
-          </div>
+          <div style="display:flex;gap:8px"><button class="primary" id="btnSleep" data-i18n="good_night">おやすみ</button></div>
         </div>
 
         <!-- Progress strip -->
         <div class="card">
-          <div class="grid cols3">
-            <div><div class="kicker" data-i18n="streak">連続日数</div><div id="streakVal2">0</div></div>
-            <div><div class="kicker" data-i18n="week_goal">今週の達成</div><div id="weekVal2">0/0</div></div>
-            <div><div class="kicker">XP</div><div id="xpVal">0</div></div>
-          </div>
+          <div class="grid cols3"><div><div class="muted" data-i18n="streak">連続日数</div><div id="streakVal2">0</div></div><div><div class="muted" data-i18n="week_goal">今週の達成</div><div id="weekVal2">0/0</div></div><div><div class="muted">XP</div><div id="xpVal">0</div></div></div>
         </div>
       </div>
 
       <!-- Diary Tab -->
-      <div id="tab-diary" class="hidden">
-        <div class="card">
-          <div class="kicker" data-i18n="diary_title">物語台帳（1日=1コマ）</div>
-          <div id="diaryGrid" class="grid cols3"></div>
-        </div>
-      </div>
+      <div id="tab-diary" class="hidden"><div class="card"><div class="muted" data-i18n="diary_title">物語台帳（1日=1コマ）</div><div id="diaryGrid" class="grid cols3"></div></div></div>
 
       <!-- Settings Tab -->
       <div id="tab-settings" class="hidden">
         <div class="card grid">
           <h3 data-i18n="settings_title">設定</h3>
-          <label>
-            <div class="kicker" data-i18n="morph_mode">体型変化</div>
-            <select id="selMorph">
-              <option value="off" selected>Off（完全固定）</option>
-              <option value="soft">やわらか（±8%）</option>
-              <option value="dynamic">ダイナミック（±12%）</option>
-            </select>
+          <label><div class="muted" data-i18n="morph_mode">体型変化</div>
+            <select id="selMorph"><option value="off" selected>Off（完全固定）</option><option value="soft">やわらか（±8%）</option><option value="dynamic">ダイナミック（±12%）</option></select>
             <div class="muted" data-i18n="morph_note">オフにすると体型は変わりません。進捗は星や背景で表します。</div>
           </label>
-          <label>
-            <div class="kicker" data-i18n="privacy">プライバシー</div>
-            <div class="row">
-              <input type="checkbox" id="optOut" /> <span data-i18n="opt_out">匿名研究ログを提供しない（オプトアウト）</span>
-            </div>
-          </label>
+          <label><div class="muted" data-i18n="privacy">プライバシー</div><div style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="optOut" /> <span data-i18n="opt_out">匿名研究ログを提供しない（オプトアウト）</span></div></label>
         </div>
       </div>
     </section>
 
-    <!-- VIEW: DAY7 UNLOCK -->
+    <!-- DAY7 -->
     <section id="view-day7" class="card hidden">
       <h2 data-i18n="unlock_title">約束を果たしたね。名前と見た目を選ぼう。</h2>
       <div class="grid cols3">
-        <label>
-          <div class="kicker" data-i18n="name_label">名前</div>
-          <input id="nameInput" maxlength="12" placeholder="ネムクーク" />
+        <label><div class="muted" data-i18n="name_label">名前</div><input id="nameInput" maxlength="12" placeholder="ネムクーク" /></label>
+        <label><div class="muted" data-i18n="skin_label">見た目</div>
+          <select id="selSkin"><option value="blue">Blue</option><option value="green">Green</option><option value="pink">Pink</option><option value="purple">Purple</option></select>
         </label>
-        <label>
-          <div class="kicker" data-i18n="skin_label">見た目</div>
-          <select id="selSkin">
-            <option value="blue">Blue</option>
-            <option value="green">Green</option>
-            <option value="pink">Pink</option>
-            <option value="purple">Purple</option>
-          </select>
-        </label>
-        <label>
-          <div class="kicker" data-i18n="morph_mode">体型変化</div>
-          <select id="selMorph2">
-            <option value="off" selected>Off</option>
-            <option value="soft">Soft</option>
-            <option value="dynamic">Dynamic</option>
-          </select>
+        <label><div class="muted" data-i18n="morph_mode">体型変化</div>
+          <select id="selMorph2"><option value="off" selected>Off</option><option value="soft">Soft</option><option value="dynamic">Dynamic</option></select>
         </label>
       </div>
-      <div class="row right" style="margin-top:8px">
-        <button class="primary" id="btnUnlockGo" data-i18n="unlock_go">決定して次の章へ</button>
-      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="primary" id="btnUnlockGo" data-i18n="unlock_go">決定して次の章へ</button></div>
     </section>
 
-    <!-- VIEW: WEEK RESULT -->
+    <!-- RESULT -->
     <section id="view-result" class="card hidden">
       <h2 data-i18n="result_title">今週の結果</h2>
       <div id="resultText" class="grid"></div>
-      <div class="row right"><button class="primary" id="btnNextWeek" data-i18n="next_week">次の週の約束へ</button></div>
+      <div style="display:flex;justify-content:flex-end"><button class="primary" id="btnNextWeek" data-i18n="next_week">次の週の約束へ</button></div>
     </section>
 
   </main>
 
-  <!-- Consent Modal (research) -->
-  <div id="consentModal" class="modal hidden">
-    <div class="panel card">
+  <!-- Consent Modal -->
+  <div id="consentModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:50">
+    <div class="card" style="width:min(720px,92vw)">
       <h3 data-i18n="consent_title">研究へのご協力のお願い</h3>
       <p class="muted" data-i18n="consent_body">本アプリは体験改善と学術研究のため、匿名の行動ログ（日時、ボタン操作、選択肢など）を端末内に保存します。［同意する］を押すと保存を開始します。設定からいつでもオプトアウト可能です。</p>
-      <div class="row right">
-        <button id="btnConsent" class="primary" data-i18n="consent_agree">同意する</button>
-      </div>
+      <div style="display:flex;justify-content:flex-end"><button id="btnConsent" class="primary" data-i18n="consent_agree">同意する</button></div>
     </div>
   </div>
 
 </div>
 
 <script>
-/**
- * WhoAI Research + i18n Starter
- * - 多言語（JP/EN/簡体/繁体/KR）
- * - 研究計測（ローカル保存→CSVエクスポート）
- * - 画面：index→guide→week→today（朝/日/夜切替）→Day7 unlock→result
- * - 倫理：Consent Modal、Opt-out、リセット
- */
-
-const I18N = {
-  ja:{
-    tagline:"朝30秒・夜3秒。小さな約束が物語を進める。",
-    export_csv:"CSV書き出し", reset:"リセット", today_stats:"今日の指標", streak:"連続日数", week_goal:"今週の達成", language:"言語",
-    index_h1:"朝30秒・夜3秒。あなたの小さな約束が、物語を進める。",
-    index_p:"7日続けると、名前と見た目が解禁されます。最初の1週間は“関係”づくりに集中します。",
-    start:"はじめる", continue:"前回の続き", research_hint:"※ 研究目的で匿名ログを保存します。設定からオプトアウトできます。",
-    guide_h2:"体験のながれ", guide_1:"朝：合言葉→“今日のひとくち”を選ぶ", guide_2:"日中：1分実行→ワンタップ報告", guide_3:"夜：3秒ふりかえり→1コマ進む", guide_next:"理解した／はじめる",
-    pledge_title:"今週の約束", pledge_days:"目標日数", pledge_xp:"XP前払", pledge_theme:"今週のテーマ", pledge_go:"今週はこれでいく", pledge_note:"達成分のXPは週末に返却されます（未達は焼却）。",
-    tab_today:"今日", tab_diary:"台帳", tab_settings:"設定",
-    morning_title:"朝（5–10時）",
-    mantra_select:"今日の合言葉（選択）",
-    mantra_note:"※ 未選択の場合は今週のテーマが自動で選ばれます。",
-    m_focus:"集中", m_rest:"休息", m_balance:"整える", m_create:"創造", mantra_ph:"今日の合言葉（例：3分だけ集中）", q_breath:"深呼吸×5", q_stretch:"1分ストレッチ", q_water:"水をコップ1杯", do_now:"いま実行", later:"あとで",
-    day_title:"日中（10–20時）", complete_quest:"今日のひとくち完了", start_3min:"3分だけ集中する",
-    night_title:"夜（20–24時）", good_night:"おやすみ",
-    diary_title:"物語台帳（1日=1コマ）",
-    settings_title:"設定", morph_mode:"体型変化", morph_note:"オフにすると体型は変わりません。進捗は星や背景で表します。",
-    privacy:"プライバシー", opt_out:"匿名研究ログを提供しない（オプトアウト）",
-    unlock_title:"約束を果たしたね。名前と見た目を選ぼう。", name_label:"名前", skin_label:"見た目", unlock_go:"決定して次の章へ",
-    result_title:"今週の結果", next_week:"次の週の約束へ",
-    consent_title:"研究へのご協力のお願い", consent_body:"本アプリは体験改善と学術研究のため、匿名の行動ログ（日時、ボタン操作、選択肢など）を端末内に保存します。［同意する］を押すと保存を開始します。設定からいつでもオプトアウト可能です。", consent_agree:"同意する"
-  },
-  en:{
-    tagline:"30s in the morning, 3s at night. Tiny commitments move the story.",
-    export_csv:"Export CSV", reset:"Reset", today_stats:"Today's Stats", streak:"Streak", week_goal:"This Week", language:"Language",
-    index_h1:"30 seconds in the morning, 3 seconds at night. Your small pledge moves the story.",
-    index_p:"After 7 days, naming and appearance unlock. In week 1 we focus on the relationship.", start:"Start", continue:"Continue", research_hint:"Anonymous logs are stored for research. You can opt out in Settings.",
-    guide_h2:"How it works", guide_1:"Morning: mantra → choose today's micro action", guide_2:"Daytime: do it in 1 min → one-tap report", guide_3:"Night: 3-second reflection → one frame forward", guide_next:"Got it / Start",
-    pledge_title:"This Week's Pledge", pledge_days:"Target days", pledge_xp:"XP escrow", pledge_theme:"Theme", pledge_go:"Go with this", pledge_note:"Completed XP is returned at weekend (unmet is burned).",
-    tab_today:"Today", tab_diary:"Diary", tab_settings:"Settings",
-    morning_title:"Morning (5–10)",
-    mantra_select:"Choose your mantra",
-    mantra_note:"If you skip, this week's theme will be used automatically.",
-    m_focus:"Focus", m_rest:"Rest", m_balance:"Balance", m_create:"Create", mantra_ph:"Today's mantra (e.g., Focus for 3 min)", q_breath:"5 deep breaths", q_stretch:"1-min stretch", q_water:"A glass of water", do_now:"Do now", later:"Later",
-    day_title:"Daytime (10–20)", complete_quest:"Mark micro action done", start_3min:"Focus for 3 min",
-    night_title:"Night (20–24)", good_night:"Good night",
-    diary_title:"Story Ledger (1 day = 1 frame)",
-    settings_title:"Settings", morph_mode:"Body change", morph_note:"OFF keeps the shape fixed. Progress is shown with stars/background.",
-    privacy:"Privacy", opt_out:"Opt out of anonymous research logging",
-    unlock_title:"You kept your pledge. Choose name and appearance.", name_label:"Name", skin_label:"Appearance", unlock_go:"Decide and go to next chapter",
-    result_title:"This Week's Result", next_week:"Pledge next week",
-    consent_title:"Research Consent", consent_body:"For product improvement and research, we store anonymous action logs (timestamps, clicks, choices) locally. Tap [Agree] to start logging. You can opt out anytime in Settings.", consent_agree:"Agree"
-  },
-  "zh-Hans":{
-    tagline:"早上30秒，晚上3秒。小小承诺推动故事前进。",
-    export_csv:"导出CSV", reset:"重置", today_stats:"今日指标", streak:"连续天数", week_goal:"本周进度", language:"语言",
-    index_h1:"早30秒、晚3秒。你的微小承诺推动故事。",
-    index_p:"连续7天后可解锁命名和外观。首周专注于建立关系。", start:"开始", continue:"继续", research_hint:"为研究目的将保存匿名日志，可在设置中退出。",
-    guide_h2:"流程", guide_1:"早上：口号→选择今日一口行动", guide_2:"白天：1分钟执行→一键报告", guide_3:"夜晚：3秒回顾→前进一格", guide_next:"明白了/开始",
-    pledge_title:"本周承诺", pledge_days:"目标天数", pledge_xp:"XP预存", pledge_theme:"主题", pledge_go:"就这样", pledge_note:"完成的XP在周末返还（未完成部分销毁）。",
-    tab_today:"今天", tab_diary:"台账", tab_settings:"设置",
-    morning_title:"早上（5–10）",
-    mantra_select:"選擇今日口號",
-    mantra_note:"若未選擇，將自動使用本週主題。",
-    m_focus:"專注", m_rest:"休息", m_balance:"調整", m_create:"創作",
-    mantra_select:"选择今日口号",
-    mantra_note:"若未选择，将自动使用本周主题。",
-    m_focus:"专注", m_rest:"休息", m_balance:"调整", m_create:"创作", mantra_ph:"今日口号（例：专注3分钟）", q_breath:"深呼吸×5", q_stretch:"1分钟拉伸", q_water:"一杯水", do_now:"现在执行", later:"稍后",
-    day_title:"白天（10–20）", complete_quest:"完成今日一口", start_3min:"专注3分钟",
-    night_title:"夜晚（20–24）", good_night:"晚安",
-    diary_title:"故事台账（1天=1格）",
-    settings_title:"设置", morph_mode:"体型变化", morph_note:"关闭后体型不变。以星星/背景显示进度。",
-    privacy:"隐私", opt_out:"退出匿名研究日志",
-    unlock_title:"你兑现了承诺。选择名字与外观。", name_label:"名字", skin_label:"外观", unlock_go:"确认并进入下一章",
-    result_title:"本周结果", next_week:"进入下周承诺",
-    consent_title:"研究同意", consent_body:"为产品改进与研究，将在本地保存匿名日志（时间戳、点击、选择）。点[同意]开始记录。可随时在设置中退出。", consent_agree:"同意"
-  },
-  "zh-Hant":{
-    tagline:"早上30秒、晚上3秒。小小承諾推動故事前進。",
-    export_csv:"匯出CSV", reset:"重設", today_stats:"今日指標", streak:"連續天數", week_goal:"本週進度", language:"語言",
-    index_h1:"早30秒、晚3秒。你的微小承諾推動故事。",
-    index_p:"連續7天後可解鎖命名與外觀。首週專注建立關係。", start:"開始", continue:"繼續", research_hint:"為研究目的將儲存匿名日誌，可於設定退出。",
-    guide_h2:"流程", guide_1:"早上：口號→選擇今日一口行動", guide_2:"白天：1分鐘執行→一鍵回報", guide_3:"夜晚：3秒回顧→前進一格", guide_next:"了解／開始",
-    pledge_title:"本週承諾", pledge_days:"目標天數", pledge_xp:"XP預存", pledge_theme:"主題", pledge_go:"就這樣", pledge_note:"完成的XP於週末退還（未完成部分銷毀）。",
-    tab_today:"今天", tab_diary:"台帳", tab_settings:"設定",
-    morning_title:"早上（5–10）",
-    mantra_select:"選擇今日口號",
-    mantra_note:"若未選擇，將自動使用本週主題。",
-    m_focus:"專注", m_rest:"休息", m_balance:"調整", m_create:"創作", mantra_ph:"今日口號（例：專注3分鐘）", q_breath:"深呼吸×5", q_stretch:"1分鐘伸展", q_water:"一杯水", do_now:"現在執行", later:"稍後",
-    day_title:"白天（10–20）", complete_quest:"完成今日一口", start_3min:"專注3分鐘",
-    night_title:"夜晚（20–24）", good_night:"晚安",
-    diary_title:"故事台帳（1日=1格）",
-    settings_title:"設定", morph_mode:"體型變化", morph_note:"關閉後體型不變。以星星/背景顯示進度。",
-    privacy:"隱私", opt_out:"退出匿名研究記錄",
-    unlock_title:"你履行了承諾。選擇名字與外觀。", name_label:"名字", skin_label:"外觀", unlock_go:"確認並前往下一章",
-    result_title:"本週結果", next_week:"前往下週承諾",
-    consent_title:"研究同意", consent_body:"為了產品改進與研究，將在本機保存匿名記錄（時間戳、點擊、選擇）。點擊［同意］開始。可隨時於設定退出。", consent_agree:"同意"
-  },
-  ko:{
-    tagline:"아침 30초, 밤 3초. 작은 약속이 이야기를 움직입니다.",
-    export_csv:"CSV 내보내기", reset:"리셋", today_stats:"오늘의 지표", streak:"연속일수", week_goal:"이번 주", language:"언어",
-    index_h1:"아침 30초, 밤 3초. 당신의 작은 약속이 이야기를 움직입니다.",
-    index_p:"7일 연속 후 이름과 외형이 해제됩니다. 첫 주는 관계 형성에 집중합니다.", start:"시작", continue:"이어하기", research_hint:"연구를 위해 익명 로그를 저장합니다. 설정에서 옵트아웃 가능합니다.",
-    guide_h2:"흐름", guide_1:"아침: 만트라 → 오늘의 한 입 선택", guide_2:"낮: 1분 실행 → 원탭 보고", guide_3:"밤: 3초 회고 → 한 칸 전진", guide_next:"이해했어요 / 시작",
-    pledge_title:"이번 주 약속", pledge_days:"목표 일수", pledge_xp:"XP 선입금", pledge_theme:"테마", pledge_go:"이대로 진행", pledge_note:"달성분 XP는 주말에 반환(미달성분 소각).",
-    tab_today:"오늘", tab_diary:"대장", tab_settings:"설정",
-    morning_title:"아침 (5–10)",
-    mantra_select:"오늘의 만트라 선택",
-    mantra_note:"선택하지 않으면 이번 주 테마가 자동으로 사용됩니다.",
-    m_focus:"집중", m_rest:"휴식", m_balance:"정돈", m_create:"창작", mantra_ph:"오늘의 만트라 (예: 3분만 집중)", q_breath:"심호흡×5", q_stretch:"1분 스트레칭", q_water:"물 한 잔", do_now:"지금 실행", later:"나중에",
-    day_title:"낮 (10–20)", complete_quest:"오늘의 한 입 완료", start_3min:"3분만 집중",
-    night_title:"밤 (20–24)", good_night:"잘 자",
-    diary_title:"이야기 대장 (하루=한 칸)",
-    settings_title:"설정", morph_mode:"체형 변화", morph_note:"OFF면 체형이 변하지 않습니다. 별/배경으로 진행을 보여줍니다.",
-    privacy:"프라이버시", opt_out:"익명 연구 로그 제공 안 함",
-    unlock_title:"약속을 지켰네요. 이름과 외형을 고르세요.", name_label:"이름", skin_label:"외형", unlock_go:"결정하고 다음 장으로",
-    result_title:"이번 주 결과", next_week:"다음 주 약속으로",
-    consent_title:"연구 동의", consent_body:"제품 개선과 연구를 위해 익명 로그(시간, 클릭, 선택)를 로컬에 저장합니다. [동의]를 누르면 기록이 시작됩니다. 언제든 설정에서 해제 가능.", consent_agree:"동의"
-  }
+// ================= I18N =================
+const I18N={
+  ja:{tagline:"朝30秒・夜3秒。小さな約束が物語を進める。",export_csv:"CSV書き出し",reset:"リセット",today_stats:"今日の指標",streak:"連続日数",week_goal:"今週の達成",language:"言語",index_h1:"朝30秒・夜3秒。あなたの小さな約束が、物語を進める。",index_p:"7日続けると、名前と見た目が解禁されます。最初の1週間は“関係”づくりに集中します。",start:"はじめる",continue:"前回の続き",research_hint:"※ 研究目的で匿名ログを保存します。設定からオプトアウトできます。",guide_h2:"体験のながれ",guide_1:"朝：合言葉→“今日のひとくち”を選ぶ",guide_2:"日中：1分実行→ワンタップ報告",guide_3:"夜：3秒ふりかえり→1コマ進む",guide_next:"理解した／はじめる",pledge_title:"今週の約束",pledge_days:"目標日数",pledge_xp:"XP前払",pledge_theme:"今週のテーマ",pledge_go:"今週はこれでいく",pledge_note:"達成分のXPは週末に返却されます（未達は焼却）。",tab_today:"今日",tab_diary:"台帳",tab_settings:"設定",morning_title:"朝（5–10時）",mantra_select:"今日の合言葉（選択）",mantra_note:"※ 未選択の場合は今週のテーマが自動で選ばれます。",m_focus:"集中",m_rest:"休息",m_balance:"整える",m_create:"創造",q_breath:"深呼吸×5",q_stretch:"1分ストレッチ",q_water:"水をコップ1杯",do_now:"いま実行",later:"あとで",day_title:"日中（10–20時）",complete_quest:"今日のひとくち完了",start_3min:"3分だけ集中する",night_title:"夜（20–24時）",good_night:"おやすみ",diary_title:"物語台帳（1日=1コマ）",settings_title:"設定",morph_mode:"体型変化",morph_note:"オフにすると体型は変わりません。進捗は星や背景で表します。",privacy:"プライバシー",opt_out:"匿名研究ログを提供しない（オプトアウト）",unlock_title:"約束を果たしたね。名前と見た目を選ぼう。",name_label:"名前",skin_label:"見た目",unlock_go:"決定して次の章へ",result_title:"今週の結果",next_week:"次の週の約束へ",consent_title:"研究へのご協力のお願い",consent_body:"本アプリは体験改善と学術研究のため、匿名の行動ログ（日時、ボタン操作、選択肢など）を端末内に保存します。［同意する］を押すと保存を開始します。設定からいつでもオプトアウト可能です。",consent_agree:"同意する"},
+  en:{tagline:"30s in the morning, 3s at night. Tiny commitments move the story.",export_csv:"Export CSV",reset:"Reset",today_stats:"Today's Stats",streak:"Streak",week_goal:"This Week",language:"Language",index_h1:"30 seconds in the morning, 3 seconds at night. Your small pledge moves the story.",index_p:"After 7 days, naming and appearance unlock. In week 1 we focus on the relationship.",start:"Start",continue:"Continue",research_hint:"Anonymous logs are stored for research. You can opt out in Settings.",guide_h2:"How it works",guide_1:"Morning: mantra → choose today's micro action",guide_2:"Daytime: do it in 1 min → one-tap report",guide_3:"Night: 3-second reflection → one frame forward",guide_next:"Got it / Start",pledge_title:"This Week's Pledge",pledge_days:"Target days",pledge_xp:"XP escrow",pledge_theme:"Theme",pledge_go:"Go with this",pledge_note:"Completed XP is returned at weekend (unmet is burned).",tab_today:"Today",tab_diary:"Diary",tab_settings:"Settings",morning_title:"Morning (5–10)",mantra_select:"Choose your mantra",mantra_note:"If you skip, this week's theme will be used automatically.",m_focus:"Focus",m_rest:"Rest",m_balance:"Balance",m_create:"Create",q_breath:"5 deep breaths",q_stretch:"1-min stretch",q_water:"A glass of water",do_now:"Do now",later:"Later",day_title:"Daytime (10–20)",complete_quest:"Mark micro action done",start_3min:"Focus for 3 min",night_title:"Night (20–24)",good_night:"Good night",diary_title:"Story Ledger (1 day = 1 frame)",settings_title:"Settings",morph_mode:"Body change",morph_note:"OFF keeps the shape fixed. Progress is shown with stars/background.",privacy:"Privacy",opt_out:"Opt out of anonymous research logging",unlock_title:"You kept your pledge. Choose name and appearance.",name_label:"Name",skin_label:"Appearance",unlock_go:"Decide and go to next chapter",result_title:"This Week's Result",next_week:"Pledge next week",consent_title:"Research Consent",consent_body:"For product improvement and research, we store anonymous action logs (timestamps, clicks, choices) locally. Tap [Agree] to start logging. You can opt out anytime in Settings.",consent_agree:"Agree"}
 };
 
-// --- State & Storage Helpers ---
-const S = {
-  get k(){
-    return {
-      lang:'whoai.lang', consent:'whoai.consent', step:'whoai.step',
-      contract:'whoai.contract.week', streak:'whoai.streakDays', xp:'whoai.xp',
-      today:'whoai.today', events:'whoai.events', avatar:'whoai.avatar', settings:'whoai.settings',
-      optout:'whoai.optout'
-    }
-  },
-  read(k,def=null){ try{const v=localStorage.getItem(k); return v?JSON.parse(v):def }catch(e){ return def } },
-  write(k,v){ localStorage.setItem(k, JSON.stringify(v)) },
-  nowISO(){ return new Date().toISOString() },
-  todayKey(){ const d=new Date(); return d.toISOString().slice(0,10) },
-  weekStartISO(){ const d=new Date(); const day=(d.getDay()+6)%7; d.setDate(d.getDate()-day); d.setHours(0,0,0,0); return d.toISOString() }
+// ================= State helpers =================
+const S={
+  get k(){return{lang:'whoai.lang',consent:'whoai.consent',step:'whoai.step',contract:'whoai.contract.week',streak:'whoai.streakDays',xp:'whoai.xp',today:'whoai.today',events:'whoai.events',settings:'whoai.settings',optout:'whoai.optout'};},
+  read(k,def=null){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def;}catch(e){return def;}},
+  write(k,v){localStorage.setItem(k,JSON.stringify(v));},
+  nowISO(){return new Date().toISOString();},
+  todayKey(){return new Date().toISOString().slice(0,10);},
+  weekStartISO(){const d=new Date();const day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);d.setHours(0,0,0,0);return d.toISOString();}
 };
 
-// --- i18n ---
-function setLang(lang){
-  if(!I18N[lang]) lang='ja';
-  S.write(S.k.lang, lang);
-  document.documentElement.lang = lang.startsWith('zh') ? 'zh' : lang;
-  const dict = I18N[lang];
-  document.querySelectorAll('[data-i18n]').forEach(el=>{
-    const key=el.getAttribute('data-i18n');
-    if(dict[key]) el.textContent=dict[key];
-  });
-  document.getElementById('langVal').textContent = lang;
-}
+function setLang(lang){if(!I18N[lang]) lang='ja';S.write(S.k.lang,lang);document.documentElement.lang=lang.startsWith('zh')?'zh':lang;const dict=I18N[lang];document.querySelectorAll('[data-i18n]').forEach(el=>{const key=el.getAttribute('data-i18n');if(dict[key]) el.textContent=dict[key];});document.getElementById('langVal')&& (document.getElementById('langVal').textContent=lang);} 
 
-// --- Events (Research Log) ---
-function logEvent(type, payload={}){
-  if(S.read(S.k.optout,false)) return; // opt-out => no logging
-  const arr = S.read(S.k.events, []);
-  arr.push({ts:S.nowISO(), type, lang:S.read(S.k.lang,'ja'), ...payload});
-  S.write(S.k.events, arr);
-}
+function logEvent(type,payload={}){if(S.read(S.k.optout,false)) return;const arr=S.read(S.k.events,[]);arr.push({ts:S.nowISO(),type,lang:S.read(S.k.lang,'ja'),...payload});S.write(S.k.events,arr);} 
 
-// --- Attachment Score (demo) ---
-function computeAS(){
-  const streak = Number(S.read(S.k.streak,0));
-  const today = S.read(S.k.today,{});
-  const morning = today?.morning?1:0;
-  const night = today?.night?1:0;
-  const activeRate = Math.min(1, (morning+night)/2);
-  // Simple demo formula (0-100)
-  const as = Math.round( 30*activeRate + 45*Math.min(1, streak/7) + 25*(today?.questDone?1:0) );
-  return Math.max(0, Math.min(100, as));
-}
+function computeAS(){const streak=Number(S.read(S.k.streak,0));const today=S.read(S.k.today,{});const morning=today?.morning?1:0;const night=today?.night?1:0;const activeRate=Math.min(1,(morning+night)/2);const as=Math.round(30*activeRate+45*Math.min(1,streak/7)+25*(today?.questDone?1:0));return Math.max(0,Math.min(100,as));}
 
-// --- UI Routing ---
-function show(id){
-  ['view-index','view-guide','view-week','view-today','view-day7','view-result'].forEach(v=>document.getElementById(v).classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
-  S.write(S.k.step,id);
-}
+function show(id){['view-index','view-guide','view-week','view-today','view-day7','view-result'].forEach(v=>{const el=document.getElementById(v);if(el) el.classList.add('hidden');});document.getElementById(id).classList.remove('hidden');S.write(S.k.step,id);} 
 
-function updateHeaderStats(){
-  const streak = Number(S.read(S.k.streak,0));
-  const contract = S.read(S.k.contract, {targetDays:0, done:0});
-  document.getElementById('streakVal').textContent = streak;
-  document.getElementById('streakVal2').textContent = streak;
-  document.getElementById('weekVal').textContent = `${contract.done||0}/${contract.targetDays||0}`;
-  document.getElementById('weekVal2').textContent = `${contract.done||0}/${contract.targetDays||0}`;
-  document.getElementById('langVal').textContent = S.read(S.k.lang,'ja');
-  document.getElementById('xpVal').textContent = S.read(S.k.xp,0);
-  const as=computeAS();
-  document.getElementById('asBar').style.width = as+"%";
-  document.getElementById('asText').textContent = `Attachment Score: ${as}`;
-}
+function updateHeaderStats(){const streak=Number(S.read(S.k.streak,0));const contract=S.read(S.k.contract,{targetDays:0,done:0});const as=computeAS();const asBar=document.getElementById('asBar');if(asBar) asBar.style.width=as+'%';const asText=document.getElementById('asText');if(asText) asText.textContent='Attachment Score: '+as;const s1=document.getElementById('streakVal2');if(s1) s1.textContent=streak;const w1=document.getElementById('weekVal2');if(w1) w1.textContent=(contract.done||0)+'/'+(contract.targetDays||0);const xp=document.getElementById('xpVal');if(xp) xp.textContent=S.read(S.k.xp,0);} 
 
-// --- Time Window Panels ---
-function setPanelsByTime(){
-  const now = new Date();
-  const h = now.getHours();
-  const mPanel = document.getElementById('panel-morning');
-  const dPanel = document.getElementById('panel-day');
-  const nPanel = document.getElementById('panel-night');
-  mPanel?.classList.toggle('hidden', !(h>=5 && h<10));
-  dPanel?.classList.toggle('hidden', !(h>=10 && h<20));
-  nPanel?.classList.toggle('hidden', !(h>=20 && h<24));
-  // one-time chip setup when panel exists
-  if(!window._chipsInit){
-    const el=document.getElementById('mantraChips');
-    if(el){ setupMantraChips(); window._chipsInit=true; }
-  }
-}
+function setPanelsByTime(){const now=new Date();const h=now.getHours();const mPanel=document.getElementById('panel-morning');const dPanel=document.getElementById('panel-day');const nPanel=document.getElementById('panel-night');if(mPanel) mPanel.classList.toggle('hidden',!(h>=5&&h<10));if(dPanel) dPanel.classList.toggle('hidden',!(h>=10&&h<20));if(nPanel) nPanel.classList.toggle('hidden',!(h>=20&&h<24));if(!window._chipsInit){const el=document.getElementById('mantraChips');if(el){setupMantraChips();window._chipsInit=true;}}} 
 
-// --- Diary Render ---
-function renderDiary(){
-  const grid = document.getElementById('diaryGrid');
-  grid.innerHTML = '';
-  const contract = S.read(S.k.contract, {startISO:S.weekStartISO()});
-  const start = new Date(contract.startISO||S.weekStartISO());
-  for(let i=0;i<14;i++){
-    const d=new Date(start); d.setDate(d.getDate()+i);
-    const key=d.toISOString().slice(0,10);
-    const today = S.read(S.k.today+":"+key, null);
-    const div=document.createElement('div');
-    div.className='card';
-    const status = today?.questDone? '★' : '・';
-    div.innerHTML = `<div class="kicker">${key}</div><div style="font-size:20px">${status}</div>`;
-    grid.appendChild(div);
-  }
-}
+function renderDiary(){const grid=document.getElementById('diaryGrid');if(!grid) return;grid.innerHTML='';const contract=S.read(S.k.contract,{startISO:S.weekStartISO()});const start=new Date(contract.startISO||S.weekStartISO());for(let i=0;i<14;i++){const d=new Date(start);d.setDate(d.getDate()+i);const key=d.toISOString().slice(0,10);const today=S.read(S.k.today+':'+key,null);const div=document.createElement('div');div.className='card';const status=today?.questDone?'★':'・';div.innerHTML=`<div class="muted">${key}</div><div style="font-size:20px">${status}</div>`;grid.appendChild(div);} } 
 
-// --- CSV Export ---
-function exportCSV(){
-  const rows = S.read(S.k.events, []);
-  if(rows.length===0){ alert('No logs'); return }
-  const keys = Array.from(new Set(rows.flatMap(r=>Object.keys(r))));
-  const header = keys.join(',');
-  const body = rows.map(r=> keys.map(k=> JSON.stringify(r[k]??'')).join(',')).join('\n');
-  const csv = header+'\n'+body;
-  const blob = new Blob([csv], {type:'text/csv'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob); a.download='whoai_logs.csv'; a.click();
-}
+function exportCSV(){const rows=S.read(S.k.events,[]);if(rows.length===0){alert('No logs');return;}const keys=Array.from(new Set(rows.flatMap(r=>Object.keys(r))));const header=keys.join(',');const body=rows.map(r=>keys.map(k=>JSON.stringify(r[k]??'')).join(',')).join('\n');const csv=header+'\n'+body;const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='whoai_logs.csv';a.click();} 
 
-// --- Init ---
+// Chips
+function setupMantraChips(){document.querySelectorAll('#mantraChips .chip').forEach(ch=>{ch.addEventListener('click',()=>{document.querySelectorAll('#mantraChips .chip').forEach(x=>x.classList.remove('selected'));ch.classList.add('selected');});ch.addEventListener('keydown',(ev)=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();ch.click();}});});const def=getSelectedMantraCode();const el=document.querySelector(`#mantraChips .chip[data-code="${def}"]`);if(el) el.classList.add('selected');}
+function getSelectedMantraCode(){const sel=document.querySelector('#mantraChips .chip.selected');if(sel) return sel.getAttribute('data-code');const theme=(S.read(S.k.contract,{theme:'blue'}).theme)||'blue';const map={blue:'focus',green:'balance',pink:'rest',purple:'create'};return map[theme]||'focus';}
+
+// Timer
+let timerInt=null,timerEnd=0;function start3min(){timerEnd=Date.now()+3*60*1000;updateTimerView();if(timerInt) clearInterval(timerInt);timerInt=setInterval(()=>{if(Date.now()>=timerEnd){clearInterval(timerInt);const tv=document.getElementById('timerView');if(tv) tv.textContent='Done';logEvent('tb.done');}else{updateTimerView();}},200);logEvent('tb.start');}
+function updateTimerView(){const remain=Math.max(0,Math.floor((timerEnd-Date.now())/1000));const tv=document.getElementById('timerView');if(tv) tv.textContent='⏳ '+remain+'s';}
+
+// Star
+function starPop(anchor){const rect=anchor.getBoundingClientRect();const s=document.createElement('div');s.className='star';s.style.left=(rect.left+rect.width/2)+'px';s.style.top=(rect.top)+'px';document.body.appendChild(s);setTimeout(()=>s.remove(),900);} 
+
+// ================= Init =================
 (function init(){
-  // Language
-  const lang = S.read(S.k.lang, navigator.language.startsWith('ja')?'ja':'en');
-  setLang(lang);
-  document.getElementById('langSelect').value = lang;
-  document.getElementById('langSelect').addEventListener('change', e=>{ setLang(e.target.value); logEvent('lang.change',{lang:e.target.value}) });
-
+  // Lang
+  const lang=S.read(S.k.lang,navigator.language.startsWith('ja')?'ja':'en');setLang(lang);document.getElementById('langSelect').value=lang;document.getElementById('langSelect').addEventListener('change',(e)=>{setLang(e.target.value);logEvent('lang.change',{lang:e.target.value});});
   // Consent
-  const consent = S.read(S.k.consent,null);
-  if(!consent){ document.getElementById('consentModal').classList.remove('hidden') }
-  document.getElementById('btnConsent').addEventListener('click',()=>{ S.write(S.k.consent,{at:S.nowISO()}); document.getElementById('consentModal').classList.add('hidden'); logEvent('consent.accept') })
-
-  // Buttons
-  document.getElementById('btnStart').addEventListener('click',()=>{ show('view-guide'); logEvent('start') })
-  document.getElementById('btnContinue').addEventListener('click',()=>{ const step=S.read(S.k.step,'view-index'); show(step); })
-  document.getElementById('btnGuideNext').addEventListener('click',()=>{ show('view-week'); logEvent('guide.done') })
-  document.getElementById('btnPledge').addEventListener('click',()=>{
-    const targetDays=Number(document.getElementById('selDays').value);
-    const pledgedXP=Number(document.getElementById('selXP').value);
-    const theme=document.getElementById('selTheme').value;
-    const contract={startISO:S.weekStartISO(), targetDays, pledgedXP, done:0, theme};
-    S.write(S.k.contract, contract);
-    S.write(S.k.xp, (S.read(S.k.xp,0)-pledgedXP));
-    document.getElementById('themeText').textContent = themeLabel(theme);
-    show('view-today'); setPanelsByTime(); renderDiary(); updateHeaderStats(); logEvent('week.pledge',{targetDays, pledgedXP, theme});
-  })
-
+  const consent=S.read(S.k.consent,null);if(!consent){document.getElementById('consentModal').classList.remove('hidden');}
+  document.getElementById('btnConsent').addEventListener('click',()=>{S.write(S.k.consent,{at:S.nowISO()});document.getElementById('consentModal').classList.add('hidden');logEvent('consent.accept');});
+  // Index buttons
+  document.getElementById('btnStart').addEventListener('click',()=>{show('view-guide');logEvent('start');});
+  document.getElementById('btnContinue').addEventListener('click',()=>{const step=S.read(S.k.step,'view-index');show(step);});
+  document.getElementById('btnGuideNext').addEventListener('click',()=>{show('view-week');logEvent('guide.done');});
+  // Pledge
+  document.getElementById('btnPledge').addEventListener('click',()=>{const targetDays=Number(document.getElementById('selDays').value);const pledgedXP=Number(document.getElementById('selXP').value);const theme=document.getElementById('selTheme').value;const contract={startISO:S.weekStartISO(),targetDays,pledgedXP,done:0,theme};S.write(S.k.contract,contract);S.write(S.k.xp,(S.read(S.k.xp,0)-pledgedXP));document.getElementById('themeText').textContent=themeLabel(theme);show('view-today');setPanelsByTime();renderDiary();updateHeaderStats();logEvent('week.pledge',{targetDays,pledgedXP,theme});});
   // Tabs
-  document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{
-    document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    const tab=b.getAttribute('data-tab');
-    ['tab-today','tab-diary','tab-settings'].forEach(id=>document.getElementById(id).classList.add('hidden'));
-    document.getElementById('tab-'+tab).classList.remove('hidden');
-    if(tab==='diary') renderDiary();
-  }))
-
-  // Morning actions
-  document.getElementById('btnDoNow').addEventListener('click',(e)=>{
-    const mantraCode = getSelectedMantraCode();
-    const quest = (document.querySelector('input[name="quest"]:checked')||{}).value;
-    const tk=S.todayKey();
-    const today=S.read(S.k.today+":"+tk,{})||{};
-    today.morning={mantraCode, quest, at:S.nowISO()};
-    S.write(S.k.today+":"+tk, today); S.write(S.k.today, today);
-    starPop(e.target);
-    logEvent('morning.select',{mantraCode, quest});
-    updateHeaderStats();
-  })
-  document.getElementById('btnLater').addEventListener('click',()=>{ logEvent('morning.later') })
-
-  // Day actions
-  document.getElementById('btnComplete').addEventListener('click',(e)=>{
-    const tk=S.todayKey();
-    const today=S.read(S.k.today+":"+tk,{})||{}; today.questDone=true; today.questDoneAt=S.nowISO();
-    S.write(S.k.today+":"+tk,today); S.write(S.k.today,today);
-    // streak & contract
-    const prevStreak=Number(S.read(S.k.streak,0));
-    if(!today.streakCounted){ S.write(S.k.streak, prevStreak+1); today.streakCounted=true }
-    const c=S.read(S.k.contract,{}); c.done=(c.done||0)+1; S.write(S.k.contract,c);
-    // xp return minimal
-    S.write(S.k.xp, Number(S.read(S.k.xp,0))+20);
-    starPop(e.target);
-    logEvent('quest.done'); updateHeaderStats();
-  })
-  document.getElementById('btnTimer').addEventListener('click',()=>start3min())
-
-  // Night actions
-  document.getElementById('btnSleep').addEventListener('click',()=>{
-    const mood=document.querySelector('input[name="mood"]:checked').value;
-    const note=document.getElementById('nightNote').value||'';
-    const tk=S.todayKey();
-    const today=S.read(S.k.today+":"+tk,{})||{}; today.night={mood,note,at:S.nowISO()};
-    S.write(S.k.today+":"+tk,today); S.write(S.k.today,today);
-    logEvent('night.checkin',{mood, hasNote:!!note});
-    updateHeaderStats();
-    // Day7 unlock if reached target
-    const c=S.read(S.k.contract,{}); if((c.done||0) >= 7){ show('view-day7') }
-  })
-
-  // Unlock actions
-  document.getElementById('btnUnlockGo').addEventListener('click',()=>{
-    const name=document.getElementById('nameInput').value||'';
-    const skin=document.getElementById('selSkin').value;
-    const morph=document.getElementById('selMorph2').value;
-    S.write(S.k.avatar,{name, skin, morph});
-    S.write(S.k.settings,{...S.read(S.k.settings,{}), morphMode:morph});
-    logEvent('unlock.set',{name_len:name.length, skin, morph});
-    show('view-today');
-  })
-
+  document.querySelectorAll('.tabs button').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');['tab-today','tab-diary','tab-settings'].forEach(id=>{const el=document.getElementById(id);if(el) el.classList.add('hidden');});document.getElementById('tab-'+b.getAttribute('data-tab')).classList.remove('hidden');if(b.getAttribute('data-tab')==='diary') renderDiary();});});
+  // Morning
+  document.getElementById('btnDoNow').addEventListener('click',(e)=>{const mantraCode=getSelectedMantraCode();const quest=(document.querySelector('input[name="quest"]:checked')||{}).value;const tk=S.todayKey();const today=S.read(S.k.today+':'+tk,{})||{};today.morning={mantraCode,quest,at:S.nowISO()};S.write(S.k.today+':'+tk,today);S.write(S.k.today,today);starPop(e.target);logEvent('morning.select',{mantraCode,quest});updateHeaderStats();});
+  document.getElementById('btnLater').addEventListener('click',()=>{logEvent('morning.later');});
+  // Day
+  document.getElementById('btnComplete').addEventListener('click',(e)=>{const tk=S.todayKey();const today=S.read(S.k.today+':'+tk,{})||{};today.questDone=true;today.questDoneAt=S.nowISO();if(!today.streakCounted){const prevStreak=Number(S.read(S.k.streak,0));S.write(S.k.streak,prevStreak+1);today.streakCounted=true;}S.write(S.k.today+':'+tk,today);S.write(S.k.today,today);const c=S.read(S.k.contract,{});c.done=(c.done||0)+1;S.write(S.k.contract,c);S.write(S.k.xp,Number(S.read(S.k.xp,0))+20);starPop(e.target);logEvent('quest.done');updateHeaderStats();});
+  document.getElementById('btnTimer').addEventListener('click',()=>{start3min();});
+  // Night
+  document.getElementById('btnSleep').addEventListener('click',()=>{const mood=(document.querySelector('input[name="mood"]:checked')||{}).value;const note=document.getElementById('nightNote').value||'';const tk=S.todayKey();const today=S.read(S.k.today+':'+tk,{})||{};today.night={mood,note,at:S.nowISO()};S.write(S.k.today+':'+tk,today);S.write(S.k.today,today);logEvent('night.checkin',{mood,hasNote:!!note});updateHeaderStats();const c=S.read(S.k.contract,{});if((c.done||0)>=7){show('view-day7');}});
+  // Unlock
+  document.getElementById('btnUnlockGo').addEventListener('click',()=>{const name=document.getElementById('nameInput').value||'';const skin=document.getElementById('selSkin').value;const morph=document.getElementById('selMorph2').value;S.write('whoai.avatar',{name,skin,morph});const st=S.read(S.k.settings,{});S.write(S.k.settings,{...st,morphMode:morph});logEvent('unlock.set',{name_len:name.length,skin,morph});show('view-today');});
   // Settings
-  document.getElementById('selMorph').addEventListener('change', (e)=>{
-    const settings={...S.read(S.k.settings,{}), morphMode:e.target.value};
-    S.write(S.k.settings, settings); logEvent('settings.morph',{mode:e.target.value});
-  })
-  document.getElementById('optOut').addEventListener('change', (e)=>{
-    S.write(S.k.optout, !!e.target.checked);
-  })
-
+  document.getElementById('selMorph').addEventListener('change',(e)=>{const settings={...S.read(S.k.settings,{}),morphMode:e.target.value};S.write(S.k.settings,settings);logEvent('settings.morph',{mode:e.target.value});});
+  document.getElementById('optOut').addEventListener('change',(e)=>{S.write(S.k.optout,!!e.target.checked);});
   // Export / Reset
-  document.getElementById('btnExport').addEventListener('click', exportCSV)
-  document.getElementById('btnReset').addEventListener('click',()=>{
-    if(confirm('Reset all local data?')){ localStorage.clear(); location.reload() }
-  })
-
-  // Start view
-  show('view-index'); updateHeaderStats(); setPanelsByTime();
-  // Poll time window each minute
-  setInterval(setPanelsByTime, 60*1000);
+  document.getElementById('btnExport').addEventListener('click',exportCSV);
+  document.getElementById('btnReset').addEventListener('click',()=>{if(confirm('Reset all local data?')){localStorage.clear();location.reload();}});
+  // Start
+  show('view-index');updateHeaderStats();setPanelsByTime();setInterval(setPanelsByTime,60*1000);
 })();
 
-function themeLabel(code){
-  switch(code){case 'blue': return 'Blue = Focus'; case 'green': return 'Green = Balance'; case 'pink': return 'Pink = Rest'; case 'purple': return 'Purple = Create'; default: return 'Theme'}
-}
-
-// --- Mantra chips helpers ---
-function setupMantraChips(){
-  document.querySelectorAll('#mantraChips .chip').forEach(ch=>{
-    // click select
-    ch.addEventListener('click',()=>{
-      document.querySelectorAll('#mantraChips .chip').forEach(x=>x.classList.remove('selected'));
-      ch.classList.add('selected');
-    });
-    // keyboard access
-    ch.addEventListener('keydown', (ev)=>{
-      if(ev.key==='Enter' || ev.key===' '){ ev.preventDefault(); ch.click(); }
-    });
-  });
-  // preselect by weekly theme
-  const def = getSelectedMantraCode();
-  const el = document.querySelector(`#mantraChips .chip[data-code="${def}"]`);
-  el && el.classList.add('selected');
-});
-  });
-  // preselect by weekly theme
-  const def = getSelectedMantraCode();
-  const el = document.querySelector(`#mantraChips .chip[data-code="${def}"]`);
-  el && el.classList.add('selected');
-}
-function getSelectedMantraCode(){
-  const sel = document.querySelector('#mantraChips .chip.selected');
-  if(sel) return sel.getAttribute('data-code');
-  const theme = (S.read(S.k.contract,{theme:'blue'}).theme)||'blue';
-  const map={blue:'focus', green:'balance', pink:'rest', purple:'create'};
-  return map[theme]||'focus';
-}
-
-// Tiny 3-min timer
-let timerInt=null, timerEnd=0;
-function start3min(){
-  timerEnd=Date.now()+3*60*1000; updateTimerView();
-  if(timerInt) clearInterval(timerInt);
-  timerInt=setInterval(()=>{
-    if(Date.now()>=timerEnd){ clearInterval(timerInt); document.getElementById('timerView').textContent='Done'; logEvent('tb.done'); }
-    else updateTimerView();
-  }, 200);
-  logEvent('tb.start');
-}
-function updateTimerView(){
-  const remain=Math.max(0, Math.floor((timerEnd-Date.now())/1000));
-  document.getElementById('timerView').textContent = `⏳ ${remain}s`;
-}
-
-// Star pop feedback
-function starPop(anchor){
-  const rect = anchor.getBoundingClientRect();
-  const s = document.createElement('div'); s.className='star';
-  s.style.left = (rect.left+rect.width/2)+'px';
-  s.style.top = (rect.top)+'px';
-  document.body.appendChild(s);
-  setTimeout(()=>s.remove(), 900);
-}
+function themeLabel(code){switch(code){case 'blue':return 'Blue = Focus';case 'green':return 'Green = Balance';case 'pink':return 'Pink = Rest';case 'purple':return 'Purple = Create';default:return 'Theme';}}
 </script>
 </body>
 </html>
