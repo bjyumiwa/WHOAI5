@@ -257,7 +257,9 @@ function setPanelsByTime(){const now=new Date();const h=now.getHours();const mPa
 
 function renderDiary(){const grid=document.getElementById('diaryGrid');if(!grid) return;grid.innerHTML='';const contract=S.read(S.k.contract,{startISO:S.weekStartISO()});const start=new Date(contract.startISO||S.weekStartISO());for(let i=0;i<14;i++){const d=new Date(start);d.setDate(d.getDate()+i);const key=d.toISOString().slice(0,10);const today=S.read(S.k.today+':'+key,null);const div=document.createElement('div');div.className='card';const status=today?.questDone?'★':'・';div.innerHTML=`<div class="muted">${key}</div><div style="font-size:20px">${status}</div>`;grid.appendChild(div);} } 
 
-function exportCSV(){const rows=S.read(S.k.events,[]);if(rows.length===0){alert('No logs');return;}const keys=Array.from(new Set(rows.flatMap(r=>Object.keys(r))));const header=keys.join(',');const body=rows.map(r=>keys.map(k=>JSON.stringify(r[k]??'')).join(',')).join('\n');const csv=header+'\n'+body;const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='whoai_logs.csv';a.click();} 
+function exportCSV(){const rows=S.read(S.k.events,[]);if(rows.length===0){alert('No logs');return;}const keys=Array.from(new Set(rows.flatMap(r=>Object.keys(r))));const header=keys.join(',');const body=rows.map(r=>keys.map(k=>JSON.stringify(r[k]??'')).join(',')).join('
+');const csv=header+'
+'+body;const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='whoai_logs.csv';a.click();} 
 
 // Chips
 function setupMantraChips(){document.querySelectorAll('#mantraChips .chip').forEach(ch=>{ch.addEventListener('click',()=>{document.querySelectorAll('#mantraChips .chip').forEach(x=>x.classList.remove('selected'));ch.classList.add('selected');});ch.addEventListener('keydown',(ev)=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();ch.click();}});});const def=getSelectedMantraCode();const el=document.querySelector(`#mantraChips .chip[data-code="${def}"]`);if(el) el.classList.add('selected');}
