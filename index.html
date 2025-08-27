@@ -1,4 +1,5 @@
-<!-- index.html · WhoAI Evo（4色対応：pink/blue/green/purple） -->
+<!-- index.html · WhoAI Evo（名前→ダイス→音符→色進化→ドリンク→ako→HB）
+     追加：下部に「サイコロの出目表（累積/直近）」、ゲット表／初期化／スタートへ戻る 等 -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -13,13 +14,24 @@
     background:#000 url("public/assets/stage1/space_background.png") center/cover fixed no-repeat;
     display:flex;flex-direction:column;align-items:center;gap:16px;padding:16px;
   }
-  .container{width:min(820px,96vw);display:flex;flex-direction:column;gap:16px}
+  .container{width:min(980px,96vw);display:flex;flex-direction:column;gap:16px}
   .card{
     border:1px solid rgba(255,255,255,.18);border-radius:16px;
     background:linear-gradient(180deg,rgba(0,0,0,.30),rgba(0,0,0,.36));
     padding:20px;text-align:center
   }
-  .hidden{display:none}
+  .row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:6px}
+  .cell{
+    aspect-ratio:1/1;border:1px solid rgba(255,255,255,.2);border-radius:12px;
+    display:flex;align-items:center;justify-content:center;background:var(--glass);position:relative;overflow:hidden;
+  }
+  .label{position:absolute;left:6px;top:6px;font-size:12px;opacity:.75}
+  .char{width:72%;max-width:120px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.5));user-select:none;-webkit-user-drag:none}
+  .goal{width:62%;max-width:110px;object-fit:contain;animation:bounce 1.2s infinite}
+  .note{position:absolute;right:8px;bottom:6px;font-size:22px}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .hud{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .tag{padding:.25em .7em;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:12px;background:rgba(0,0,0,.25)}
   .buttons{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
   button{
     flex:1 1 auto;min-width:120px;padding:12px 14px;font-size:16px;
@@ -31,27 +43,33 @@
     padding:10px;font-size:16px;border-radius:8px;border:1px solid rgba(255,255,255,.3);
     width:80%;max-width:320px;background:rgba(0,0,0,.25);color:#fff
   }
+  .log{border:1px solid rgba(255,255,255,.18);border-radius:12px;background:rgba(0,0,0,.25);padding:10px;min-height:64px;max-height:28vh;overflow:auto;font-size:14px;text-align:left}
 
-  /* 盤面 */
-  .hud{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:6px}
-  .tag{padding:.25em .7em;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:12px;background:rgba(0,0,0,.25)}
-  .row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:6px}
-  .cell{
-    aspect-ratio:1/1;border:1px solid rgba(255,255,255,.2);border-radius:12px;
-    display:flex;align-items:center;justify-content:center;background:var(--glass);position:relative;overflow:hidden;
-  }
-  .label{position:absolute;left:6px;top:6px;font-size:12px;opacity:.75}
-  .char{width:72%;max-width:120px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.5));user-select:none;-webkit-user-drag:none}
-  .goal{width:62%;max-width:110px;object-fit:contain;animation:bounce 1.2s infinite}
-  .note{position:absolute;right:8px;bottom:6px;font-size:22px}
-  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-  .log{border:1px solid rgba(255,255,255,.18);border-radius:12px;background:rgba(0,0,0,.25);padding:10px;min-height:64px;max-height:38vh;overflow:auto;font-size:14px;text-align:left}
+  /* 下部の統計パネル */
+  .panel{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .stat{border:1px solid rgba(255,255,255,.18);border-radius:12px;background:rgba(0,0,0,.25);padding:12px;text-align:left}
+  .stat h3{margin:0 0 8px 0;font-size:16px}
+  .grid2{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .pill{border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:.35em .6em;text-align:center}
+
+  /* 出目表（累積/直近） */
+  .diceTable{width:100%;border-collapse:collapse;font-size:14px}
+  .diceTable th,.diceTable td{border:1px solid rgba(255,255,255,.2);padding:6px 8px;text-align:center}
+  .diceFaces{font-size:20px;letter-spacing:2px}
+  .small{opacity:.9;font-size:12px}
 
   /* 中央演出（ドリンク/フィナーレ） */
-  .center{
-    display:flex;flex-direction:column;align-items:center;gap:10px;min-height:40vh;justify-content:center
-  }
+  .center{display:flex;flex-direction:column;align-items:center;gap:10px;min-height:40vh;justify-content:center}
   .bigChar{width:min(55vw,320px);height:auto;filter:drop-shadow(0 8px 24px rgba(0,0,0,.55))}
+  .hidden{display:none}
+
+  /* ako をゆらゆらさせる */
+  .ako{animation:sway 3s ease-in-out infinite}
+  @keyframes sway{
+    0%{ transform:rotate(-2deg) translateY(0) }
+    50%{ transform:rotate(2deg) translateY(-4px) }
+    100%{ transform:rotate(-2deg) translateY(0) }
+  }
 </style>
 </head>
 <body>
@@ -69,6 +87,9 @@
 
   <!-- 2) ゲーム -->
   <section id="view-game" class="card hidden">
+    <h1>WhoAI Evo 🎲</h1>
+    <p id="greet"></p>
+
     <div class="hud">
       <strong id="sceneTitle">Scene 1：旅のはじまり</strong>
       <div>
@@ -77,13 +98,59 @@
         <span id="notesTag" class="tag">音符: 0/3</span>
       </div>
     </div>
+
     <div id="board" class="row"></div>
+
     <div class="buttons">
       <button id="rollBtn">🎲 サイコロ</button>
-      <button id="resetBtn">🔄 リセット</button>
+      <button id="softResetBtn">🔄 位置だけ初期化</button>
+      <button id="renameBtn">📝 名前を変える</button>
+      <button id="toStartBtn">⏮ スタートに戻る</button>
+      <button id="hardResetBtn">🧹 全初期化（名前と記録も）</button>
       <a href="about.html"><button>📖 研究の説明</button></a>
     </div>
+
     <div id="log" class="log"></div>
+
+    <!-- 下部パネル：左=ゲット表／右=出目表 -->
+    <div class="panel">
+      <!-- ゲット表 -->
+      <div class="stat">
+        <h3>ゲット表：マカロン（累積）</h3>
+        <div class="grid2">
+          <div class="pill" id="macPink">ピンク 0</div>
+          <div class="pill" id="macBlue">ブルー 0</div>
+          <div class="pill" id="macGreen">グリーン 0</div>
+          <div class="pill" id="macPurple">パープル 0</div>
+        </div>
+        <h3 style="margin-top:12px">ゲット表：音符（累積 / 今回）</h3>
+        <div class="grid2">
+          <div class="pill" id="noteAll">累積 0</div>
+          <div class="pill" id="noteRun">今回 0/3</div>
+          <div class="pill" id="runs">プレイ回数 0</div>
+          <div class="pill"><a href="?new=1" style="color:#fff;text-decoration:none">?new=1 で名前から</a></div>
+        </div>
+      </div>
+
+      <!-- 出目表 -->
+      <div class="stat">
+        <h3>サイコロの出目</h3>
+        <table class="diceTable">
+          <tr>
+            <th>面</th><th>⚀</th><th>⚁</th><th>⚂</th><th>⚃</th><th>⚄</th><th>⚅</th>
+          </tr>
+          <tr>
+            <td>累積</td>
+            <td id="d1">0</td><td id="d2">0</td><td id="d3">0</td>
+            <td id="d4">0</td><td id="d5">0</td><td id="d6">0</td>
+          </tr>
+        </table>
+        <div style="margin-top:8px">
+          <div class="small">直近（最大10回）</div>
+          <div id="diceHistory" class="diceFaces">—</div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- 3) ドリンク -->
@@ -91,7 +158,7 @@
     <div class="title">ドリンクタイム</div>
     <div class="subtitle">ひとくち飲んで、もう一歩。</div>
     <div class="center">
-      <img id="drinkImg" src="public/assets/stage1/milk_potion.png" alt="drink" class="bigChar" />
+      <img id="drinkImg" src="public/assets/stage1/drink_item.png" alt="drink" class="bigChar" />
       <div class="buttons">
         <button id="drinkBtn">🥛 のむ</button>
         <button id="toFinal">つぎへ</button>
@@ -103,7 +170,8 @@
   <section id="view-final" class="card hidden">
     <div class="title">Finale</div>
     <div class="center">
-      <img src="public/assets/stage1/ako.png" alt="ako" class="bigChar" />
+      <!-- 透明背景の ako.png を推奨 -->
+      <img src="public/assets/stage1/ako.png" alt="ako" class="bigChar ako" />
       <div class="buttons">
         <button id="playHB">🎵 ハッピーバースデーを鳴らす</button>
         <button id="replay">もう一度あそぶ</button>
@@ -116,18 +184,22 @@
 
 <script>
 (() => {
-  /* ===== ASSETS（4色対応・必要ならファイル名を合わせてください） ===== */
-  const CHAR_START  = "public/assets/stage1/miwacchi_open.png"; // 最初のキャラ
+  /* ===== ASSETS ===== */
+  const CHAR_START  = "public/assets/stage1/miwacchi_open.png";
   const CHAR_PINK   = "public/assets/stage1/pink_open.png";
   const CHAR_BLUE   = "public/assets/stage1/blue_open.png";
   const CHAR_GREEN  = "public/assets/stage1/green_open.png";
-  const CHAR_PURPLE = "public/assets/stage1/purple_open.png";   // 追加：パープル
+  const CHAR_PURPLE = "public/assets/stage1/purple_open.png";
 
   const MAC_PINK    = "public/assets/stage1/macaron_pink.png";
   const MAC_BLUE    = "public/assets/stage1/macaron_blue.png";
   const MAC_GREEN   = "public/assets/stage1/macaron_green.png";
-  const MAC_PURPLE  = "public/assets/stage1/macaron_purple.png"; // 追加：パープル
-  /* ============================================================ */
+  const MAC_PURPLE  = "public/assets/stage1/macaron_purple.png";
+  /* =================== */
+
+  // URL ?new=1 なら名前から
+  const forceNew = new URLSearchParams(location.search).get('new') === '1';
+  if (forceNew) localStorage.removeItem('whoai_name');
 
   // ビュー
   const V = {
@@ -135,12 +207,26 @@
     game: document.getElementById('view-game'),
     drink: document.getElementById('view-drink'),
     final: document.getElementById('view-final'),
+    greet: document.getElementById('greet'),
     posTag: document.getElementById('posTag'),
     dieTag: document.getElementById('dieTag'),
     notesTag: document.getElementById('notesTag'),
     board: document.getElementById('board'),
     log: document.getElementById('log'),
     sceneTitle: document.getElementById('sceneTitle'),
+    macPink: document.getElementById('macPink'),
+    macBlue: document.getElementById('macBlue'),
+    macGreen: document.getElementById('macGreen'),
+    macPurple: document.getElementById('macPurple'),
+    noteAll: document.getElementById('noteAll'),
+    noteRun: document.getElementById('noteRun'),
+    runs: document.getElementById('runs'),
+    // 出目表
+    dCells: [null,
+      document.getElementById('d1'),document.getElementById('d2'),document.getElementById('d3'),
+      document.getElementById('d4'),document.getElementById('d5'),document.getElementById('d6')
+    ],
+    diceHistory: document.getElementById('diceHistory'),
   };
 
   function show(which){
@@ -157,15 +243,46 @@
     if(!val) return;
     charName = val;
     localStorage.setItem("whoai_name", charName);
-    resetGame();
+    V.greet.textContent = `${charName} の冒険が始まるよ！`;
+    resetGame(true);
     show('game');
   };
 
-  // 盤面パラメータ
+  /* ===== 統計（累積） ===== */
+  const defaultStats = {
+    macarons:{pink:0,blue:0,green:0,purple:0},
+    notes:0,
+    runs:0,
+    dice:[0,0,0,0,0,0]  // 1..6 の累積カウント
+  };
+  function readStats(){
+    try{ return JSON.parse(localStorage.getItem('whoai_stats')) || structuredClone(defaultStats); }
+    catch(e){ return structuredClone(defaultStats); }
+  }
+  function writeStats(s){ localStorage.setItem('whoai_stats', JSON.stringify(s)); }
+  let stats = readStats();
+
+  /* ===== 出目の表示（⚀〜⚅ とヒストリー） ===== */
+  const diceFaces = ["⚀","⚁","⚂","⚃","⚄","⚅"];
+  let recentFaces = []; // 直近10回
+
+  function renderDicePanel(){
+    for(let i=1;i<=6;i++){
+      V.dCells[i].textContent = stats.dice[i-1];
+    }
+    V.diceHistory.textContent = recentFaces.length ? recentFaces.join(" ") : "—";
+  }
+
+  function pushRecent(face){
+    recentFaces.unshift(face);
+    if(recentFaces.length>10) recentFaces.pop();
+    renderDicePanel();
+  }
+
+  /* ===== ゲーム状態 ===== */
   const N = 5;
   let pos=1, last=0, got=false, notesOwned=0;
 
-  // 音符を3つ、2..4のランダムに配置
   let notes = new Set();
   function rollNotes(){
     notes.clear();
@@ -175,38 +292,45 @@
     }
   }
 
-  // マカロンの色 → 進化キャラ（4色）
   const COLORS = [
-    {name:'pink',   mac:MAC_PINK,   evo:CHAR_PINK},
-    {name:'blue',   mac:MAC_BLUE,   evo:CHAR_BLUE},
-    {name:'green',  mac:MAC_GREEN,  evo:CHAR_GREEN},
-    {name:'purple', mac:MAC_PURPLE, evo:CHAR_PURPLE}, // 追加
+    {name:'pink',   mac:MAC_PINK,   evo:CHAR_PINK,   key:'pink'},
+    {name:'blue',   mac:MAC_BLUE,   evo:CHAR_BLUE,   key:'blue'},
+    {name:'green',  mac:MAC_GREEN,  evo:CHAR_GREEN,  key:'green'},
+    {name:'purple', mac:MAC_PURPLE, evo:CHAR_PURPLE, key:'purple'},
   ];
   let goal = COLORS[Math.floor(Math.random()*COLORS.length)];
-  let evolvedChar = CHAR_PINK;
 
   function vibrate(ms){ if(navigator.vibrate) navigator.vibrate(ms); }
   function log(s,cls){ const d=document.createElement('div'); if(cls)d.className=cls; d.textContent=(charName?charName+"：":"")+s; V.log.prepend(d); }
 
+  function renderStats(){
+    V.macPink.textContent   = `ピンク ${stats.macarons.pink}`;
+    V.macBlue.textContent   = `ブルー ${stats.macarons.blue}`;
+    V.macGreen.textContent  = `グリーン ${stats.macarons.green}`;
+    V.macPurple.textContent = `パープル ${stats.macarons.purple}`;
+    V.noteAll.textContent   = `累積 ${stats.notes}`;
+    V.runs.textContent      = `プレイ回数 ${stats.runs}`;
+    V.noteRun.textContent   = `今回 ${notesOwned}/3`;
+  }
+
   function renderBoard(){
     V.posTag.textContent = `位置: ${pos}/${N}`;
-    V.dieTag.textContent = `ダイス: ${last||'―'}`;
+    V.dieTag.textContent = `ダイス: ${last? diceFaces[last-1] : '―'}`;
     V.notesTag.textContent = `音符: ${notesOwned}/3`;
+    renderStats();
+    renderDicePanel();
 
     V.board.innerHTML = '';
     for(let i=1;i<=N;i++){
       const cell=document.createElement('div'); cell.className='cell';
       const label=document.createElement('span'); label.className='label'; label.textContent=i; cell.appendChild(label);
 
-      // キャラ（Scene1は初期キャラ）
       if(i===pos){
         const img=document.createElement('img'); img.src=CHAR_START; img.alt='char'; img.className='char'; cell.appendChild(img);
       }
-      // ゴールのマカロン
       if(i===N){
         const g=document.createElement('img'); g.src=goal.mac; g.alt='macaron'; g.className='goal'; cell.appendChild(g);
       }
-      // 音符
       if(notes.has(i)){
         const note=document.createElement('div'); note.className='note'; note.textContent='🎵'; cell.appendChild(note);
       }
@@ -219,36 +343,48 @@
       notes.delete(at);
       notesOwned++;
       log("🎵 音符を手に入れた！");
+      renderStats();
     }
   }
 
   function roll(){
-    if(got){ log("もうゴール済み。リセットしてね"); vibrate(20); return; }
+    if(got){ log("もうゴール済み。位置だけ初期化してね"); vibrate(20); return; }
     last = Math.floor(Math.random()*6)+1;
+    const face = diceFaces[last-1];
+    stats.dice[last-1] += 1; // 累積
+    writeStats(stats);
+    pushRecent(face);
+
     const next = pos + last;
 
     if(next === N){
       pos = next;
       collectNoteIfAny(pos);
-      log(`🎲 ${last} → ぴったり${N}！ ${goal.name} マカロン！`, 'ok');
+      log(`${face} → ぴったり${N}！ ${goal.name} マカロン！`, 'ok');
       vibrate(70);
       got = true;
-      evolvedChar = goal.evo; // 到達色に合わせた進化
+
+      stats.macarons[goal.key] += 1;
+      stats.notes += notesOwned;
+      writeStats(stats);
+      renderStats();
+
       setTimeout(()=>{ show('drink'); }, 400);
+
     }else if(next < N){
       pos = next;
       collectNoteIfAny(pos);
-      log(`🎲 ${last} → 位置 ${pos}/${N}`);
+      log(`${face} → 位置 ${pos}/${N}`);
       vibrate(20);
       renderBoard();
     }else{
-      log(`🎲 ${last} → ${next} 通り過ぎ（無効）`, 'ng');
+      log(`${face} → ${next} 通り過ぎ（無効）`, 'ng');
       vibrate(10);
     }
     renderBoard();
   }
 
-  function resetGame(){
+  function softReset(){
     pos=1; last=0; got=false; notesOwned=0;
     goal = COLORS[Math.floor(Math.random()*COLORS.length)];
     rollNotes();
@@ -256,9 +392,36 @@
     V.sceneTitle.textContent = "Scene 1：旅のはじまり";
     renderBoard();
   }
+  function hardReset(){
+    localStorage.removeItem('whoai_name');
+    localStorage.removeItem('whoai_stats');
+    stats = readStats();
+    charName = "";
+    V.greet.textContent = "";
+    recentFaces = [];
+    softReset();
+    show('name');
+  }
+  function toStart(){
+    document.getElementById('nameInput').value = localStorage.getItem('whoai_name') || '';
+    show('name');
+  }
 
+  function resetGame(incrementRun){
+    softReset();
+    if(incrementRun){
+      stats.runs += 1;
+      writeStats(stats);
+      renderStats();
+    }
+  }
+
+  // ボタン
   document.getElementById('rollBtn').onclick = roll;
-  document.getElementById('resetBtn').onclick = resetGame;
+  document.getElementById('softResetBtn').onclick = softReset;
+  document.getElementById('hardResetBtn').onclick = hardReset;
+  document.getElementById('renameBtn').onclick = toStart;
+  document.getElementById('toStartBtn').onclick = toStart;
 
   // ドリンク
   document.getElementById('drinkBtn').onclick = () => {
@@ -272,12 +435,19 @@
   // フィナーレ
   document.getElementById('playHB').onclick = () => { playHappyBirthday(); };
   document.getElementById('replay').onclick = () => {
-    resetGame();
+    softReset();
     show('game');
   };
 
   // 初期表示
-  if(charName){ resetGame(); show('game'); } else { show('name'); }
+  if(charName){
+    V.greet.textContent = `${charName} の冒険が始まるよ！`;
+    stats = readStats();
+    resetGame(false);
+    show('game');
+  }else{
+    show('name');
+  }
 
   /* ===== サウンド：Web Audio ===== */
   let audioCtx;
