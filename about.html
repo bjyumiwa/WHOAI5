@@ -2,460 +2,62 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>WhoAI Evo · Sugoroku</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WhoAI Evo · About</title>
 <style>
-  :root{
-    --fg:#fff; --glow:rgba(173,216,255,.45);
-    --primaryFrom:#ff8cc7; --primaryTo:#ff63b2;
-    --ghostBg:rgba(255,255,255,.18);
-  }
-  html,body{height:100%;margin:0}
   body{
-    font-family:"Noto Sans JP",system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:var(--fg);
+    font-family:"Noto Sans JP",system-ui,sans-serif;color:#fff;
     background:#000 url("public/assets/stage1/space_background.png") center/cover fixed no-repeat;
-    display:flex;align-items:center;justify-content:center;padding:10px;
+    margin:0;padding:20px;display:flex;align-items:center;justify-content:center;min-height:100vh
   }
-  .container{width:min(920px,96vw);height:min(96vh,940px);display:flex;flex-direction:column}
   .card{
-    flex:1;border-radius:20px;
+    width:min(880px,96vw);
+    border-radius:18px;padding:20px;text-align:left;
     background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.04));
     box-shadow:0 12px 28px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.12);
-    backdrop-filter:blur(6px);padding:14px;position:relative;
-    display:flex;flex-direction:column;align-items:center;justify-content:center
+    backdrop-filter:blur(6px)
   }
-  .hidden{display:none}
-
-  /* ボタン */
-  .buttons{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px}
-  .btn{border:none;border-radius:999px;cursor:pointer;outline:2px solid transparent;outline-offset:2px}
-  .btn:focus-visible{outline-color:var(--glow)}
-  .btn-primary{
-    min-width:220px;padding:14px 18px;font-size:18px;color:#2b1630;
-    background:linear-gradient(180deg,var(--primaryFrom),var(--primaryTo));
-    box-shadow:0 10px 20px rgba(255,99,178,.35)
-  }
-  .btn-mini{
-    min-width:auto;padding:6px 10px;font-size:12px;color:#24313a;
-    background:rgba(255,255,255,.9);box-shadow:0 4px 10px rgba(0,0,0,.25)
-  }
-  .btn-ghost{
-    min-width:160px;padding:12px 16px;font-size:16px;color:#edf3ff;
-    background:var(--ghostBg);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)
-  }
-  .corner{position:absolute;right:10px;bottom:10px}
-
-  /* Cover */
-  .cover-title{font-size:clamp(22px,6vw,36px);margin:.2em 0 .1em}
-  .cover-sub{opacity:.9;margin:0 0 10px}
-  .cover-hero{width:160px;filter:drop-shadow(0 8px 24px rgba(0,0,0,.55))}
-
-  /* Name */
-  input{
-    padding:10px;font-size:16px;border-radius:10px;border:1px solid rgba(255,255,255,.28);
-    width:min(420px,80vw);background:rgba(0,0,0,.25);color:#fff
-  }
-
-  /* Top mini buttons */
-  .topbar{position:absolute;top:10px;right:10px;display:flex;gap:6px}
-
-  /* レイアウト：左 盤面 / 右 ルーレット */
-  .layout{
-    display:grid; grid-template-columns: 2fr 1fr; gap:12px; width:100%; height:100%;
-    align-items:center; justify-items:center;
-  }
-  @media (max-width:780px){
-    .layout{ grid-template-columns: 1fr; grid-template-rows: auto auto; gap:10px }
-  }
-
-  /* 盤面：5x5 S字 */
-  .board{
-    width:100%; max-width:640px; aspect-ratio:1/1;
-    display:grid; grid-template-columns:repeat(5,1fr); grid-template-rows:repeat(5,1fr); gap:8px;
-    padding:6px;
-  }
-  .cell{
-    position:relative;border-radius:14px;overflow:hidden;
-    background:
-      radial-gradient(120% 80% at 20% 20%, rgba(255,255,255,.22), transparent 55%),
-      linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
-    box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 6px 18px rgba(0,0,0,.35);
-  }
-  .idx{
-    position:absolute;left:6px;top:6px;font-size:12px;font-weight:700;color:#24313a;
-    background:#fff;border-radius:999px;padding:.1em .5em;box-shadow:0 2px 6px rgba(0,0,0,.25)
-  }
-
-  /* ゴール（ドリンク画像） */
-  .goal-img{
-    position:absolute; right:6px; top:6px; width:34px; height:34px; object-fit:contain;
-    filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));
-  }
-
-  /* キャラ：盤面上の絶対配置（1からスタート） */
-  .charWrap{
-    position:absolute; pointer-events:none;
-    width: calc(100% - 12px); height: calc(100% - 12px);
-    left: 6px; top: 6px;
-  }
-  .char{
-    position:absolute; width:48px; height:48px; object-fit:contain;
-    filter:drop-shadow(0 3px 10px rgba(0,0,0,.55));
-    transition: transform .28s ease;
-  }
-
-  /* アイテム（マス内中央に配置） */
-  .item{
-    position:absolute; width:42px; height:42px; object-fit:contain;
-    filter:drop-shadow(0 3px 10px rgba(0,0,0,.5));
-  }
-  .noteEmoji{position:absolute; font-size:22px}
-
-  /* ルーレット */
-  .wheelBox{
-    width:min(260px,84vw); aspect-ratio:1/1;
-    position:relative; display:flex; align-items:center; justify-content:center;
-  }
-  .wheel{
-    width:100%; height:100%; transform:rotate(0deg);
-    transition: transform 2.2s cubic-bezier(.17,.89,.32,1.27);
-  }
-  .pointer{
-    position:absolute; top:-6px; width:0; height:0; border-left:12px solid transparent; border-right:12px solid transparent;
-    border-bottom:16px solid #fff; filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));
-  }
-  .spinNum{ margin-top:10px; font-size:20px; letter-spacing:.06em; }
-
-  /* HUD & log */
-  .hud{position:absolute;left:14px;top:10px;display:flex;gap:6px;flex-wrap:wrap}
-  .tag{padding:.35em .6em;border-radius:999px;font-size:12px;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
-  .collect{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:8px;flex-wrap:wrap}
-  .mac{position:relative;width:56px;height:56px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35))}
-  .mac img{width:100%;height:100%;object-fit:contain}
-  .badge{position:absolute;right:-6px;bottom:-6px;background:#fff;color:#24313a;border-radius:999px;padding:.2em .5em;font-size:12px;box-shadow:0 3px 8px rgba(0,0,0,.3)}
-  .log{
-    position:absolute;left:14px;right:14px;bottom:56px;background:rgba(255,255,255,.08);
-    border-radius:12px;padding:6px 8px;font-size:12px;max-height:22vh;overflow:auto;
-    box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)
-  }
-
-  /* フィナーレ */
-  .bigChar{width:min(55vw,340px);height:auto;filter:drop-shadow(0 8px 24px rgba(0,0,0,.55))}
-  .ako{animation:sway 3s ease-in-out infinite; mix-blend-mode:multiply;}
-  @keyframes sway{0%{transform:rotate(-2deg)}50%{transform:rotate(2deg) translateY(-3px)}100%{transform:rotate(-2deg)}}
+  h1{margin:.2em 0}
+  .langbar{display:flex;gap:8px;flex-wrap:wrap;margin:.6em 0 1em}
+  .chip{padding:.35em .8em;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:13px;background:rgba(0,0,0,.35);cursor:pointer}
+  .active{border-color:#a7e3ff;color:#a7e3ff}
+  .small{opacity:.9}
+  a.btn{display:inline-block;margin-top:10px;padding:.5em 1em;background:#fff;color:#24313a;border-radius:999px;text-decoration:none}
 </style>
 </head>
 <body>
-<div class="container">
-
-  <!-- Cover -->
-  <section id="view-cover" class="card">
-    <img src="public/assets/stage1/miwacchi_open.png" class="cover-hero" alt="">
-    <h1 class="cover-title">WhoAI Evo</h1>
-    <div class="cover-sub">偶然と意思のはざまで育つ、小さな進化の物語。</div>
-    <div class="buttons">
-      <button id="btnStart" class="btn btn-primary">▶ スタート</button>
-      <a href="about.html"><button class="btn btn-mini">📖 研究の説明</button></a>
-    </div>
-  </section>
-
-  <!-- Name -->
-  <section id="view-name" class="card hidden">
-    <h2 style="margin:.2em 0 6px">キャラクターに名前をつけよう</h2>
-    <input id="nameInput" type="text" placeholder="キャラの名前">
-    <div class="buttons">
-      <button id="btnSetName" class="btn btn-primary">OK</button>
-      <button id="btnBackCover" class="btn btn-mini">表紙へ</button>
-    </div>
-  </section>
-
-  <!-- Game -->
-  <section id="view-game" class="card hidden">
-    <!-- トップ小ボタン -->
-    <div class="topbar">
-      <a href="about.html"><button class="btn btn-mini">📖 説明</button></a>
-      <button id="hardReset" class="btn btn-mini">🧹 全初期化</button>
-    </div>
-
-    <div class="hud">
-      <span id="posTag" class="tag">位置: 1/25</span>
-      <span id="goalTag" class="tag">ゴール: 25</span>
-      <span id="notesTag" class="tag">音符: 0/5</span>
-      <span id="macTag" class="tag">マカロン: 0/4</span>
-    </div>
-
-    <div class="layout">
-      <!-- 盤面 -->
-      <div style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
-        <div id="board" class="board"></div>
-        <!-- キャラの絶対配置レイヤー -->
-        <div id="charWrap" class="charWrap">
-          <img id="char" src="public/assets/stage1/miwacchi_open.png" class="char" alt="">
-        </div>
-      </div>
-
-      <!-- ルーレット＆進捗 -->
-      <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
-        <div class="wheelBox">
-          <div class="pointer"></div>
-          <svg id="wheel" class="wheel" viewBox="0 0 100 100" aria-label="roulette">
-            <circle cx="50" cy="50" r="48" fill="#222" />
-            <g id="slices"></g>
-            <g id="labels" font-size="10" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-family="system-ui, sans-serif"></g>
-            <circle cx="50" cy="50" r="4" fill="#fff"/>
-          </svg>
-        </div>
-        <div class="spinNum" id="spinNum">—</div>
-        <div class="buttons">
-          <button id="btnSpin" class="btn btn-primary">🎡 ルーレットを回す</button>
-        </div>
-
-        <!-- マカロン進捗（画像＋バッジ） -->
-        <div class="collect" style="margin-top:6px">
-          <div class="mac"><img src="public/assets/stage1/macaron_pink.png" alt="pink"><span class="badge" id="cntPink">0</span></div>
-          <div class="mac"><img src="public/assets/stage1/macaron_blue.png" alt="blue"><span class="badge" id="cntBlue">0</span></div>
-          <div class="mac"><img src="public/assets/stage1/macaron_green.png" alt="green"><span class="badge" id="cntGreen">0</span></div>
-          <div class="mac"><img src="public/assets/stage1/macaron_purple.png" alt="purple"><span class="badge" id="cntPurple">0</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="corner"><button id="toCover" class="btn btn-mini">⏮ スタートへ</button></div>
-    <div id="log" class="log"></div>
-  </section>
-
-  <!-- Drink（自動遷移前のワンカット） -->
-  <section id="view-drink" class="card hidden">
-    <div class="center">
-      <img src="public/assets/stage1/drink_item.png" class="bigChar" alt="">
-      <div style="margin-top:6px;opacity:.9">コンプリート！少し休んで…</div>
-    </div>
-  </section>
-
-  <!-- Finale（HB自動再生・ボタンなし） -->
-  <section id="view-final" class="card hidden">
-    <div class="center">
-      <img src="public/assets/stage1/ako.png" class="bigChar ako" alt="ako">
-      <div style="margin-top:8px;opacity:.95">🎉 おめでとう！</div>
-      <div class="buttons"><button id="replay" class="btn btn-ghost">もう一度</button></div>
-    </div>
-  </section>
+<div class="card">
+  <h1 id="title">WhoAI Evo</h1>
+  <div id="subtitle" class="small">偶然と意思のはざまで育つ、小さな進化の物語。</div>
+  <div class="langbar" id="langBar"></div>
+  <div id="about"></div>
+  <a href="index.html" class="btn">ゲームへ戻る</a>
 </div>
 
 <script>
 (()=> {
-  /* ========= 色味（ここを変えるだけでルーレット配色変更） ========= */
-  const WHEEL_COLORS = ['#ff7ab6','#6aa6ff','#ffd166','#7ee6a2','#caa6ff','#ff9f6e']; // 1..6
-
-  /* ========= 参照 ========= */
-  const V = {
-    cover:gid('view-cover'), name:gid('view-name'), game:gid('view-game'), drink:gid('view-drink'), final:gid('view-final'),
-    board:gid('board'), char:gid('char'),
-    posTag:gid('posTag'), goalTag:gid('goalTag'), notesTag:gid('notesTag'), macTag:gid('macTag'),
-    cntPink:gid('cntPink'), cntBlue:gid('cntBlue'), cntGreen:gid('cntGreen'), cntPurple:gid('cntPurple'),
-    log:gid('log'), spinNum:gid('spinNum'), wheel:gid('wheel')
+  const LANGS=["ja","en","zh-CN","zh-TW","ko"]; let lang="ja";
+  const I18N={
+    "ja":{title:"WhoAI Evo",subtitle:"偶然と意思のはざまで育つ、小さな進化の物語。",
+      about:`『WhoAI Evo』は、25マスのすごろく盤をS字に進み、ルーレットで出た数だけ移動しながら、\nマカロン（4色）と音符（5つ）をすべて集める実験的ゲームです。\n中心の問いは「人はなぜ意思を出して介入してしまうのか」。\n偶然（ルーレット）と介入（意志的な再挑戦や命名、観察）から生まれる感情や愛着を観察し、\n人とAIキャラクターのあいだに芽生える関係と愛着形成のプロセスを探ります。`},
+    "en":{title:"WhoAI Evo",subtitle:"A small story of evolution between chance and will.",
+      about:`“WhoAI Evo” is an experimental board game with 25 S-shaped tiles.\nSpin the roulette and move; collect all 4 macarons and 5 notes.\nWe ask: *why do players intervene with their will?*\nBy observing emotions emerging between chance (roulette) and intervention (naming, retry, attention),\nwe explore how attachment forms between humans and AI characters.`},
+    "zh-CN":{title:"WhoAI Evo",subtitle:"在偶然与意志之间成长的小小进化故事。",
+      about:`《WhoAI Evo》是一款实验性“飞行棋”式游戏：25个格子按S形排列。\n转动轮盘前进，收集4种马卡龙和5个音符。\n核心问题是：**为什么玩家会主动以意志介入？**\n通过观察偶然（轮盘）与介入（命名、重试、关注）之间生成的情感与依恋，\n探索人与AI角色之间的关系与依恋形成过程。`},
+    "zh-TW":{title:"WhoAI Evo",subtitle:"在偶然與意志之間成長的小小進化故事。",
+      about:`《WhoAI Evo》是一款實驗性桌遊：25個格子以S形排列。\n轉動輪盤前進，收集4色馬卡龍與5個音符。\n核心問題是：**為什麼玩家會主動以意志介入？**\n透過觀察偶然（輪盤）與介入（命名、重試、注意）之間生成的情感與依戀，\n探索人與AI角色之間的關係與依戀形成過程。`},
+    "ko":{title:"WhoAI Evo",subtitle:"우연과 의지 사이에서 자라는 작은 진화 이야기.",
+      about:`『WhoAI Evo』는 25칸 S자 보드를 룰렛으로 이동하며,\n마카롱 4색과 음표 5개를 모두 모으면 클리어하는 실험적 게임입니다.\n핵심 질문은 **“왜 사람은 굳이 의지로 개입할까?”** 입니다.\n우연(룰렛)과 개입(이름짓기, 재도전, 주의) 사이에서 생기는 감정과 애착을 관찰하며,\n인간과 AI 캐릭터 사이의 애착 형성을 탐구합니다。`}
   };
-  function gid(id){return document.getElementById(id)}
-  function show(which){['cover','name','game','drink','final'].forEach(k=>V[k].classList.toggle('hidden',k!==which))}
-
-  gid('btnStart').onclick=()=>show('name');
-  gid('btnBackCover').onclick=()=>show('cover');
-  gid('toCover').onclick=()=>show('cover');
-
-  /* ========= 盤面（5x5 S字） ========= */
-  const N=25, SIZE=5;
-  function indexToRC(idx){
-    const r = Math.floor((idx-1)/SIZE);
-    const cInRow = (idx-1)%SIZE;
-    const c = (r%2===0) ? cInRow : (SIZE-1-cInRow);
-    return [SIZE-1-r, c];
+  function render(){
+    const d=I18N[lang];
+    document.getElementById('title').textContent=d.title;
+    document.getElementById('subtitle').textContent=d.subtitle;
+    document.getElementById('about').innerHTML=d.about.replace(/\n/g,"<br>");
+    const bar=document.getElementById('langBar'); bar.innerHTML="";
+    LANGS.forEach(code=>{ const b=document.createElement('div'); b.className="chip"+(code===lang?" active":""); b.textContent=code; b.onclick=()=>{lang=code;render();}; bar.appendChild(b); });
   }
-  const cellCenters = new Array(N+1);
-  function buildBoard(){
-    V.board.innerHTML='';
-    for(let i=1;i<=N;i++){
-      const div=document.createElement('div');
-      div.className='cell';
-      const [r,c]=indexToRC(i);
-      div.style.gridRow=(r+1);
-      div.style.gridColumn=(c+1);
-      const lab=document.createElement('div'); lab.className='idx'; lab.textContent=i; div.appendChild(lab);
-      if(i===N){
-        const drink=document.createElement('img');
-        drink.src="public/assets/stage1/drink_item.png";
-        drink.className='goal-img';
-        div.appendChild(drink);
-      }
-      V.board.appendChild(div);
-    }
-    // 座標キャッシュ
-    const rect=V.board.getBoundingClientRect(); const gap=8;
-    const w=rect.width,h=rect.height; const cellW=(w-gap*4)/SIZE, cellH=(h-gap*4)/SIZE;
-    for(let i=1;i<=N;i++){
-      const [r,c]=indexToRC(i);
-      const x=(c*(cellW+gap)+cellW/2+6)/w*100; const y=(r*(cellH+gap)+cellH/2+6)/h*100;
-      cellCenters[i]={x,y};
-    }
-  }
-
-  /* ========= アセット ========= */
-  const CHAR={ start:"public/assets/stage1/miwacchi_open.png", pink:"public/assets/stage1/pink_open.png", blue:"public/assets/stage1/blue_open.png", green:"public/assets/stage1/green_open.png", purple:"public/assets/stage1/purple_open.png" };
-  const MAC ={ pink:"public/assets/stage1/macaron_pink.png",  blue:"public/assets/stage1/macaron_blue.png",  green:"public/assets/stage1/macaron_green.png",  purple:"public/assets/stage1/macaron_purple.png" };
-  const NOTE_EMO=['🎵','🎶','♫','♬'];
-
-  /* ========= アイテム配置（マス内ランダム） ========= */
-  const macSlots={}; let noteSlots=new Set();
-  function placeItems(){
-    const pool=Array.from({length:N-2},(_,k)=>k+2); // 2..24
-    shuffle(pool);
-    const cols=['pink','blue','green','purple'];
-    cols.forEach((col,i)=>macSlots[col]=pool[i]);
-    noteSlots = new Set(pool.slice(4,9)); // 5つ
-    // 既存のDOM除去
-    V.board.querySelectorAll('.item,.noteEmoji').forEach(e=>e.remove());
-    // マカロン
-    cols.forEach(col=>{
-      const idx=macSlots[col]; const {x,y}=cellCenters[idx];
-      const img=document.createElement('img'); img.src=MAC[col]; img.className='item';
-      img.style.left=`calc(${x}% - 21px)`; img.style.top=`calc(${y}% - 21px)`;
-      V.board.appendChild(img);
-    });
-    // 音符
-    noteSlots.forEach(idx=>{
-      const {x,y}=cellCenters[idx];
-      const d=document.createElement('div'); d.className='noteEmoji'; d.textContent=NOTE_EMO[Math.floor(Math.random()*NOTE_EMO.length)];
-      d.style.left=`calc(${x}% - 10px)`; d.style.top=`calc(${y}% - 28px)`; V.board.appendChild(d);
-    });
-  }
-  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
-
-  /* ========= 状態 ========= */
-  let pos=1, moving=false;
-  let macGot={pink:false,blue:false,green:false,purple:false};
-  let notesGot=new Set();
-  let currentChar=CHAR.start;
-
-  function setCharImageBy(col){ currentChar = col? CHAR[col] : CHAR.start; V.char.src=currentChar; }
-  function renderChar(){ const {x,y}=cellCenters[pos]; V.char.style.transform=`translate(calc(${x}% - 24px), calc(${y}% - 24px))`; }
-  function updateHUD(){
-    const gotMacs=Object.values(macGot).filter(v=>v).length;
-    V.posTag.textContent=`位置: ${pos}/25`; V.goalTag.textContent=`ゴール: 25`;
-    V.notesTag.textContent=`音符: ${notesGot.size}/5`; V.macTag.textContent=`マカロン: ${gotMacs}/4`;
-    gid('cntPink').textContent = macGot.pink?1:0;
-    gid('cntBlue').textContent = macGot.blue?1:0;
-    gid('cntGreen').textContent= macGot.green?1:0;
-    gid('cntPurple').textContent= macGot.purple?1:0;
-  }
-  function log(t){ const d=document.createElement('div'); d.textContent=t; V.log.prepend(d); }
-
-  /* ========= ルーレット（色味変更可） ========= */
-  (function buildWheel(){
-    const slices=V.wheel.querySelector('#slices'); const labels=V.wheel.querySelector('#labels');
-    for(let i=0;i<6;i++){
-      const a0=(-90+i*60)*Math.PI/180, a1=(-90+(i+1)*60)*Math.PI/180;
-      const x0=50+48*Math.cos(a0), y0=50+48*Math.sin(a0);
-      const x1=50+48*Math.cos(a1), y1=50+48*Math.sin(a1);
-      const p=document.createElementNS('http://www.w3.org/2000/svg','path');
-      p.setAttribute('d',`M50,50 L${x0},${y0} A48,48 0 0 1 ${x1},${y1} Z`);
-      p.setAttribute('fill', WHEEL_COLORS[i%WHEEL_COLORS.length]||'#2b2f44');
-      slices.appendChild(p);
-      const mid=(-90+(i+0.5)*60)*Math.PI/180; const lx=50+30*Math.cos(mid), ly=50+30*Math.sin(mid);
-      const t=document.createElementNS('http://www.w3.org/2000/svg','text'); t.setAttribute('x',lx); t.setAttribute('y',ly); t.textContent=(i+1); labels.appendChild(t);
-    }
-  })();
-
-  let wheelAngle=0;
-  gid('btnSpin').onclick=()=>{
-    if(moving) return;
-    const steps=Math.floor(Math.random()*6)+1;
-    V.spinNum.textContent=`出目：${steps}`;
-    const targetIdx=steps-1, targetAngle=targetIdx*60;
-    const base=3*360; const finalAngle=base+(360-targetAngle);
-    wheelAngle=finalAngle; V.wheel.style.transform=`rotate(${finalAngle}deg)`;
-    setTimeout(()=>animateMove(steps), 2300);
-  };
-
-  /* ========= アニメーション移動 ========= */
-  function animateMove(steps){
-    if(moving) return; moving=true;
-    let moved=0;
-    const timer=setInterval(()=>{
-      // 25に到達しても未コンプなら 1 にループ
-      if(pos===N && !(allMac()&&allNote())) pos=0;
-      pos++; renderChar(); moved++;
-      if(moved>=steps){ clearInterval(timer); moving=false; onArrive(); }
-    }, 300);
-  }
-
-  /* ========= 到着処理（ぴったり判定） ========= */
-  function onArrive(){
-    // マカロン：そのマスが割り当ての場合のみゲット＆色変化
-    for(const [col,slot] of Object.entries(macSlots)){
-      if(slot===pos && !macGot[col]){
-        macGot[col]=true; setCharImageBy(col);
-        log(`🍪 ${col} マカロンを手に入れた！（ぴったり）`);
-      }
-    }
-    // 音符：そのマスにあるときのみゲット
-    if(noteSlots.has(pos) && !notesGot.has(pos)){
-      notesGot.add(pos); log(`🎵 音符を手に入れた！ (${notesGot.size}/5)`);
-    }
-    updateHUD();
-
-    // すべて集めたら → ドリンク → フィナーレ（HB自動）
-    if(allMac() && allNote()){
-      show('drink');
-      setTimeout(()=>{ show('final'); try{ playHappyBirthday(); }catch(e){} }, 1000);
-      return;
-    }
-
-    if(pos===N) log('🏁 ゴール！ まだ集めていないものがあるよ → 周回して続けよう');
-  }
-  const allMac = ()=>Object.values(macGot).every(v=>v);
-  const allNote= ()=>notesGot.size===5;
-
-  /* ========= 全初期化 / リプレイ ========= */
-  gid('hardReset').onclick=resetAll;
-  gid('replay').onclick=()=>{ resetRun(); show('game'); };
-
-  function resetAll(){ resetRun(); show('cover'); }
-  function resetRun(){
-    pos=1; moving=false;
-    macGot={pink:false,blue:false,green:false,purple:false};
-    notesGot=new Set(); currentChar=CHAR.start; V.char.src=currentChar;
-    V.log.innerHTML=''; placeItems(); renderChar(); updateHUD();
-  }
-
-  /* ========= サウンド ========= */
-  let audioCtx; function ctx(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
-  function playToneSeq(seq){
-    const ac=ctx(); let t=ac.currentTime+0.02;
-    seq.forEach(s=>{ const o=ac.createOscillator(), g=ac.createGain(); o.type='sine'; o.frequency.value=s.freq;
-      g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.18,t+0.02); g.gain.exponentialRampToValueAtTime(0.001,t+s.dur);
-      o.connect(g).connect(ac.destination); o.start(t); o.stop(t+s.dur+0.02); t+=s.dur+(s.gap||0.02); });
-  }
-  function note(n){
-    const N={'C4':261.63,'C#4':277.18,'D4':293.66,'D#4':311.13,'E4':329.63,'F4':349.23,'F#4':369.99,'G4':392.00,'G#4':415.30,'A4':440.00,'A#4':466.16,'B4':493.88,
-             'C5':523.25,'C#5':554.37,'D5':587.33,'D#5':622.25,'E5':659.25,'F5':698.46,'F#5':739.99,'G5':783.99,'G#5':830.61,'A5':880.00,'A#5':932.33,'B5':987.77};
-    return N[n]||440;
-  }
-  function playHappyBirthday(){
-    const q=.30,e=.15, d=n=>({freq:note(n),dur:e}), qn=n=>({freq:note(n),dur:q});
-    const seq=[d('G4'),d('G4'),qn('A4'),qn('G4'),qn('C5'),qn('B4'),
-               d('G4'),d('G4'),qn('A4'),qn('G4'),qn('D5'),qn('C5'),
-               d('G4'),d('G4'),qn('G5'),qn('E5'),qn('C5'),qn('B4'),qn('A4'),
-               d('F5'),d('F5'),qn('E5'),qn('C5'),qn('D5'),qn('C5')];
-    playToneSeq(seq);
-  }
-
-  /* ========= 初期化 ========= */
-  buildBoard(); placeItems();
-  // スタート位置（1）に表示
-  renderChar(); updateHUD();
-  // 名前→ゲーム
-  gid('btnSetName').onclick=()=>{ show('game'); };
-  // 初期画面
-  show('cover');
+  render();
 })();
 </script>
 </body>
