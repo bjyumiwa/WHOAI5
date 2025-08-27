@@ -1,127 +1,84 @@
-<!-- FILE: whoai_dice_exact5.html -->
+<!-- index.html · WhoAI Evo -->
 <!DOCTYPE html>
 <html lang="ja">
+<head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>WhoAI Dice · 5マスぴったり</title>
+<title>WhoAI Evo</title>
 <style>
-  :root{ --fg:#fff; --glass:rgba(255,255,255,.08) }
-  html,body{height:100%;margin:0}
   body{
-    font-family:"Noto Sans JP",system-ui,sans-serif;color:var(--fg);
+    font-family:"Noto Sans JP",system-ui,sans-serif;color:#fff;
     background:#000 url("public/assets/stage1/space_background.png") center/cover fixed no-repeat;
-    display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px;
+    margin:0;padding:20px;display:flex;flex-direction:column;align-items:center;gap:16px;
   }
-  .container{width:min(720px,96vw);display:flex;flex-direction:column;gap:12px}
-  .lang{position:fixed;right:10px;top:10px;display:flex;gap:6px;z-index:10}
-  .chip{padding:.35em .7em;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:12px;background:rgba(0,0,0,.35);cursor:pointer;user-select:none}
-  .active{border-color:#a7e3ff;color:#a7e3ff}
+  .container{width:min(820px,96vw);display:flex;flex-direction:column;gap:16px}
   .card{
-    border:1px solid rgba(255,255,255,.15);border-radius:16px;
-    background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.35));
-    padding:18px;
+    border:1px solid rgba(255,255,255,.18);border-radius:16px;
+    background:linear-gradient(180deg,rgba(0,0,0,.30),rgba(0,0,0,.36));
+    padding:20px;text-align:center
   }
-  .title{font-size:clamp(22px,5.5vw,30px);font-weight:700;margin:6px 0}
-  .subtitle{opacity:.9}
-  .buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .hidden{display:none}
+  h1{font-size:clamp(22px,5vw,32px);margin-top:0}
+  .subtitle{opacity:.9;margin-bottom:10px}
+  .buttons{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
   button{
     flex:1 1 auto;min-width:140px;padding:14px 16px;font-size:18px;
     border-radius:999px;border:1px solid rgba(255,255,255,.18);
     background:rgba(0,0,0,.35);color:#fff;cursor:pointer
   }
   button:active{transform:scale(.98)}
-  .row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px}
+
+  /* 盤面 */
+  .row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:6px}
   .cell{
-    aspect-ratio:1/1;border-radius:12px;border:1px solid rgba(255,255,255,.18);
-    background:var(--glass);position:relative;overflow:hidden;
-    display:flex;align-items:center;justify-content:center;
+    aspect-ratio:1/1;border:1px solid rgba(255,255,255,.2);border-radius:12px;
+    display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);position:relative;
   }
   .label{position:absolute;left:6px;top:6px;font-size:12px;opacity:.75}
-  .char{width:70%;max-width:120px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.5));user-select:none;-webkit-user-drag:none}
-  .apple{font-size:clamp(28px,7vw,40px);animation:bounce 1.2s infinite}
-  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-  .hud{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center}
-  .tags{display:flex;gap:8px;flex-wrap:wrap}
-  .tag{padding:.2em .7em;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:12px;opacity:.9;background:rgba(0,0,0,.25)}
-  .log{border:1px solid rgba(255,255,255,.15);border-radius:12px;background:rgba(0,0,0,.25);padding:10px;min-height:64px;max-height:38vh;overflow:auto;font-size:14px;line-height:1.5}
-  .ok{color:#9be08d}.ng{color:#ff9aa7}
-  .hidden{display:none}
-  .lead{line-height:1.8;white-space:pre-wrap}
-  .list{line-height:1.8;margin:8px 0 0 0;padding-left:1em}
+  .char{width:72%;max-width:120px;object-fit:contain}
+  .goal{width:62%;max-width:100px;object-fit:contain;animation:bounce 1.2s infinite}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .log{border:1px solid rgba(255,255,255,.18);border-radius:12px;background:rgba(0,0,0,.25);padding:10px;min-height:64px;max-height:38vh;overflow:auto;font-size:14px;text-align:left}
+  .langbar{display:flex;gap:6px;margin-bottom:10px;justify-content:center}
+  .chip{padding:.3em .8em;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:13px;background:rgba(0,0,0,.35);cursor:pointer}
+  .active{border-color:#a7e3ff;color:#a7e3ff}
 </style>
+</head>
 <body>
-<div class="lang" id="langBar"></div>
-
 <div class="container">
 
   <!-- 表紙 -->
   <section id="view-cover" class="card">
-    <div class="title" data-i18n="cover_title"></div>
-    <div class="subtitle" data-i18n="cover_sub"></div>
+    <img src="public/assets/stage1/code.png" alt="cover" style="max-width:420px;width:80%;border-radius:12px;filter:drop-shadow(0 6px 18px rgba(0,0,0,.6))">
+    <h1>WhoAI Evo</h1>
+    <div class="subtitle">偶然と意思のはざまで育つ、小さな進化の物語。</div>
     <div class="buttons">
-      <button id="btnStart" data-i18n="btn_start"></button>
-      <button id="btnAbout" data-i18n="btn_about"></button>
+      <button id="btnStart">スタート</button>
+      <button id="btnAbout">研究の説明</button>
     </div>
   </section>
 
   <!-- ゲーム -->
   <section id="view-game" class="card hidden">
-    <div class="hud">
-      <strong data-i18n="game_title"></strong>
-      <div class="tags">
-        <span id="posTag" class="tag"></span>
-        <span id="willTag" class="tag"></span>
-        <span id="dieTag" class="tag"></span>
-      </div>
-    </div>
-
-    <div class="row" id="board"></div>
-
-    <div class="tags" style="margin-top:10px">
-      <span class="tag" data-i18n="rule_exact"></span>
-      <span class="tag" data-i18n="rule_over"></span>
-      <span class="tag" data-i18n="rule_will"></span>
-    </div>
-
+    <h2>Scene 1：みわっちの旅</h2>
+    <div id="board" class="row"></div>
     <div class="buttons">
-      <button id="rollBtn" data-i18n="btn_roll"></button>
-      <button id="plusBtn" data-i18n="btn_plus"></button>
-      <button id="minusBtn" data-i18n="btn_minus"></button>
-      <button id="resetBtn" data-i18n="btn_reset"></button>
-      <button id="btnBackCover" data-i18n="btn_back_cover"></button>
-      <button id="btnToAbout" data-i18n="btn_to_about"></button>
+      <button id="rollBtn">🎲 サイコロ</button>
+      <button id="resetBtn">🔄 リセット</button>
+      <button id="btnBackCover">表紙へ</button>
     </div>
-
     <div id="log" class="log"></div>
   </section>
 
-  <!-- 研究説明 -->
+  <!-- About / 研究説明 -->
   <section id="view-about" class="card hidden">
-    <div class="title" data-i18n="about_title"></div>
-    <div class="lead" data-i18n="about_lead"></div>
-
-    <div class="subtitle" style="margin-top:14px" data-i18n="about_simple"></div>
-    <ul class="list">
-      <li data-i18n="about_rule"></li>
-      <li data-i18n="about_why_care"></li>
-      <li data-i18n="about_happy"></li>
-    </ul>
-
-    <div class="subtitle" style="margin-top:14px" data-i18n="about_research_q"></div>
-    <ul class="list">
-      <li data-i18n="about_rq1"></li>
-      <li data-i18n="about_rq2"></li>
-    </ul>
-
-    <div class="subtitle" style="margin-top:14px" data-i18n="about_logs"></div>
-    <ul class="list">
-      <li data-i18n="about_log1"></li>
-      <li data-i18n="about_log2"></li>
-    </ul>
-
-    <div class="buttons" style="margin-top:12px">
-      <button id="btnBackGame" data-i18n="btn_back_game"></button>
-      <button id="btnBackCover2" data-i18n="btn_back_cover"></button>
+    <div class="langbar" id="langBar"></div>
+    <h2 id="title"></h2>
+    <div id="subtitle" class="subtitle"></div>
+    <div id="about"></div>
+    <div class="buttons">
+      <button id="btnBackGame">ゲームへ戻る</button>
+      <button id="btnBackCover2">表紙へ</button>
     </div>
   </section>
 
@@ -129,295 +86,122 @@
 
 <script>
 (() => {
-  const CHAR_PATH = "public/assets/stage1/pink_open.png";
-  const N = 5;
-  const LANGS = ["ja","en","zh-Hans","zh-Hant","ko"];
-
-  const I18N = {
+  // ===== 多言語研究説明 =====
+  const LANGS=["ja","en","zh-CN","zh-TW","ko"];
+  let lang="ja";
+  const I18N={
     "ja":{
-      cover_title:"WhoAI Dice（5マス・ぴったり）",
-      cover_sub:"サイコロで進む。ぴったりで小さなご褒美。偶然と意思のあいだを味わう短い旅。",
-      btn_start:"スタート", btn_about:"研究の説明",
-      btn_back_cover:"表紙へ", btn_to_about:"研究の説明へ", btn_back_game:"ゲームへ戻る",
-
-      game_title:"5マス・ぴったりルール",
-      rule_exact:"ぴったり5で🍎", rule_over:"通り過ぎは無効", rule_will:"意志±1は各1P",
-
-      btn_roll:"🎲 サイコロ", btn_plus:"➕ 意志 +1", btn_minus:"➖ 意志 -1", btn_reset:"🔄 リセット",
-
-      about_title:"研究の説明",
-      about_lead:"この試作は「なぜ人は意思を出して介入してしまうのか」を観察するための超短編ゲームです。サイコロ＝偶然、意志ポイント＝自分の介入。両者の交差で愛着や手応えがどのように生まれるかを見ます。",
-      about_simple:"シンプルな核",
-      about_rule:"1プレイにつき、サイコロを振る→進む。ぴったり止まったらご褒美。",
-      about_why_care:"世話の理由は「自分の一手が確かに効いた」という手ざわりを得るため。",
-      about_happy:"うれしさは、偶然で届く日と、意思で届く日の両方が小さな物語になること。",
-      about_research_q:"リサーチクエスチョン",
-      about_rq1:"意思の投入はどんな状況で起きやすいか（惜しさ・共感・投資感覚など）。",
-      about_rq2:"意思による介入後、愛着・再訪意図はどう変化するか。",
-      about_logs:"計測の例（ローカルのみ・送信なしでも可）",
-      about_log1:"ダイス結果、±1使用回数、成功/通過、タップ数。",
-      about_log2:"成功直後の任意自己報告（楽しい/悔しい/発見など）。"
+      title:"WhoAI Evo",
+      subtitle:"偶然と意思のはざまで育つ、小さな進化の物語。",
+      about:`『WhoAI Evo』は、サイコロでキャラを進め、マカロンや音符を集めて進化していく実験的なゲームです。  
+中心の問いは「なぜ人は意思を出して介入してしまうのか」。  
+偶然（ダイス）と介入（意思ポイント）の交差から生まれる感情や愛着を観察し、  
+人とAIキャラクターの関係性、愛着形成のプロセスを探ります。`
     },
     "en":{
-      cover_title:"WhoAI Dice (Exact-5)",
-      cover_sub:"Roll to move. Land exactly to earn a tiny reward—a short trip between chance and will.",
-      btn_start:"Start", btn_about:"Research Notes",
-      btn_back_cover:"Cover", btn_to_about:"Research", btn_back_game:"Back to Game",
-
-      game_title:"Exact-5 Rule",
-      rule_exact:"Exact 5 → 🍎", rule_over:"Overshoot = invalid", rule_will:"+/−1 costs 1 Will",
-
-      btn_roll:"🎲 Roll", btn_plus:"➕ Will +1", btn_minus:"➖ Will −1", btn_reset:"🔄 Reset",
-
-      about_title:"Research Notes",
-      about_lead:"This mini-game observes why players willingly intervene. Dice = chance, Will = deliberate intervention. We explore how their interplay yields attachment and agency.",
-      about_simple:"Simple core",
-      about_rule:"Per play: roll → move; land exactly to get a reward.",
-      about_why_care:"Why care: to feel that one’s small action truly worked.",
-      about_happy:"Joy: both lucky days and will-driven days form a tiny narrative.",
-      about_research_q:"Research questions",
-      about_rq1:"When is intervention triggered (near-miss, empathy, sunk-cost, etc.)?",
-      about_rq2:"How does intervention shift attachment and revisit intent?",
-      about_logs:"Possible logs (local-only or disabled)",
-      about_log1:"Dice results, ±1 uses, success/overshoot, taps.",
-      about_log2:"Optional self-report after success (fun/frustration/discovery)."
+      title:"WhoAI Evo",
+      subtitle:"A small story of evolution between chance and will.",
+      about:`“WhoAI Evo” is an experimental game where the player rolls dice to move a character,  
+collects macarons and notes, and evolves step by step.  
+It asks: *why do players intervene with their will?*  
+By observing emotions and attachment emerging between chance and intervention,  
+we explore how attachment forms between humans and AI characters.`
     },
-    "zh-Hans":{
-      cover_title:"WhoAI 骰子（正好到5）",
-      cover_sub:"掷骰前进。正好到达获得小奖励——在“偶然与意志”之间的短旅程。",
-      btn_start:"开始", btn_about:"研究说明",
-      btn_back_cover:"封面", btn_to_about:"研究说明", btn_back_game:"返回游戏",
-
-      game_title:"正好到5规则",
-      rule_exact:"正好5 → 🍎", rule_over:"超出作废", rule_will:"意志±1消耗1点",
-
-      btn_roll:"🎲 掷骰", btn_plus:"➕ 意志 +1", btn_minus:"➖ 意志 -1", btn_reset:"🔄 重置",
-
-      about_title:"研究说明",
-      about_lead:"此原型用于观察“为何人会主动介入”。骰子=偶然，意志点=主动。二者交织如何产生爱着与能动感。",
-      about_simple:"核心",
-      about_rule:"每次游玩：掷骰前进；正好停下获得奖励。",
-      about_why_care:"动机：确认自己的小动作确实有效。",
-      about_happy:"快乐：幸运获得与意志获得共同构成小叙事。",
-      about_research_q:"研究问题",
-      about_rq1:"何时更易触发主动介入（差一点、共情、投入感等）？",
-      about_rq2:"介入后，爱着与再玩意图如何变化？",
-      about_logs:"记录示例（可仅本地或关闭）",
-      about_log1:"骰子结果、±1使用次数、成功/超出、点击数。",
-      about_log2:"成功后的可选自我报告（有趣/懊恼/发现）。"
+    "zh-CN":{
+      title:"WhoAI Evo",
+      subtitle:"在偶然与意志之间成长的小小进化故事。",
+      about:`《WhoAI Evo》是一款实验性游戏，玩家掷骰子让角色前进，  
+收集马卡龙和音符，并逐步进化。  
+核心问题是：**为什么玩家会主动使用意志来干预？**  
+通过观察在偶然（骰子）与干预（意志点）之间产生的情感和依恋，  
+探讨人类与AI角色之间关系和依恋的形成过程。`
     },
-    "zh-Hant":{
-      cover_title:"WhoAI 骰子（剛好到5）",
-      cover_sub:"擲骰前進。剛好停下得小獎勵——在「偶然與意志」之間的短旅程。",
-      btn_start:"開始", btn_about:"研究說明",
-      btn_back_cover:"封面", btn_to_about:"研究說明", btn_back_game:"回到遊戲",
-
-      game_title:"剛好到5規則",
-      rule_exact:"剛好5 → 🍎", rule_over:"超過作廢", rule_will:"意志±1 消耗1點",
-
-      btn_roll:"🎲 擲骰", btn_plus:"➕ 意志 +1", btn_minus:"➖ 意志 -1", btn_reset:"🔄 重設",
-
-      about_title:"研究說明",
-      about_lead:"此原型觀察「為何人會主動介入」。骰子=偶然，意志=主動。兩者交織如何產生依附與能動感。",
-      about_simple:"核心",
-      about_rule:"每次遊玩：擲骰前進；剛好停下即得獎勵。",
-      about_why_care:"動機：確認自己的小動作確實有效。",
-      about_happy:"喜悅：幸運與意志達成都能形成小故事。",
-      about_research_q:"研究問題",
-      about_rq1:"何時較容易觸發主動介入（差一點、共感、投入感等）？",
-      about_rq2:"介入後，依附與回訪意圖如何改變？",
-      about_logs:"紀錄範例（可僅本機或關閉）",
-      about_log1:"骰子結果、±1 次數、成功/超過、點擊數。",
-      about_log2:"成功後的可選自我回饋（有趣/懊惱/發現）。"
+    "zh-TW":{
+      title:"WhoAI Evo",
+      subtitle:"在偶然與意志之間成長的小小進化故事。",
+      about:`《WhoAI Evo》是一款實驗性遊戲，玩家擲骰子讓角色前進，  
+收集馬卡龍和音符，並逐步進化。  
+核心問題是：**為什麼玩家會主動使用意志來干預？**  
+透過觀察在偶然（骰子）與干預（意志點）之間產生的情感和依戀，  
+探討人類與AI角色之間的關係與依戀的形成過程。`
     },
     "ko":{
-      cover_title:"WhoAI Dice (정확히 5)",
-      cover_sub:"주사위를 굴려 전진. 정확히 도착하면 작은 보상. 우연과 의지 사이의 짧은 여행.",
-      btn_start:"시작", btn_about:"연구 설명",
-      btn_back_cover:"표지", btn_to_about:"연구", btn_back_game:"게임으로",
-
-      game_title:"정확히 5 규칙",
-      rule_exact:"정확히 5 → 🍎", rule_over:"초과 이동은 무효", rule_will:"의지 ±1은 1포인트",
-
-      btn_roll:"🎲 굴리기", btn_plus:"➕ 의지 +1", btn_minus:"➖ 의지 -1", btn_reset:"🔄 리셋",
-
-      about_title:"연구 설명",
-      about_lead:"이 프로토타입은 왜 사람이 자발적으로 개입하는지 관찰합니다. 주사위=우연, 의지=개입. 두 요소의 상호작용이 애착과 작동감을 어떻게 낳는지 봅니다.",
-      about_simple:"핵심",
-      about_rule:"플레이마다 주사위를 굴려 이동, 정확히 도착하면 보상.",
-      about_why_care:"돌보는 이유: 작은 행동이 실제로 효과 있었다는 감각.",
-      about_happy:"기쁨: 운으로 된 날과 의지로 된 날이 작은 이야기로 남음.",
-      about_research_q:"연구 질문",
-      about_rq1:"개입이 촉발되는 순간은 언제인가(아깝다, 공감, 투자감 등)?",
-      about_rq2:"개입 후 애착/재방문 의도는 어떻게 변하는가?",
-      about_logs:"기록 예시(로컬 전용 또는 비활성화 가능)",
-      about_log1:"주사위 결과, ±1 사용, 성공/초과, 탭 수.",
-      about_log2:"성공 직후 선택적 자기보고(재미/아쉬움/발견)."
+      title:"WhoAI Evo",
+      subtitle:"우연과 의지 사이에서 자라는 작은 진화 이야기.",
+      about:`『WhoAI Evo』는 주사위를 굴려 캐릭터를 움직이고,  
+마카롱과 음표를 모으면서 점차 진화하는 실험적 게임입니다.  
+핵심 질문은 **“왜 플레이어는 굳이 의지를 사용해 개입할까?”** 입니다.  
+우연(주사위)과 개입(의지) 사이에서 생겨나는 감정과 애착을 관찰함으로써,  
+인간과 AI 캐릭터 간의 관계와 애착 형성을 탐구합니다.`
     }
   };
-
-  const V={cover:document.getElementById('view-cover'),game:document.getElementById('view-game'),about:document.getElementById('view-about')};
-  function show(name){V.cover.classList.toggle('hidden',name!=='cover');V.game.classList.toggle('hidden',name!=='game');V.about.classList.toggle('hidden',name!=='about');localStorage.setItem('whoai_view',name);}
-
-  // 言語UI
-  const langBar=document.getElementById('langBar');
-  let lang=localStorage.getItem('whoai_lang')||'ja';
-  if(!I18N[lang]) lang='ja';
-
-  function renderLang(){
-    langBar.innerHTML='';
+  function renderLangBar(){
+    const bar=document.getElementById("langBar");
+    bar.innerHTML="";
     LANGS.forEach(code=>{
-      const b=document.createElement('div');
-      b.className='chip'+(code===lang?' active':'');
+      const b=document.createElement("div");
+      b.className="chip"+(code===lang?" active":"");
       b.textContent=code;
-      b.onclick=()=>{lang=code;localStorage.setItem('whoai_lang',lang);applyI18N();renderLang();render();};
-      langBar.appendChild(b);
+      b.onclick=()=>{lang=code;renderAbout();};
+      bar.appendChild(b);
     });
   }
-  function applyI18N(){
-    document.querySelectorAll('[data-i18n]').forEach(el=>{
-      const k=el.getAttribute('data-i18n');
-      el.textContent = (I18N[lang] && I18N[lang][k]) ? I18N[lang][k] : k;
-    });
+  function renderAbout(){
+    const d=I18N[lang];
+    document.getElementById("title").textContent=d.title;
+    document.getElementById("subtitle").textContent=d.subtitle;
+    document.getElementById("about").innerHTML=d.about.replace(/\n/g,"<br>");
+    renderLangBar();
   }
 
-  // ゲーム本体
-  let pos=0,last=0,will=3,got=false;
-  const boardEl=document.getElementById('board');
+  // ===== シーン制御 =====
+  const V={cover:document.getElementById('view-cover'),game:document.getElementById('view-game'),about:document.getElementById('view-about')};
+  function show(name){
+    V.cover.classList.toggle('hidden',name!=='cover');
+    V.game.classList.toggle('hidden',name!=='game');
+    V.about.classList.toggle('hidden',name!=='about');
+  }
+
+  // ===== 簡単なゲーム盤面（仮） =====
+  const board=document.getElementById('board');
   const logEl=document.getElementById('log');
-  const posTag=document.getElementById('posTag');
-  const willTag=document.getElementById('willTag');
-  const dieTag=document.getElementById('dieTag');
-
-  function vibrate(ms){ if(navigator.vibrate) navigator.vibrate(ms); }
-  function log(msg, cls){ const d=document.createElement('div'); if(cls)d.className=cls; d.textContent=msg; logEl.prepend(d); }
-  function appleNode(){ const s=document.createElement('span'); s.className='apple'; s.textContent='🍎'; return s; }
-  function charNode(){ const img=document.createElement('img'); img.src=CHAR_PATH; img.alt='char'; img.className='char'; return img; }
-
-  function render(){
-    const HUD = {
-      ja:{pos:'位置', will:'意志', dice:'ダイス'},
-      en:{pos:'Pos', will:'Will', dice:'Dice'},
-      "zh-Hans":{pos:'位置', will:'意志', dice:'骰子'},
-      "zh-Hant":{pos:'位置', will:'意志', dice:'骰子'},
-      ko:{pos:'위치', will:'의지', dice:'주사위'}
-    };
-    const H = HUD[lang]||HUD.ja;
-    posTag.textContent  = `${H.pos}: ${pos}/${N}`;
-    willTag.textContent = `${H.will}: ${will}`;
-    dieTag.textContent  = `${H.dice}: ${last||'―'}`;
-
-    boardEl.innerHTML='';
-    for(let i=1;i<=N;i++){
-      const c=document.createElement('div'); c.className='cell';
-      const l=document.createElement('span'); l.className='label'; l.textContent=i; c.appendChild(l);
-      if(i===pos) c.appendChild(charNode());
-      else if(i===N) c.appendChild(appleNode());
-      boardEl.appendChild(c);
+  let pos=1,last=0;
+  function renderBoard(){
+    board.innerHTML='';
+    for(let i=1;i<=5;i++){
+      const cell=document.createElement('div');cell.className='cell';
+      const l=document.createElement('span');l.className='label';l.textContent=i;cell.appendChild(l);
+      if(i===pos){
+        const img=document.createElement('img');img.src="public/assets/stage1/miwacchi_open.png";img.className='char';cell.appendChild(img);
+      }
+      if(i===5){
+        const g=document.createElement('img');g.src="public/assets/stage1/macaron_pink.png";g.className='goal';cell.appendChild(g);
+      }
+      board.appendChild(cell);
     }
   }
-
   function roll(){
-    if(got){ log(txt('already')); vibrate(30); return; }
-    last = Math.floor(Math.random()*6)+1;
-    const next = pos + last;
-    if(next === N){ pos=next; got=true; log(txt('exact', {n:last}), 'ok'); vibrate(80); }
-    else if(next < N){ pos=next; log(txt('forward', {n:last, remain:N-pos})); vibrate(20); }
-    else { log(txt('over', {n:last, to:next}), 'ng'); vibrate(10); }
-    render();
+    last=Math.floor(Math.random()*6)+1;
+    const next=pos+last;
+    if(next===5){pos=next;log("ぴったりマカロン！","ok");}
+    else if(next<5){pos=next;log("位置 "+pos);}
+    else{log("通り過ぎ","ng");}
+    renderBoard();
   }
-  function adjust(d){
-    if(got){ log(txt('already')); return; }
-    if(will<=0){ log(txt('no_will'),'ng'); vibrate(10); return; }
-    if(last===0){ log(txt('need_roll'),'ng'); vibrate(10); return; }
-    const adj = last + d;
-    if(adj<1 || adj>6){ log(txt('range'),'ng'); vibrate(10); return; }
+  function reset(){pos=1;logEl.innerHTML="";renderBoard();}
+  function log(msg,cls){const d=document.createElement("div");if(cls)d.className=cls;d.textContent=msg;logEl.prepend(d);}
 
-    const next = pos + adj; will -= 1;
-    if(next === N){ pos=next; got=true; log(txt('adjust_exact',{d:d>0?'+1':'-1',adj}),'ok'); vibrate(80); }
-    else if(next < N){ pos=next; log(txt('adjust_forward',{d:d>0?'+1':'-1',adj,remain:N-pos}),'ok'); vibrate(20); }
-    else { log(txt('adjust_over',{d:d>0?'+1':'-1',adj,to:next}),'ng'); vibrate(10); }
-    render();
-  }
-  function reset(){ pos=0; last=0; will=3; got=false; log(txt('reset')); render(); }
+  // ===== イベント配線 =====
+  document.getElementById("btnStart").onclick=()=>{show("game");renderBoard();};
+  document.getElementById("btnAbout").onclick=()=>{show("about");renderAbout();};
+  document.getElementById("btnBackCover").onclick=()=>{show("cover");};
+  document.getElementById("btnBackCover2").onclick=()=>{show("cover");};
+  document.getElementById("btnBackGame").onclick=()=>{show("game");renderBoard();};
+  document.getElementById("rollBtn").onclick=roll;
+  document.getElementById("resetBtn").onclick=reset;
 
-  function txt(key,p={}){
-    const T={
-      ja:{
-        already:"もう🍎を手に入れました。リセットして再挑戦できます。",
-        exact:o=>`ダイス${o.n}。ぴったり${N}！🍎`,
-        forward:o=>`ダイス${o.n} → 位置${pos}/${N}。あと${o.remain}。`,
-        over:o=>`ダイス${o.n}は通り過ぎ（${pos}→${o.to}）。無効。`,
-        no_will:"意志ポイントが足りません。", need_roll:"まずはサイコロを振ってください。",
-        range:"調整は1〜6の範囲のみ有効です。", adjust_exact:o=>`意志で${o.d} → ${o.adj}。ぴったり${N}！🍎`,
-        adjust_forward:o=>`意志で${o.d} → ${o.adj}。位置${pos}/${N}。あと${o.remain}。`,
-        adjust_over:o=>`意志で${o.d} → ${o.adj}でも通り過ぎ（${pos}→${o.to}）。無効。`,
-        reset:"リセット。ぴったり5を目指そう。"
-      },
-      en:{
-        already:"🍎 already obtained. Reset to try again.",
-        exact:o=>`Dice ${o.n}. Exact ${N}! 🍎`,
-        forward:o=>`Dice ${o.n} → pos ${pos}/${N}. remain ${o.remain}.`,
-        over:o=>`Dice ${o.n} overshoot (${pos}→${o.to}). invalid.`,
-        no_will:"No Will points.", need_roll:"Roll the dice first.",
-        range:"Adjust only within 1–6.", adjust_exact:o=>`Will ${o.d} → ${o.adj}. Exact ${N}! 🍎`,
-        adjust_forward:o=>`Will ${o.d} → ${o.adj}. pos ${pos}/${N}. remain ${o.remain}.`,
-        adjust_over:o=>`Will ${o.d} → ${o.adj} overshoot (${pos}→${o.to}). invalid.`,
-        reset:"Reset. Aim for exact 5."
-      },
-      "zh-Hans":{
-        already:"已获得🍎。重置后可再试。",
-        exact:o=>`骰子 ${o.n}。正好 ${N}！🍎`,
-        forward:o=>`骰子 ${o.n} → 位置 ${pos}/${N}。剩余 ${o.remain}。`,
-        over:o=>`骰子 ${o.n} 超出（${pos}→${o.to}），无效。`,
-        no_will:"意志点不足。", need_roll:"请先掷骰。",
-        range:"调整仅限 1–6。", adjust_exact:o=>`意志 ${o.d} → ${o.adj}。正好 ${N}！🍎`,
-        adjust_forward:o=>`意志 ${o.d} → ${o.adj}。位置 ${pos}/${N}。剩余 ${o.remain}。`,
-        adjust_over:o=>`意志 ${o.d} → ${o.adj} 仍然超出（${pos}→${o.to}），无效。`,
-        reset:"已重置。目标：正好 5。"
-      },
-      "zh-Hant":{
-        already:"已取得🍎。重設後可再試。",
-        exact:o=>`骰子 ${o.n}。剛好 ${N}！🍎`,
-        forward:o=>`骰子 ${o.n} → 位置 ${pos}/${N}。剩餘 ${o.remain}。`,
-        over:o=>`骰子 ${o.n} 超過（${pos}→${o.to}），作廢。`,
-        no_will:"意志點不足。", need_roll:"請先擲骰。",
-        range:"調整僅限 1–6。", adjust_exact:o=>`意志 ${o.d} → ${o.adj}。剛好 ${N}！🍎`,
-        adjust_forward:o=>`意志 ${o.d} → ${o.adj}。位置 ${pos}/${N}。剩餘 ${o.remain}。`,
-        adjust_over:o=>`意志 ${o.d} → ${o.adj} 仍超過（${pos}→${o.to}），作廢。`,
-        reset:"已重設。目標：剛好 5。"
-      },
-      ko:{
-        already:"🍎는 이미 획득했습니다. 리셋 후 재도전 가능.",
-        exact:o=>`주사위 ${o.n}. 정확히 ${N}! 🍎`,
-        forward:o=>`주사위 ${o.n} → 위치 ${pos}/${N}. 남은 ${o.remain}.`,
-        over:o=>`주사위 ${o.n} 초과 이동 (${pos}→${o.to}). 무효.`,
-        no_will:"의지 포인트가 부족합니다.", need_roll:"먼저 주사위를 굴려 주세요.",
-        range:"조정은 1–6 범위만 가능합니다.", adjust_exact:o=>`의지 ${o.d} → ${o.adj}. 정확히 ${N}! 🍎`,
-        adjust_forward:o=>`의지 ${o.d} → ${o.adj}. 위치 ${pos}/${N}. 남은 ${o.remain}.`,
-        adjust_over:o=>`의지 ${o.d} → ${o.adj} 여전히 초과 (${pos}→${o.to}). 무효.`,
-        reset:"리셋. 목표는 정확히 5."
-      }
-    };
-    const P=T[lang]||T.ja;
-    const v=P[key]; return typeof v==="function"?v(p):v||key;
-  }
-
-  // ボタン
-  document.getElementById('rollBtn').onclick=roll;
-  document.getElementById('plusBtn').onclick=()=>adjust(+1);
-  document.getElementById('minusBtn').onclick=()=>adjust(-1);
-  document.getElementById('resetBtn').onclick=reset;
-  document.getElementById('btnStart').onclick=()=>show('game');
-  document.getElementById('btnAbout').onclick=()=>show('about');
-  document.getElementById('btnBackCover').onclick=()=>show('cover');
-  document.getElementById('btnBackCover2').onclick=()=>show('cover');
-  document.getElementById('btnBackGame').onclick=()=>show('game');
-  document.getElementById('btnToAbout').onclick=()=>show('about');
-
-  // 初期化
-  renderLang(); applyI18N(); render();
-  show(localStorage.getItem('whoai_view') || 'cover');
+  // 初期表示
+  show("cover");
 })();
 </script>
 </body>
