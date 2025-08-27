@@ -2,40 +2,68 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>WhoAI Evo · Game</title>
 <style>
   :root{
     --fg:#fff; --glass:rgba(255,255,255,.10); --glow:rgba(173,216,255,.45);
+    --primaryFrom:#ff8cc7; --primaryTo:#ff63b2; /* 主役ピンク */
+    --ghostBg:rgba(255,255,255,.18); --danger:#ff7b7b;
     --pink:#ffc7de; --blue:#bfe3ff; --green:#c9f3d2; --purple:#e0c9ff;
   }
   html,body{height:100%;margin:0}
   body{
     font-family:"Noto Sans JP",system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:var(--fg);
     background:#000 url("public/assets/stage1/space_background.png") center/cover fixed no-repeat;
-    display:flex;flex-direction:column;align-items:center;gap:18px;padding:18px;
+    display:flex;align-items:center;justify-content:center;padding:10px;
   }
-  .container{width:min(980px,96vw);display:flex;flex-direction:column;gap:16px}
+  .container{width:min(820px,96vw);height:min(96vh,820px);display:flex;flex-direction:column}
   .card{
-    border-radius:20px;
+    flex:1;border-radius:20px;
     background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.04));
     box-shadow:0 12px 28px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.12);
-    backdrop-filter:blur(6px);
-    padding:20px;text-align:center
+    backdrop-filter:blur(6px);padding:14px;position:relative;
+    display:flex;flex-direction:column;align-items:center;justify-content:center
   }
-  .buttons{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px}
-  button{
-    flex:1 1 auto;min-width:140px;padding:12px 16px;font-size:16px;border:none;border-radius:999px;
-    color:#24313a;background:linear-gradient(180deg,#fff,#f2f6ff);box-shadow:0 6px 14px rgba(0,0,0,.25);
-    outline:2px solid transparent;outline-offset:2px;cursor:pointer;
-  }
-  button:active{transform:translateY(1px)} button:focus-visible{outline-color:var(--glow)}
-  a button{color:#24313a}
+  .hidden{display:none}
 
-  /* 盤面 */
-  .hud{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:8px}
-  .tag{padding:.35em .75em;border-radius:999px;font-size:12px;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
-  .row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:6px}
+  /* ボタンの階層化 */
+  .buttons{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+  .btn{border:none;border-radius:999px;cursor:pointer;outline:2px solid transparent;outline-offset:2px}
+  .btn:focus-visible{outline-color:var(--glow)}
+  .btn-primary{
+    min-width:220px;padding:14px 18px;font-size:18px;color:#2b1630;
+    background:linear-gradient(180deg,var(--primaryFrom),var(--primaryTo));
+    box-shadow:0 10px 20px rgba(255,99,178,.35)
+  }
+  .btn-ghost{
+    min-width:160px;padding:12px 16px;font-size:16px;color:#edf3ff;
+    background:var(--ghostBg);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)
+  }
+  .btn-mini{
+    min-width:auto;padding:6px 10px;font-size:12px;color:#24313a;
+    background:rgba(255,255,255,.9);box-shadow:0 4px 10px rgba(0,0,0,.25)
+  }
+  .btn-danger{background:rgba(255,255,255,.94);color:#8b1e1e}
+  .corner{position:absolute;right:10px;bottom:10px}
+
+  /* Cover（中央） */
+  .cover-title{font-size:clamp(22px,6vw,36px);margin:.2em 0 .1em}
+  .cover-sub{opacity:.9;margin:0 0 10px}
+  .cover-hero{width:160px;filter:drop-shadow(0 8px 24px rgba(0,0,0,.55))}
+
+  /* 名前 */
+  input{
+    padding:10px;font-size:16px;border-radius:10px;border:1px solid rgba(255,255,255,.28);
+    width:min(420px,80vw);background:rgba(0,0,0,.25);color:#fff
+  }
+
+  /* 上部ミニボタン */
+  .topbar{position:absolute;top:10px;right:10px;display:flex;gap:6px}
+
+  /* 盤面（中央大きめ） */
+  .board-wrap{display:flex;align-items:center;justify-content:center;margin-top:4px}
+  .row{width:min(720px,92vw);display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
   .cell{
     aspect-ratio:1/1;border-radius:18px;position:relative;overflow:hidden;
     background:
@@ -45,148 +73,130 @@
     display:flex;align-items:center;justify-content:center;
   }
   .label{
-    position:absolute;left:8px;top:8px;font-size:13px;font-weight:700;color:#24313a;
-    background:#fff;border-radius:999px;padding:.25em .55em;box-shadow:0 2px 6px rgba(0,0,0,.25)
+    position:absolute;left:8px;top:8px;font-size:12px;font-weight:700;color:#24313a;
+    background:#fff;border-radius:999px;padding:.2em .55em;box-shadow:0 2px 6px rgba(0,0,0,.25)
   }
-  .char{width:72%;max-width:120px;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
-  .goal{width:62%;max-width:110px;object-fit:contain;animation:bounce 1.2s ease-in-out infinite}
+  .char{width:72%;max-width:130px;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
+  .goal{width:60%;max-width:110px;object-fit:contain;animation:bounce 1.2s ease-in-out infinite}
   @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
   .note{position:absolute;right:8px;bottom:6px;font-size:22px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.35))}
-  .log{background:rgba(255,255,255,.08);border-radius:14px;padding:10px;min-height:64px;max-height:28vh;overflow:auto;font-size:14px;text-align:left;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+  .hud{position:absolute;left:14px;top:10px;display:flex;gap:6px}
+  .tag{padding:.35em .6em;border-radius:999px;font-size:12px;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
 
-  /* 下部パネル */
-  .panel{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .stat{border-radius:16px;background:rgba(255,255,255,.08);padding:12px;text-align:left;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
-  .stat h3{margin:0 0 8px 0;font-size:16px}
-  .grid2{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-  .pill{border-radius:999px;padding:.45em .7em;text-align:center;background:#fff;color:#24313a;box-shadow:0 3px 10px rgba(0,0,0,.2)}
-  .diceTable{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:14px}
-  .diceTable th,.diceTable td{background:rgba(255,255,255,.12);padding:8px 10px;text-align:center;backdrop-filter:blur(4px)}
-  .diceTable th:first-child,.diceTable td:first-child{border-radius:999px 0 0 999px}
-  .diceTable th:last-child,.diceTable td:last-child{border-radius:0 999px 999px 0}
-  .diceFaces{font-size:20px;letter-spacing:2px}
-  .small{opacity:.9;font-size:12px}
+  /* マカロン獲得（画像＋バッジ） */
+  .collect{display:flex;gap:12px;align-items:center;justify-content:center;margin-top:8px;flex-wrap:wrap}
+  .mac{position:relative;width:70px;height:70px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35))}
+  .mac img{width:100%;height:100%;object-fit:contain}
+  .badge{position:absolute;right:-6px;bottom:-6px;background:#fff;color:#24313a;border-radius:999px;padding:.2em .5em;font-size:12px;box-shadow:0 3px 8px rgba(0,0,0,.3)}
 
-  /* ドリンク/フィナーレ */
-  .center{display:flex;flex-direction:column;align-items:center;gap:10px;min-height:40vh;justify-content:center}
+  /* 出目（マカロンの下） */
+  .dice-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:6px;flex-wrap:wrap}
+  .faces{font-size:20px;letter-spacing:2px}
+  .counts{display:flex;gap:6px;font-size:13px;flex-wrap:wrap}
+  .pill{background:rgba(255,255,255,.18);padding:.3em .6em;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
+
+  /* ログ（下部控えめ） */
+  .log{
+    position:absolute;left:14px;right:14px;bottom:56px;background:rgba(255,255,255,.08);
+    border-radius:12px;padding:6px 8px;font-size:12px;max-height:22vh;overflow:auto;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)
+  }
+
+  /* フィナーレ */
   .bigChar{width:min(55vw,320px);height:auto;filter:drop-shadow(0 8px 24px rgba(0,0,0,.55))}
-  .hidden{display:none}
-
-  /* ako：暫定“白抜き対策” */
-  .ako{animation:sway 3s ease-in-out infinite; mix-blend-mode:multiply;}
+  .ako{animation:sway 3s ease-in-out infinite;mix-blend-mode:multiply}
   @keyframes sway{0%{transform:rotate(-2deg)}50%{transform:rotate(2deg) translateY(-3px)}100%{transform:rotate(-2deg)}}
+
+  @media (max-width:480px){
+    .mac{width:60px;height:60px}.badge{font-size:11px}
+    .row{gap:8px}.log{bottom:50px}
+  }
 </style>
 </head>
 <body>
 <div class="container">
 
-  <!-- 0) Cover（新規） -->
+  <!-- Cover -->
   <section id="view-cover" class="card">
-    <img src="public/assets/stage1/miwacchi_open.png" alt="cover-char" style="width:140px;height:auto;filter:drop-shadow(0 6px 18px rgba(0,0,0,.55));margin-top:6px">
-    <h1 style="margin:.2em 0 0 0">WhoAI Evo</h1>
-    <div style="opacity:.9;margin:.2em 0 1em 0">偶然と意思のはざまで育つ、小さな進化の物語。</div>
+    <img src="public/assets/stage1/miwacchi_open.png" class="cover-hero" alt="">
+    <h1 class="cover-title">WhoAI Evo</h1>
+    <div class="cover-sub">偶然と意思のはざまで育つ、小さな進化の物語。</div>
     <div class="buttons">
-      <button id="btnStart">スタート</button>
-      <a href="about.html"><button>📖 研究の説明</button></a>
+      <button id="btnStart" class="btn btn-primary">▶ スタート</button>
+      <a href="about.html"><button class="btn btn-mini">📖 研究の説明</button></a>
     </div>
   </section>
 
-  <!-- 1) 名前 -->
+  <!-- Name -->
   <section id="view-name" class="card hidden">
-    <h2>キャラクターに名前をつけよう</h2>
-    <input id="nameInput" type="text" placeholder="キャラの名前" inputmode="latin-name">
+    <h2 style="margin:.2em 0 6px">キャラクターに名前をつけよう</h2>
+    <input id="nameInput" type="text" placeholder="キャラの名前">
     <div class="buttons">
-      <button id="btnSetName">OK</button>
-      <button id="btnBackCover">表紙へ</button>
+      <button id="btnSetName" class="btn btn-primary">OK</button>
+      <button id="btnBackCover" class="btn btn-mini">表紙へ</button>
     </div>
   </section>
 
-  <!-- 2) ゲーム -->
+  <!-- Game -->
   <section id="view-game" class="card hidden">
-    <h1 style="margin-top:2px">WhoAI Evo 🎲</h1>
-    <p id="greet" style="margin-top:0"></p>
+    <div class="topbar">
+      <a href="about.html"><button class="btn btn-mini">📖 説明</button></a>
+      <button id="hardResetBtn" class="btn btn-mini btn-danger">🧹 全初期化</button>
+    </div>
 
     <div class="hud">
-      <strong id="sceneTitle">Scene 1：旅のはじまり</strong>
-      <div>
-        <span id="posTag" class="tag">位置: 1/5</span>
-        <span id="dieTag" class="tag">ダイス: ―</span>
-        <span id="notesTag" class="tag">音符: 0/3</span>
+      <span id="posTag" class="tag">位置: 1/5</span>
+      <span id="dieTag" class="tag">ダイス: ―</span>
+      <span id="notesTag" class="tag">音符: 0/3</span>
+    </div>
+
+    <div class="board-wrap"><div id="board" class="row"></div></div>
+
+    <div class="buttons"><button id="rollBtn" class="btn btn-primary">🎲 サイコロを振る</button></div>
+
+    <div class="collect" aria-label="獲得マカロン">
+      <div class="mac"><img src="public/assets/stage1/macaron_pink.png" alt="pink"><span class="badge" id="cntPink">0</span></div>
+      <div class="mac"><img src="public/assets/stage1/macaron_blue.png" alt="blue"><span class="badge" id="cntBlue">0</span></div>
+      <div class="mac"><img src="public/assets/stage1/macaron_green.png" alt="green"><span class="badge" id="cntGreen">0</span></div>
+      <div class="mac"><img src="public/assets/stage1/macaron_purple.png" alt="purple"><span class="badge" id="cntPurple">0</span></div>
+    </div>
+
+    <div class="dice-bar">
+      <div class="faces" id="diceHistory">—</div>
+      <div class="counts">
+        <span class="pill">⚀ <b id="d1">0</b></span>
+        <span class="pill">⚁ <b id="d2">0</b></span>
+        <span class="pill">⚂ <b id="d3">0</b></span>
+        <span class="pill">⚃ <b id="d4">0</b></span>
+        <span class="pill">⚄ <b id="d5">0</b></span>
+        <span class="pill">⚅ <b id="d6">0</b></span>
+        <span class="pill">♪ <b id="noteAll">0</b></span>
+        <span class="pill">回 <b id="runs">0</b></span>
       </div>
     </div>
 
-    <div id="board" class="row"></div>
-
-    <div class="buttons">
-      <button id="rollBtn">🎲 サイコロ</button>
-      <button id="softResetBtn">🔄 位置だけ初期化</button>
-      <button id="renameBtn">📝 名前を変える</button>
-      <button id="toStartBtn">⏮ スタートに戻る</button>
-      <button id="hardResetBtn">🧹 全初期化（名前と記録も）</button>
-      <a href="about.html"><button>📖 研究の説明</button></a>
-    </div>
-
+    <div class="corner"><button id="toCover" class="btn btn-mini">⏮ スタートへ</button></div>
     <div id="log" class="log"></div>
-
-    <div class="panel">
-      <div class="stat">
-        <h3>ゲット表：マカロン（累積）</h3>
-        <div class="grid2">
-          <div class="pill" id="macPink">ピンク 0</div>
-          <div class="pill" id="macBlue">ブルー 0</div>
-          <div class="pill" id="macGreen">グリーン 0</div>
-          <div class="pill" id="macPurple">パープル 0</div>
-        </div>
-        <h3 style="margin-top:12px">ゲット表：音符（累積 / 今回）</h3>
-        <div class="grid2">
-          <div class="pill" id="noteAll">累積 0</div>
-          <div class="pill" id="noteRun">今回 0/3</div>
-          <div class="pill" id="runs">プレイ回数 0</div>
-          <div class="pill"><a href="?new=1" style="color:#24313a;text-decoration:none">?new=1 で名前から</a></div>
-        </div>
-      </div>
-
-      <div class="stat">
-        <h3>サイコロの出目</h3>
-        <table class="diceTable">
-          <tr><th>面</th><th>⚀</th><th>⚁</th><th>⚂</th><th>⚃</th><th>⚄</th><th>⚅</th></tr>
-          <tr>
-            <td>累積</td>
-            <td id="d1">0</td><td id="d2">0</td><td id="d3">0</td>
-            <td id="d4">0</td><td id="d5">0</td><td id="d6">0</td>
-          </tr>
-        </table>
-        <div style="margin-top:8px">
-          <div class="small">直近（最大10回）</div>
-          <div id="diceHistory" class="diceFaces">—</div>
-        </div>
-      </div>
-    </div>
   </section>
 
-  <!-- 3) ドリンク（パープル進化の後だけ来る） -->
+  <!-- Drink -->
   <section id="view-drink" class="card hidden">
-    <div class="title">ドリンクタイム</div>
-    <div class="subtitle">ひとくち飲んで、フィナーレへ。</div>
     <div class="center">
-      <img id="drinkImg" src="public/assets/stage1/drink_item.png" alt="drink" class="bigChar" />
+      <img src="public/assets/stage1/drink_item.png" class="bigChar" alt="">
       <div class="buttons">
-        <button id="drinkBtn">🥛 のむ</button>
-        <button id="toFinal">つぎへ</button>
+        <button id="drinkBtn" class="btn btn-ghost">🥛 のむ</button>
+        <button id="toFinal"  class="btn btn-primary">つぎへ</button>
       </div>
     </div>
   </section>
 
-  <!-- 4) フィナーレ -->
+  <!-- Final -->
   <section id="view-final" class="card hidden">
-    <div class="title">Finale</div>
     <div class="center">
-      <!-- 透明PNGが最適／暫定は mix-blend-mode で白地をなじませる -->
-      <img src="public/assets/stage1/ako.png" alt="ako" class="bigChar ako" />
+      <img src="public/assets/stage1/ako.png" class="bigChar ako" alt="ako">
       <div class="buttons">
-        <button id="playHB">🎵 ハッピーバースデーを鳴らす</button>
-        <button id="replay">もう一度あそぶ</button>
-        <a href="about.html"><button>📖 研究の説明</button></a>
+        <button id="playHB" class="btn btn-primary">🎵 ハッピーバースデー</button>
+        <button id="replay" class="btn btn-ghost">もう一度</button>
       </div>
     </div>
   </section>
@@ -194,187 +204,147 @@
 </div>
 
 <script>
-(() => {
-  /* ===== ASSETS ===== */
-  const CHAR_START  = "public/assets/stage1/miwacchi_open.png";
-  const CHAR_PINK   = "public/assets/stage1/pink_open.png";
-  const CHAR_BLUE   = "public/assets/stage1/blue_open.png";
-  const CHAR_GREEN  = "public/assets/stage1/green_open.png";
-  const CHAR_PURPLE = "public/assets/stage1/purple_open.png";
-  const MAC_PINK    = "public/assets/stage1/macaron_pink.png";
-  const MAC_BLUE    = "public/assets/stage1/macaron_blue.png";
-  const MAC_GREEN   = "public/assets/stage1/macaron_green.png";
-  const MAC_PURPLE  = "public/assets/stage1/macaron_purple.png";
+(()=> {
+  /* 画像パス */
+  const CHAR = {
+    start:"public/assets/stage1/miwacchi_open.png",
+    pink:"public/assets/stage1/pink_open.png",
+    blue:"public/assets/stage1/blue_open.png",
+    green:"public/assets/stage1/green_open.png",
+    purple:"public/assets/stage1/purple_open.png",
+  };
+  const MAC = {
+    pink:"public/assets/stage1/macaron_pink.png",
+    blue:"public/assets/stage1/macaron_blue.png",
+    green:"public/assets/stage1/macaron_green.png",
+    purple:"public/assets/stage1/macaron_purple.png",
+  };
 
+  /* ビュー参照 */
   const V = {
-    cover:document.getElementById('view-cover'),
-    name: document.getElementById('view-name'),
-    game: document.getElementById('view-game'),
-    drink:document.getElementById('view-drink'),
-    final:document.getElementById('view-final'),
-    greet:document.getElementById('greet'),
-    posTag:document.getElementById('posTag'),
-    dieTag:document.getElementById('dieTag'),
-    notesTag:document.getElementById('notesTag'),
-    board:document.getElementById('board'),
-    log:document.getElementById('log'),
-    sceneTitle:document.getElementById('sceneTitle'),
-    macPink:document.getElementById('macPink'),
-    macBlue:document.getElementById('macBlue'),
-    macGreen:document.getElementById('macGreen'),
-    macPurple:document.getElementById('macPurple'),
-    noteAll:document.getElementById('noteAll'),
-    noteRun:document.getElementById('noteRun'),
-    runs:document.getElementById('runs'),
-    dCells:[null,document.getElementById('d1'),document.getElementById('d2'),document.getElementById('d3'),document.getElementById('d4'),document.getElementById('d5'),document.getElementById('d6')],
-    diceHistory:document.getElementById('diceHistory')
+    cover:id('view-cover'), name:id('view-name'), game:id('view-game'), drink:id('view-drink'), final:id('view-final'),
+    board:id('board'), log:id('log'),
+    posTag:id('posTag'), dieTag:id('dieTag'), notesTag:id('notesTag'),
+    cntPink:id('cntPink'), cntBlue:id('cntBlue'), cntGreen:id('cntGreen'), cntPurple:id('cntPurple'),
+    noteAll:id('noteAll'), runs:id('runs'),
+    dCells:[null,id('d1'),id('d2'),id('d3'),id('d4'),id('d5'),id('d6')], diceHistory:id('diceHistory'),
   };
-  function show(which){
-    V.cover.classList.toggle('hidden', which!=='cover');
-    V.name.classList.toggle('hidden', which!=='name');
-    V.game.classList.toggle('hidden', which!=='game');
-    V.drink.classList.toggle('hidden', which!=='drink');
-    V.final.classList.toggle('hidden', which!=='final');
-  }
+  function id(s){return document.getElementById(s)}
+  function show(x){['cover','name','game','drink','final'].forEach(k=>V[k].classList.toggle('hidden',k!==x))}
 
-  // Cover → 名前
-  document.getElementById('btnStart').onclick = () => show('name');
-  document.getElementById('btnBackCover').onclick = () => show('cover');
+  /* 画面遷移 */
+  id('btnStart').onclick=()=>show('name');
+  id('btnBackCover').onclick=()=>show('cover');
+  id('toCover').onclick=()=>show('cover');
 
-  // 名前
-  let charName = localStorage.getItem("whoai_name") || "";
-  document.getElementById('btnSetName').onclick = () => {
-    const val = document.getElementById('nameInput').value.trim();
-    if(!val) return;
-    charName = val;
-    localStorage.setItem("whoai_name", charName);
-    V.greet.textContent = `${charName} の冒険が始まるよ！`;
-    resetGame(true);
-    show('game');
-  };
+  /* 名前→ゲーム */
+  id('btnSetName').onclick=()=>{ resetRun(true); show('game'); };
 
-  // 累積統計
-  const defaultStats = {macarons:{pink:0,blue:0,green:0,purple:0}, notes:0, runs:0, dice:[0,0,0,0,0,0]};
-  const readStats = ()=>{ try{ return JSON.parse(localStorage.getItem('whoai_stats')) || structuredClone(defaultStats);}catch(e){return structuredClone(defaultStats);} };
-  const writeStats = (s)=>localStorage.setItem('whoai_stats', JSON.stringify(s));
-  let stats = readStats();
+  /* 累積統計（localStorage） */
+  const DEF={macarons:{pink:0,blue:0,green:0,purple:0},notes:0,runs:0,dice:[0,0,0,0,0,0]};
+  let stats=read(); function read(){try{return JSON.parse(localStorage.getItem('whoai_stats'))||structuredClone(DEF);}catch(e){return structuredClone(DEF)}}
+  function write(){localStorage.setItem('whoai_stats',JSON.stringify(stats))}
 
-  // 出目
-  const faces = ["⚀","⚁","⚂","⚃","⚄","⚅"];
-  let recentFaces = [];
-  function renderDicePanel(){ for(let i=1;i<=6;i++) V.dCells[i].textContent = stats.dice[i-1]; V.diceHistory.textContent = recentFaces.length?recentFaces.join(" "):"—"; }
-  function pushRecent(f){ recentFaces.unshift(f); if(recentFaces.length>10) recentFaces.pop(); renderDicePanel(); }
+  /* ダイス表示 */
+  const faces=["⚀","⚁","⚂","⚃","⚄","⚅"]; let recent=[];
+  function renderDice(){ for(let i=1;i<=6;i++) V.dCells[i].textContent=stats.dice[i-1]; V.diceHistory.textContent=recent.join(" ")||"—"; }
+  function pushFace(f){ recent.unshift(f); if(recent.length>12) recent.pop(); renderDice(); }
 
-  // ゲーム状態
+  /* ゲーム状態 */
   const N=5;
-  let pos=1,last=0,got=false,notesOwned=0;
-  let currentChar = CHAR_START;          // ← いまの姿
-  const COLORS = [
-    {key:'pink',   mac:MAC_PINK,   evo:CHAR_PINK},
-    {key:'blue',   mac:MAC_BLUE,   evo:CHAR_BLUE},
-    {key:'green',  mac:MAC_GREEN,  evo:CHAR_GREEN},
-    {key:'purple', mac:MAC_PURPLE, evo:CHAR_PURPLE},
-  ];
-  let collected = new Set();             // 取った色
-  let goal = pickNextGoal();             // 最初のゴール
+  let pos=1,last=0,notesOwned=0;
+  let currentChar=CHAR.start;
+  let collected=new Set();       // 取った色
+  let goal=null;                 // 今のゴール（未取得色から）
+  let notes=new Set();           // 音符の位置
 
-  // 音符配置
-  let notes = new Set();
-  function rollNotes(){ notes.clear(); while(notes.size<3){ const m=Math.floor(Math.random()*(N-2))+2; notes.add(m);} }
-
-  function pickNextGoal(){
-    const remain = COLORS.filter(c=>!collected.has(c.key));
-    const pick = remain[Math.floor(Math.random()*remain.length)];
-    return pick;
+  function nextGoal(){
+    const remain=['pink','blue','green','purple'].filter(k=>!collected.has(k));
+    if(remain.length===0) return null;
+    const key= remain[Math.floor(Math.random()*remain.length)];
+    return {key, mac:MAC[key], evo:CHAR[key]};
   }
 
-  function vibrate(ms){ if(navigator.vibrate) navigator.vibrate(ms); }
-  function log(s,cls){ const d=document.createElement('div'); if(cls)d.className=cls; d.textContent=(charName?charName+"：":"")+s; V.log.prepend(d); }
-
-  function labelTint(i){ return [ 'var(--pink)','var(--blue)','var(--green)','var(--purple)','var(--pink)'][ (i-1)%4 ]; }
-
-  function renderStats(){
-    V.macPink.textContent   = `ピンク ${stats.macarons.pink}`;
-    V.macBlue.textContent   = `ブルー ${stats.macarons.blue}`;
-    V.macGreen.textContent  = `グリーン ${stats.macarons.green}`;
-    V.macPurple.textContent = `パープル ${stats.macarons.purple}`;
-    V.noteAll.textContent   = `累積 ${stats.notes}`;
-    V.runs.textContent      = `プレイ回数 ${stats.runs}`;
-    V.noteRun.textContent   = `今回 ${notesOwned}/3`;
+  function rollNotes(){
+    notes.clear();
+    while(notes.size<3){ const m=Math.floor(Math.random()*3)+2; notes.add(m); } // 2..4
   }
 
-  function renderBoard(){
+  function render(){
     V.posTag.textContent = `位置: ${pos}/${N}`;
     V.dieTag.textContent = `ダイス: ${last?faces[last-1]:'―'}`;
     V.notesTag.textContent = `音符: ${notesOwned}/3`;
-    renderStats(); renderDicePanel();
+    V.cntPink.textContent = stats.macarons.pink;
+    V.cntBlue.textContent = stats.macarons.blue;
+    V.cntGreen.textContent= stats.macarons.green;
+    V.cntPurple.textContent= stats.macarons.purple;
+    V.noteAll.textContent  = stats.notes;
+    V.runs.textContent     = stats.runs;
+    renderDice();
 
     V.board.innerHTML='';
     for(let i=1;i<=N;i++){
       const cell=document.createElement('div'); cell.className='cell';
-      const label=document.createElement('span'); label.className='label'; label.textContent=i; label.style.background = labelTint(i); cell.appendChild(label);
-      if(i===pos){ const img=document.createElement('img'); img.src=currentChar; img.className='char'; cell.appendChild(img); }
-      if(i===N){ const g=document.createElement('img'); g.src=goal.mac; g.className='goal'; cell.appendChild(g); }
-      if(notes.has(i)){ const note=document.createElement('div'); note.className='note'; note.textContent='🎵'; cell.appendChild(note); }
+      const lab=document.createElement('span'); lab.className='label'; lab.textContent=i; cell.appendChild(lab);
+      if(i===pos){ const ch=document.createElement('img'); ch.src=currentChar; ch.className='char'; cell.appendChild(ch); }
+      if(i===N && goal){ const g=document.createElement('img'); g.src=goal.mac; g.className='goal'; cell.appendChild(g); }
+      if(notes.has(i)){ const n=document.createElement('div'); n.className='note'; n.textContent='🎵'; cell.appendChild(n); }
       V.board.appendChild(cell);
     }
   }
 
-  function collectNoteIfAny(at){ if(notes.has(at)){ notes.delete(at); notesOwned++; log("🎵 音符を手に入れた！"); renderStats(); } }
+  function collectNote(at){ if(notes.has(at)){ notes.delete(at); notesOwned++; log('🎵 音符ゲット'); } }
+  function log(t){ const d=document.createElement('div'); d.textContent=t; V.log.prepend(d); }
 
   function roll(){
-    if(got){ log("もうゴール済み。位置だけ初期化してね"); vibrate(20); return; }
-    last = Math.floor(Math.random()*6)+1;
-    const face = faces[last-1]; stats.dice[last-1]++; writeStats(stats); pushRecent(face);
-    const next = pos + last;
+    last=Math.floor(Math.random()*6)+1;
+    stats.dice[last-1]++; write(); pushFace(faces[last-1]);
 
-    if(next === N){
-      pos = next; collectNoteIfAny(pos);
-      // 進化
-      currentChar = goal.evo; collected.add(goal.key);
-      log(`${face} → ぴったり${N}！ ${goal.key} に進化！`, 'ok'); vibrate(70);
-      stats.macarons[goal.key] += 1; stats.notes += notesOwned; writeStats(stats); renderStats();
+    const next=pos+last;
+    if(next===N && goal){
+      pos=next; collectNote(pos);
+      currentChar=goal.evo; collected.add(goal.key);
+      stats.macarons[goal.key]++; stats.notes+=notesOwned; write();
+      log(`ぴったり！ ${goal.key} に進化`);
 
-      if(goal.key === 'purple'){  // パープルでドリンクへ
-        got = true;
-        setTimeout(()=>show('drink'), 420);
+      if(collected.size===4){
+        show('drink');
       }else{
-        // 続行：次のゴールを未取得色から選ぶ
+        // 次ラウンド
         pos=1; last=0; notesOwned=0; V.log.innerHTML='';
-        goal = pickNextGoal(); rollNotes(); renderBoard();
-        V.sceneTitle.textContent = "Scene つづき：もっと進化しよう";
+        goal=nextGoal(); rollNotes(); render();
       }
-
-    }else if(next < N){
-      pos = next; collectNoteIfAny(pos);
-      log(`${face} → 位置 ${pos}/${N}`); vibrate(18); renderBoard();
+    }else if(next<N){
+      pos=next; collectNote(pos); render();
     }else{
-      log(`${face} → ${next} 通り過ぎ（無効）`, 'ng'); vibrate(10);
+      log('通り過ぎ（無効）');
     }
   }
 
-  function softReset(){ pos=1; last=0; got=false; notesOwned=0; V.log.innerHTML=''; V.sceneTitle.textContent="Scene 1：旅のはじまり"; rollNotes(); renderBoard(); }
-  function hardReset(){ localStorage.removeItem('whoai_name'); localStorage.removeItem('whoai_stats'); stats=readStats(); charName=""; V.greet.textContent=""; recentFaces=[]; currentChar=CHAR_START; collected.clear(); goal=pickNextGoal(); softReset(); show('cover'); }
-  function toStart(){ document.getElementById('nameInput').value = localStorage.getItem('whoai_name') || ''; show('name'); }
-  function resetGame(incrementRun){ collected.clear(); currentChar=CHAR_START; goal=pickNextGoal(); softReset(); if(incrementRun){ stats.runs++; writeStats(stats); renderStats(); } }
+  /* ランごとの初期化 */
+  function resetRun(increment){
+    pos=1; last=0; notesOwned=0; currentChar=CHAR.start; collected.clear(); V.log.innerHTML='';
+    goal=nextGoal(); rollNotes(); render();
+    if(increment){ stats.runs++; write(); }
+  }
 
-  document.getElementById('rollBtn').onclick=roll;
-  document.getElementById('softResetBtn').onclick=softReset;
-  document.getElementById('hardResetBtn').onclick=hardReset;
-  document.getElementById('renameBtn').onclick=toStart;
-  document.getElementById('toStartBtn').onclick=()=>show('cover');
+  /* 全初期化 */
+  id('hardResetBtn').onclick=()=>{
+    localStorage.removeItem('whoai_stats'); stats=structuredClone(DEF);
+    resetRun(false); show('cover');
+  };
 
-  // ドリンク → フィナーレ
-  document.getElementById('drinkBtn').onclick = () => playToneSeq([{freq:784,dur:0.12},{freq:988,dur:0.12},{freq:1175,dur:0.18}]);
-  document.getElementById('toFinal').onclick = () => { show('final'); try{ playHappyBirthday(); }catch(e){} };
-  document.getElementById('playHB').onclick = () => playHappyBirthday();
-  document.getElementById('replay').onclick = () => { resetGame(false); show('game'); };
+  /* ゲーム操作 */
+  id('rollBtn').onclick=roll;
 
-  // 初期表示：表紙
-  show('cover');
+  /* ドリンク → フィナーレ（音は最小） */
+  id('drinkBtn').onclick=()=>playToneSeq([{freq:784,dur:0.12},{freq:988,dur:0.12},{freq:1175,dur:0.18}]);
+  id('toFinal').onclick=()=>{ show('final'); try{ playHappyBirthday(); }catch(e){} };
+  id('playHB').onclick=()=>playHappyBirthday();
+  id('replay').onclick=()=>{ resetRun(false); show('game'); };
 
-  /* ===== 音 ===== */
-  let audioCtx; function ctx(){ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+  /* サウンド */
+  let audioCtx; function ctx(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
   function playToneSeq(seq){
     const ac=ctx(); let t=ac.currentTime+0.02;
     seq.forEach(s=>{ const o=ac.createOscillator(), g=ac.createGain(); o.type='sine'; o.frequency.value=s.freq;
@@ -395,8 +365,8 @@
     return N[n]||440;
   }
 
-  // 起動時セットアップ
-  (function init(){ rollNotes(); renderBoard(); })();
+  /* 初期表示 */
+  show('cover');
 })();
 </script>
 </body>
