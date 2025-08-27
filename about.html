@@ -1,4 +1,3 @@
-<!-- about.html · WhoAI Evo（研究説明・多言語） -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -9,100 +8,57 @@
   body{
     font-family:"Noto Sans JP",system-ui,sans-serif;color:#fff;
     background:#000 url("public/assets/stage1/space_background.png") center/cover fixed no-repeat;
-    margin:0;padding:20px;display:flex;flex-direction:column;align-items:center;gap:16px;
+    margin:0;padding:20px;display:flex;align-items:center;justify-content:center;min-height:100vh
   }
-  .card{border:1px solid rgba(255,255,255,.18);border-radius:16px;background:rgba(0,0,0,.36);padding:20px;max-width:820px}
-  .langbar{display:flex;gap:6px;margin-bottom:10px;justify-content:center}
-  .chip{padding:.3em .8em;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:13px;background:rgba(0,0,0,.35);cursor:pointer}
+  .card{
+    width:min(880px,96vw);
+    border-radius:18px;padding:20px;text-align:left;
+    background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.04));
+    box-shadow:0 12px 28px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.12);
+    backdrop-filter:blur(6px)
+  }
+  h1{margin:.2em 0}
+  .langbar{display:flex;gap:8px;flex-wrap:wrap;margin:.6em 0 1em}
+  .chip{padding:.35em .8em;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:13px;background:rgba(0,0,0,.35);cursor:pointer}
   .active{border-color:#a7e3ff;color:#a7e3ff}
-  .subtitle{opacity:.9;margin-bottom:10px}
-  button{margin-top:20px;padding:12px 14px;font-size:16px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.35);color:#fff;cursor:pointer}
+  .small{opacity:.9}
+  a.btn{display:inline-block;margin-top:10px;padding:.5em 1em;background:#fff;color:#24313a;border-radius:999px;text-decoration:none}
 </style>
 </head>
 <body>
 <div class="card">
+  <h1 id="title">WhoAI Evo</h1>
+  <div id="subtitle" class="small">偶然と意思のはざまで育つ、小さな進化の物語。</div>
   <div class="langbar" id="langBar"></div>
-  <h1 id="title"></h1>
-  <div id="subtitle" class="subtitle"></div>
   <div id="about"></div>
-  <a href="index.html"><button>🎲 ゲームに戻る</button></a>
+  <a href="index.html" class="btn">ゲームへ戻る</a>
 </div>
 
 <script>
-const LANGS=["ja","en","zh-CN","zh-TW","ko"];
-let lang="ja";
-const I18N={
-  "ja":{
-    title:"WhoAI Evo",
-    subtitle:"偶然と意思のはざまで育つ、小さな進化の物語。",
-    about:`『WhoAI Evo』は、キャラクターに名前を付け、サイコロで前進し、音符とマカロンを集めて進化する実験的なゲームです。  
-マカロンは4色（ピンク・ブルー・グリーン・パープル）で、到達した色に応じてキャラが進化します。  
-最後に集めた音符で「Happy Birthday」を奏でる演出は、プレイヤー自身の旅を祝福する小さな儀式です。  
-中心の問いは「なぜ人は意思を出して介入してしまうのか」。  
-偶然（ダイス）と介入（意思）の交差から生まれる感情や愛着を観察し、  
-人とAIキャラクターの関係性、愛着形成のプロセスを探ります。`
-  },
-  "en":{
-    title:"WhoAI Evo",
-    subtitle:"A small story of evolution between chance and will.",
-    about:`“WhoAI Evo” is an experimental game where you name a character, roll dice to move,  
-collect musical notes and macarons, and evolve the character.  
-Macarons come in four colors (pink/blue/green/purple); the character evolves to the color you reach.  
-At the finale, the gathered notes play “Happy Birthday,” a small ritual celebrating your journey.  
-It asks: *why do players intervene with their will?*  
-By observing the attachment and emotions emerging between chance (dice) and intervention (will),  
-the project explores how attachment forms between humans and AI characters.`
-  },
-  "zh-CN":{
-    title:"WhoAI Evo",
-    subtitle:"在偶然与意志之间成长的小小进化故事。",
-    about:`《WhoAI Evo》是一款实验性游戏：先为角色命名，通过掷骰子前进，  
-收集音符与马卡龙并逐步进化。马卡龙有四种颜色（粉/蓝/绿/紫），到达哪种颜色，角色就进化为相应颜色。  
-最后用收集到的音符演奏《生日快乐》，成为对旅程的庆祝。  
-核心问题是：**为什么玩家会主动用意志进行干预？**  
-通过观察在偶然（骰子）与干预（意志）之间产生的情感和依恋，探索人类与AI角色的依恋形成过程。`
-  },
-  "zh-TW":{
-    title:"WhoAI Evo",
-    subtitle:"在偶然與意志之間成長的小小進化故事。",
-    about:`《WhoAI Evo》是一款實驗性遊戲：先替角色命名，透過擲骰子前進，  
-收集音符與馬卡龍並逐步進化。馬卡龍有四色（粉/藍/綠/紫），到達哪一色，角色就進化為相對應的顏色。  
-最後以收集到的音符奏出《生日快樂》，作為對旅程的慶祝。  
-核心問題是：**為什麼玩家會主動以意志介入？**  
-透過觀察偶然（骰子）與介入（意志）之間產生的情感與依附，探索人與AI角色的依附形成。`
-  },
-  "ko":{
-    title:"WhoAI Evo",
-    subtitle:"우연과 의지 사이에서 자라는 작은 진화 이야기.",
-    about:`『WhoAI Evo』는 캐릭터에 이름을 붙이고 주사위를 굴려 전진하며,  
-음표와 마카롱을 모아 진화하는 실험적 게임입니다.  
-마카롱은 4가지 색(핑크/블루/그린/퍼플)이며 도달한 색에 맞춰 캐릭터가 진화합니다.  
-마지막에는 모은 음표로 「Happy Birthday」를 연주하여 여정을 축하합니다.  
-핵심 질문은 **“왜 플레이어는 굳이 의지를 사용해 개입할까?”** 입니다.  
-우연(주사위)과 개입(의지) 사이에서 생겨나는 감정과 애착을 관찰하며,  
-인간과 AI 캐릭터 간의 애착 형성 과정을 탐구합니다.`
+(()=> {
+  const LANGS=["ja","en","zh-CN","zh-TW","ko"]; let lang="ja";
+  const I18N={
+    "ja":{title:"WhoAI Evo",subtitle:"偶然と意思のはざまで育つ、小さな進化の物語。",
+      about:`『WhoAI Evo』は、25マスのすごろく盤をS字に進み、ルーレットで出た数だけ移動しながら、\nマカロン（4色）と音符（5つ）をすべて集める実験的ゲームです。\n中心の問いは「人はなぜ意思を出して介入してしまうのか」。\n偶然（ルーレット）と介入（意志的な再挑戦や命名、観察）から生まれる感情や愛着を観察し、\n人とAIキャラクターのあいだに芽生える関係と愛着形成のプロセスを探ります。`},
+    "en":{title:"WhoAI Evo",subtitle:"A small story of evolution between chance and will.",
+      about:`“WhoAI Evo” is an experimental board game with 25 S-shaped tiles.\nSpin the roulette and move; collect all 4 macarons and 5 notes.\nWe ask: *why do players intervene with their will?*\nBy observing emotions emerging between chance (roulette) and intervention (naming, retry, attention),\nwe explore how attachment forms between humans and AI characters.`},
+    "zh-CN":{title:"WhoAI Evo",subtitle:"在偶然与意志之间成长的小小进化故事。",
+      about:`《WhoAI Evo》是一款实验性“飞行棋”式游戏：25个格子按S形排列。\n转动轮盘前进，收集4种马卡龙和5个音符。\n核心问题是：**为什么玩家会主动以意志介入？**\n通过观察偶然（轮盘）与介入（命名、重试、关注）之间生成的情感与依恋，\n探索人与AI角色之间的关系与依恋形成过程。`},
+    "zh-TW":{title:"WhoAI Evo",subtitle:"在偶然與意志之間成長的小小進化故事。",
+      about:`《WhoAI Evo》是一款實驗性桌遊：25個格子以S形排列。\n轉動輪盤前進，收集4色馬卡龍與5個音符。\n核心問題是：**為什麼玩家會主動以意志介入？**\n透過觀察偶然（輪盤）與介入（命名、重試、注意）之間生成的情感與依戀，\n探索人與AI角色之間的關係與依戀形成過程。`},
+    "ko":{title:"WhoAI Evo",subtitle:"우연과 의지 사이에서 자라는 작은 진화 이야기.",
+      about:`『WhoAI Evo』는 25칸 S자 보드를 룰렛으로 이동하며,\n마카롱 4색과 음표 5개를 모두 모으면 클리어하는 실험적 게임입니다.\n핵심 질문은 **“왜 사람은 굳이 의지로 개입할까?”** 입니다.\n우연(룰렛)과 개입(이름짓기, 재도전, 주의) 사이에서 생기는 감정과 애착을 관찰하며,\n인간과 AI 캐릭터 사이의 애착 형성을 탐구합니다。`}
+  };
+  function render(){
+    const d=I18N[lang];
+    document.getElementById('title').textContent=d.title;
+    document.getElementById('subtitle').textContent=d.subtitle;
+    document.getElementById('about').innerHTML=d.about.replace(/\n/g,"<br>");
+    const bar=document.getElementById('langBar'); bar.innerHTML="";
+    LANGS.forEach(code=>{ const b=document.createElement('div'); b.className="chip"+(code===lang?" active":""); b.textContent=code; b.onclick=()=>{lang=code;render();}; bar.appendChild(b); });
   }
-};
-
-function renderLangBar(){
-  const bar=document.getElementById("langBar");
-  bar.innerHTML="";
-  LANGS.forEach(code=>{
-    const b=document.createElement("div");
-    b.className="chip"+(code===lang?" active":"");
-    b.textContent=code;
-    b.onclick=()=>{lang=code;renderAbout();};
-    bar.appendChild(b);
-  });
-}
-function renderAbout(){
-  const d=I18N[lang];
-  document.getElementById("title").textContent=d.title;
-  document.getElementById("subtitle").textContent=d.subtitle;
-  document.getElementById("about").innerHTML=d.about.replace(/\n/g,"<br>");
-  renderLangBar();
-}
-renderAbout();
+  render();
+})();
 </script>
 </body>
 </html>
