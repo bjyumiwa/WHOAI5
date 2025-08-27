@@ -29,7 +29,6 @@
   /* ボタン */
   .buttons{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px}
   .btn{border:none;border-radius:999px;cursor:pointer;outline:2px solid transparent;outline-offset:2px}
-  .btn:focus-visible{outline-color:var(--glow)}
   .btn-primary{
     min-width:220px;padding:14px 18px;font-size:18px;color:#2b1630;
     background:linear-gradient(180deg,var(--primaryFrom),var(--primaryTo));
@@ -39,107 +38,39 @@
     min-width:auto;padding:6px 10px;font-size:12px;color:#24313a;
     background:rgba(255,255,255,.9);box-shadow:0 4px 10px rgba(0,0,0,.25)
   }
-  .btn-ghost{
-    min-width:160px;padding:12px 16px;font-size:16px;color:#edf3ff;
-    background:var(--ghostBg);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)
-  }
   .corner{position:absolute;right:10px;bottom:10px}
 
-  /* Cover */
-  .cover-title{font-size:clamp(22px,6vw,36px);margin:.2em 0 .1em}
-  .cover-sub{opacity:.9;margin:0 0 10px}
-  .cover-hero{width:160px;filter:drop-shadow(0 8px 24px rgba(0,0,0,.55))}
-
-  /* Name */
-  input{
-    padding:10px;font-size:16px;border-radius:10px;border:1px solid rgba(255,255,255,.28);
-    width:min(420px,80vw);background:rgba(0,0,0,.25);color:#fff
-  }
-
-  /* Top mini buttons */
-  .topbar{position:absolute;top:10px;right:10px;display:flex;gap:6px}
-
-  /* 盤面：5x5 S字 */
-  .layout{
-    display:grid; grid-template-columns: 2fr 1fr; gap:12px; width:100%; height:100%;
-    align-items:center; justify-items:center;
-  }
-  @media (max-width:780px){
-    .layout{ grid-template-columns: 1fr; grid-template-rows: auto auto; gap:10px }
-  }
-
+  /* 盤面 */
   .board{
     width:100%; max-width:640px; aspect-ratio:1/1;
     display:grid; grid-template-columns:repeat(5,1fr); grid-template-rows:repeat(5,1fr); gap:8px;
     padding:6px;
   }
-  .cell{
-    position:relative;border-radius:14px;overflow:hidden;
-    background:
-      radial-gradient(120% 80% at 20% 20%, rgba(255,255,255,.22), transparent 55%),
-      linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
-    box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 6px 18px rgba(0,0,0,.35);
-  }
-  .idx{
-    position:absolute;left:6px;top:6px;font-size:12px;font-weight:700;color:#24313a;
-    background:#fff;border-radius:999px;padding:.1em .5em;box-shadow:0 2px 6px rgba(0,0,0,.25)
-  }
-  .goal-flag{
-    position:absolute; right:6px; top:6px; font-size:14px;
-  }
+  .cell{position:relative;border-radius:14px;background:rgba(255,255,255,.08)}
+  .idx{position:absolute;left:6px;top:6px;font-size:12px;color:#24313a;background:#fff;border-radius:999px;padding:.1em .5em}
+  .goal-img{position:absolute;right:6px;top:6px;width:34px;height:34px;object-fit:contain}
 
-  /* キャラ：盤面上の絶対配置 */
-  .charWrap{
-    position:absolute; pointer-events:none;
-    width: calc(100% - 12px); height: calc(100% - 12px);  /* board paddingに合わせる */
-    left: 6px; top: 6px;
-  }
-  .char{
-    position:absolute; width:48px; height:48px; object-fit:contain;
-    filter:drop-shadow(0 3px 10px rgba(0,0,0,.55));
-    transition: transform .28s ease;
-  }
+  /* キャラ */
+  .charWrap{position:absolute;pointer-events:none;width:calc(100% - 12px);height:calc(100% - 12px);left:6px;top:6px}
+  .char{position:absolute;width:48px;height:48px;object-fit:contain;transition:transform .28s ease}
 
-  /* アイテム（少しはみ出しOK） */
-  .item{
-    position:absolute; width:40px; height:40px; object-fit:contain;
-    filter:drop-shadow(0 3px 10px rgba(0,0,0,.5));
-  }
-  .noteEmoji{position:absolute; font-size:22px}
+  /* アイテム */
+  .item{position:absolute;width:42px;height:42px;object-fit:contain}
+  .noteEmoji{position:absolute;font-size:22px}
 
   /* ルーレット */
-  .wheelBox{
-    width:min(260px,84vw); aspect-ratio:1/1;
-    position:relative; display:flex; align-items:center; justify-content:center;
-  }
-  .wheel{
-    width:100%; height:100%; transform:rotate(0deg);
-    transition: transform 2.2s cubic-bezier(.17,.89,.32,1.27);
-  }
-  .pointer{
-    position:absolute; top:-6px; width:0; height:0; border-left:12px solid transparent; border-right:12px solid transparent;
-    border-bottom:16px solid #fff; filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));
-  }
-  .spinNum{
-    margin-top:10px; font-size:20px; letter-spacing:.06em;
-  }
+  .wheelBox{width:min(260px,84vw);aspect-ratio:1/1;position:relative;display:flex;align-items:center;justify-content:center}
+  .wheel{width:100%;height:100%;transform:rotate(0deg);transition:transform 2.2s cubic-bezier(.17,.89,.32,1.27)}
+  .pointer{position:absolute;top:-6px;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:16px solid #fff}
+  .spinNum{margin-top:10px;font-size:20px}
 
-  /* HUD & log */
-  .hud{position:absolute;left:14px;top:10px;display:flex;gap:6px;flex-wrap:wrap}
-  .tag{padding:.35em .6em;border-radius:999px;font-size:12px;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
-  .collect{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:8px;flex-wrap:wrap}
-  .mac{position:relative;width:56px;height:56px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35))}
-  .mac img{width:100%;height:100%;object-fit:contain}
-  .badge{position:absolute;right:-6px;bottom:-6px;background:#fff;color:#24313a;border-radius:999px;padding:.2em .5em;font-size:12px;box-shadow:0 3px 8px rgba(0,0,0,.3)}
-  .log{
-    position:absolute;left:14px;right:14px;bottom:56px;background:rgba(255,255,255,.08);
-    border-radius:12px;padding:6px 8px;font-size:12px;max-height:22vh;overflow:auto;
-    box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)
-  }
+  /* HUD */
+  .hud{position:absolute;left:14px;top:10px;display:flex;gap:6px}
+  .tag{padding:.35em .6em;border-radius:999px;font-size:12px;background:rgba(255,255,255,.18)}
 
   /* フィナーレ */
-  .bigChar{width:min(55vw,340px);height:auto;filter:drop-shadow(0 8px 24px rgba(0,0,0,.55))}
-  .ako{animation:sway 3s ease-in-out infinite; mix-blend-mode:multiply;}
+  .bigChar{width:min(55vw,340px);height:auto}
+  .ako{animation:sway 3s ease-in-out infinite;}
   @keyframes sway{0%{transform:rotate(-2deg)}50%{transform:rotate(2deg) translateY(-3px)}100%{transform:rotate(-2deg)}}
 </style>
 </head>
@@ -150,401 +81,102 @@
   <section id="view-cover" class="card">
     <img src="public/assets/stage1/miwacchi_open.png" class="cover-hero" alt="">
     <h1 class="cover-title">WhoAI Evo</h1>
-    <div class="cover-sub">偶然と意思のはざまで育つ、小さな進化の物語。</div>
-    <div class="buttons">
-      <button id="btnStart" class="btn btn-primary">▶ スタート</button>
-      <a href="about.html"><button class="btn btn-mini">📖 研究の説明</button></a>
-    </div>
-  </section>
-
-  <!-- Name -->
-  <section id="view-name" class="card hidden">
-    <h2 style="margin:.2em 0 6px">キャラクターに名前をつけよう</h2>
-    <input id="nameInput" type="text" placeholder="キャラの名前">
-    <div class="buttons">
-      <button id="btnSetName" class="btn btn-primary">OK</button>
-      <button id="btnBackCover" class="btn btn-mini">表紙へ</button>
-    </div>
+    <div class="buttons"><button id="btnStart" class="btn btn-primary">▶ スタート</button></div>
   </section>
 
   <!-- Game -->
   <section id="view-game" class="card hidden">
-    <!-- トップ小ボタン -->
-    <div class="topbar">
-      <a href="about.html"><button class="btn btn-mini">📖 説明</button></a>
-      <button id="hardReset" class="btn btn-mini">🧹 全初期化</button>
-    </div>
-
-    <!-- 左：盤面 / 右：ルーレット -->
     <div class="hud">
       <span id="posTag" class="tag">位置: 1/25</span>
-      <span id="goalTag" class="tag">ゴール: 25</span>
       <span id="notesTag" class="tag">音符: 0/5</span>
       <span id="macTag" class="tag">マカロン: 0/4</span>
     </div>
 
-    <div class="layout">
-      <div style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+    <div class="layout" style="display:grid;grid-template-columns:2fr 1fr;gap:12px;width:100%;height:100%">
+      <div style="position:relative">
         <div id="board" class="board"></div>
-        <!-- キャラの絶対配置レイヤー -->
         <div id="charWrap" class="charWrap">
           <img id="char" src="public/assets/stage1/miwacchi_open.png" class="char" alt="">
         </div>
       </div>
-
       <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
         <div class="wheelBox">
           <div class="pointer"></div>
-          <!-- SVG ルーレット（6分割） -->
-          <svg id="wheel" class="wheel" viewBox="0 0 100 100" aria-label="roulette">
-            <!-- 背景円 -->
+          <svg id="wheel" class="wheel" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="48" fill="#222" />
-            <!-- 扇形（交互色） -->
-            <g id="slices">
-              <!-- 6セクタ：0..5 (0度が上方向に来るよう -90度基準) -->
-            </g>
-            <!-- 数字 -->
-            <g id="labels" font-size="10" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-family="system-ui, sans-serif"></g>
-            <!-- 中心 -->
+            <g id="slices"></g>
+            <g id="labels" font-size="10" text-anchor="middle" dominant-baseline="middle" fill="#fff"></g>
             <circle cx="50" cy="50" r="4" fill="#fff"/>
           </svg>
         </div>
         <div class="spinNum" id="spinNum">—</div>
-        <div class="buttons">
-          <button id="btnSpin" class="btn btn-primary">🎡 ルーレットを回す</button>
-        </div>
-
-        <!-- マカロン進捗（画像＋バッジ） -->
-        <div class="collect" style="margin-top:6px">
-          <div class="mac"><img src="public/assets/stage1/macaron_pink.png" alt="pink"><span class="badge" id="cntPink">0</span></div>
-          <div class="mac"><img src="public/assets/stage1/macaron_blue.png" alt="blue"><span class="badge" id="cntBlue">0</span></div>
-          <div class="mac"><img src="public/assets/stage1/macaron_green.png" alt="green"><span class="badge" id="cntGreen">0</span></div>
-          <div class="mac"><img src="public/assets/stage1/macaron_purple.png" alt="purple"><span class="badge" id="cntPurple">0</span></div>
-        </div>
+        <div class="buttons"><button id="btnSpin" class="btn btn-primary">🎡 ルーレットを回す</button></div>
       </div>
     </div>
-
-    <!-- 右下：表紙へ -->
     <div class="corner"><button id="toCover" class="btn btn-mini">⏮ スタートへ</button></div>
     <div id="log" class="log"></div>
   </section>
 
-  <!-- Drink（自動遷移前のワンカット） -->
+  <!-- Drink -->
   <section id="view-drink" class="card hidden">
-    <div class="center">
-      <img src="public/assets/stage1/drink_item.png" class="bigChar" alt="">
-      <div style="margin-top:6px;opacity:.9">コンプリート！少し休んで…</div>
-    </div>
+    <img src="public/assets/stage1/drink_item.png" class="bigChar" alt="">
   </section>
 
-  <!-- Finale（HB自動再生・ボタンなし） -->
+  <!-- Finale -->
   <section id="view-final" class="card hidden">
-    <div class="center">
-      <!-- 透明PNG推奨、暫定は multiply で白地を馴染ませ -->
-      <img src="public/assets/stage1/ako.png" class="bigChar ako" alt="ako">
-      <div style="margin-top:8px;opacity:.95">🎉 おめでとう！</div>
-      <div class="buttons"><button id="replay" class="btn btn-ghost">もう一度</button></div>
-    </div>
+    <img src="public/assets/stage1/ako.png" class="bigChar ako" alt="ako">
   </section>
 </div>
 
 <script>
 (()=> {
-  /* ========= 基本参照 ========= */
-  const V = {
-    cover:gid('view-cover'), name:gid('view-name'), game:gid('view-game'), drink:gid('view-drink'), final:gid('view-final'),
-    board:gid('board'), charWrap:gid('charWrap'), char:gid('char'),
-    posTag:gid('posTag'), goalTag:gid('goalTag'), notesTag:gid('notesTag'), macTag:gid('macTag'),
-    cntPink:gid('cntPink'), cntBlue:gid('cntBlue'), cntGreen:gid('cntGreen'), cntPurple:gid('cntPurple'),
-    log:gid('log'), spinNum:gid('spinNum'), wheel:gid('wheel')
-  };
+  const V={cover:gid('view-cover'),game:gid('view-game'),drink:gid('view-drink'),final:gid('view-final'),
+           board:gid('board'),char:gid('char'),spinNum:gid('spinNum'),wheel:gid('wheel'),
+           posTag:gid('posTag'),notesTag:gid('notesTag'),macTag:gid('macTag')};
   function gid(id){return document.getElementById(id)}
-  function show(which){
-    ['cover','name','game','drink','final'].forEach(k=>V[k].classList.toggle('hidden', k!==which));
-  }
-  gid('btnStart').onclick=()=>show('name');
-  gid('btnBackCover').onclick=()=>show('cover');
-  gid('toCover').onclick=()=>show('cover');
+  function show(s){['cover','game','drink','final'].forEach(k=>V[k].classList.toggle('hidden',k!==s))}
 
-  /* ========= 盤面 (5x5 S字) ========= */
-  const N = 25;
-  const SIZE = 5;
-  // S字（1→25）のインデックスから [row,col] を求める
-  function indexToRC(idx){
-    const r = Math.floor((idx-1)/SIZE);
-    const cInRow = (idx-1)%SIZE;
-    const c = (r%2===0) ? cInRow : (SIZE-1-cInRow);
-    return [SIZE-1-r, c]; // 下が1, 上が25 にならないよう「上=25」見やすくするため上から下へ描画
-  }
+  const N=25,SIZE=5;let pos=1,moving=false;
+  const cellCenters=new Array(N+1);
 
-  // セルDOM生成 & 座標キャッシュ
-  const cellCenters = new Array(N+1); // 1..25 の中心座標（%基準）
+  function indexToRC(i){const r=Math.floor((i-1)/SIZE);const cInRow=(i-1)%SIZE;const c=(r%2===0)?cInRow:(SIZE-1-cInRow);return [SIZE-1-r,c];}
   function buildBoard(){
     V.board.innerHTML='';
-    for(let i=1;i<=N;i++){
-      const div=document.createElement('div');
-      div.className='cell';
-      const [r,c] = indexToRC(i);
-      div.style.gridRow = (r+1);
-      div.style.gridColumn = (c+1);
-      const lab=document.createElement('div'); lab.className='idx'; lab.textContent=i; div.appendChild(lab);
-      if(i===N){ const flag=document.createElement('div'); flag.className='goal-flag'; flag.textContent='🏁'; div.appendChild(flag); }
-      V.board.appendChild(div);
-    }
-    // 各セル中心の絶対座標（%）を計算
-    const rect = V.board.getBoundingClientRect();
-    const gap = 8; // CSSと合わせる
-    const w = rect.width, h = rect.height;
-    const cellW = (w - gap*4) / SIZE; // 5列 → gap4本
-    const cellH = (h - gap*4) / SIZE;
-    for(let i=1;i<=N;i++){
-      const [r,c] = indexToRC(i);
-      const x = (c* (cellW+gap) + cellW/2 + 6) / w * 100;     // 左padding 6px と一致
-      const y = (r* (cellH+gap) + cellH/2 + 6) / h * 100;     // 上padding 6px
-      cellCenters[i] = {x,y};
-    }
+    for(let i=1;i<=N;i++){const d=document.createElement('div');d.className='cell';const [r,c]=indexToRC(i);
+      d.style.gridRow=(r+1);d.style.gridColumn=(c+1);
+      const lab=document.createElement('div');lab.className='idx';lab.textContent=i;d.appendChild(lab);
+      if(i===N){const g=document.createElement('img');g.src="public/assets/stage1/drink_item.png";g.className='goal-img';d.appendChild(g);}
+      V.board.appendChild(d);}
+    const rect=V.board.getBoundingClientRect(),gap=8,w=rect.width,h=rect.height;const cw=(w-gap*4)/SIZE,ch=(h-gap*4)/SIZE;
+    for(let i=1;i<=N;i++){const [r,c]=indexToRC(i);const x=(c*(cw+gap)+cw/2+6)/w*100;const y=(r*(ch+gap)+ch/2+6)/h*100;cellCenters[i]={x,y};}
   }
+  function renderChar(){const {x,y}=cellCenters[pos];V.char.style.transform=`translate(calc(${x}% - 24px),calc(${y}% - 24px))`;V.posTag.textContent=`位置:${pos}/25`; }
 
-  /* ========= アイテム配置 ========= */
-  const CHAR = {
-    start:"public/assets/stage1/miwacchi_open.png",
-    pink:"public/assets/stage1/pink_open.png",
-    blue:"public/assets/stage1/blue_open.png",
-    green:"public/assets/stage1/green_open.png",
-    purple:"public/assets/stage1/purple_open.png",
-  };
-  const MAC = {
-    pink:"public/assets/stage1/macaron_pink.png",
-    blue:"public/assets/stage1/macaron_blue.png",
-    green:"public/assets/stage1/macaron_green.png",
-    purple:"public/assets/stage1/macaron_purple.png",
-  };
-  const NOTE_EMO = ['🎵','🎶','♫','♬'];
-
-  // 配置（はみ出し演出：中心から±(px)ずらす）
-  const macSlots = {};   // 色 → マス番号
-  const noteSlots = new Set(); // マス番号（5つ）
-  function placeItems(){
-    // 1,25 は使わない
-    const candidates = Array.from({length:N-2}, (_,k)=>k+2);
-    // シャッフル
-    for(let i=candidates.length-1;i>0;i--){
-      const j=Math.floor(Math.random()*(i+1)); [candidates[i],candidates[j]]=[candidates[j],candidates[i]];
-    }
-    const colors = ['pink','blue','green','purple'];
-    colors.forEach((col,idx)=>{ macSlots[col] = candidates[idx]; });
-    for(let i=4;i<9;i++){ noteSlots.add(candidates[i]); } // 5つ
-
-    // DOMへ描画（board内にアイテム）
-    // 既存の item 要素を一掃
-    V.board.querySelectorAll('.item,.noteEmoji').forEach(e=>e.remove());
-    // マカロン
-    for(const col of colors){
-      const idx = macSlots[col];
-      const node = document.createElement('img');
-      node.src = MAC[col]; node.className='item';
-      const {x,y} = cellCenters[idx];
-      // 少しはみ出し
-      node.style.left = `calc(${x}% - 18px)`;
-      node.style.top  = `calc(${y}% - 22px)`;
-      V.board.appendChild(node);
-    }
-    // 音符
-    noteSlots.forEach(idx=>{
-      const n = document.createElement('div');
-      n.className = 'noteEmoji';
-      n.textContent = NOTE_EMO[Math.floor(Math.random()*NOTE_EMO.length)];
-      const {x,y} = cellCenters[idx];
-      n.style.left = `calc(${x}% - 10px)`;
-      n.style.top  = `calc(${y}% - 28px)`;
-      V.board.appendChild(n);
-    });
-  }
-
-  /* ========= 状態 ========= */
-  let pos=1, moving=false;
-  let macGot = {pink:false, blue:false, green:false, purple:false};
-  let notesGot = new Set();
-  let currentChar = CHAR.start;
-
-  function updateHUD(){
-    const gotMacs = Object.values(macGot).filter(v=>v).length;
-    V.posTag.textContent = `位置: ${pos}/25`;
-    V.goalTag.textContent = `ゴール: 25`;
-    V.notesTag.textContent= `音符: ${notesGot.size}/5`;
-    V.macTag.textContent  = `マカロン: ${gotMacs}/4`;
-    gid('cntPink').textContent = macGot.pink?1:0;
-    gid('cntBlue').textContent = macGot.blue?1:0;
-    gid('cntGreen').textContent= macGot.green?1:0;
-    gid('cntPurple').textContent= macGot.purple?1:0;
-  }
-
-  function setCharImage(){
-    // 進化は取得順の色に合わせる
-    if(macGot.purple) currentChar = CHAR.purple;
-    else if(macGot.green) currentChar = CHAR.green;
-    else if(macGot.blue) currentChar = CHAR.blue;
-    else if(macGot.pink) currentChar = CHAR.pink;
-    else currentChar = CHAR.start;
-    V.char.src = currentChar;
-  }
-
-  function renderChar(){
-    const {x,y} = cellCenters[pos];
-    V.char.style.transform = `translate(calc(${x}% - 24px), calc(${y}% - 24px))`;
-  }
-
-  function log(t){ const d=document.createElement('div'); d.textContent=t; V.log.prepend(d); }
-
-  /* ========= ルーレット ========= */
-  // SVGスライスを描く
-  (function buildWheel(){
-    const slices = V.wheel.querySelector('#slices');
-    const labels = V.wheel.querySelector('#labels');
-    for(let i=0;i<6;i++){
-      const a0 = (-90 + i*60) * Math.PI/180;
-      const a1 = (-90 + (i+1)*60) * Math.PI/180;
-      const x0 = 50 + 48*Math.cos(a0), y0 = 50 + 48*Math.sin(a0);
-      const x1 = 50 + 48*Math.cos(a1), y1 = 50 + 48*Math.sin(a1);
-      const largeArc = 0;
-      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-      path.setAttribute('d',`M50,50 L${x0},${y0} A48,48 0 ${largeArc} 1 ${x1},${y1} Z`);
-      path.setAttribute('fill', i%2? '#3a3f55' : '#2b2f44');
-      slices.appendChild(path);
-
-      const mid = (-90 + (i+0.5)*60) * Math.PI/180;
-      const lx = 50 + 30*Math.cos(mid), ly = 50 + 30*Math.sin(mid);
-      const text = document.createElementNS('http://www.w3.org/2000/svg','text');
-      text.setAttribute('x', lx); text.setAttribute('y', ly);
-      text.textContent = (i+1);
-      labels.appendChild(text);
-    }
+  const WHEEL_COLORS=['#ff7ab6','#6aa6ff','#ffd166','#7ee6a2','#caa6ff','#ff9f6e'];
+  (function buildWheel(){const slices=V.wheel.querySelector('#slices');const labels=V.wheel.querySelector('#labels');
+    for(let i=0;i<6;i++){const a0=(-90+i*60)*Math.PI/180,a1=(-90+(i+1)*60)*Math.PI/180;
+      const x0=50+48*Math.cos(a0),y0=50+48*Math.sin(a0),x1=50+48*Math.cos(a1),y1=50+48*Math.sin(a1);
+      const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',`M50,50 L${x0},${y0} A48,48 0 0 1 ${x1},${y1} Z`);
+      p.setAttribute('fill',WHEEL_COLORS[i%WHEEL_COLORS.length]);slices.appendChild(p);
+      const mid=(-90+(i+0.5)*60)*Math.PI/180;const lx=50+30*Math.cos(mid),ly=50+30*Math.sin(mid);
+      const t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x',lx);t.setAttribute('y',ly);t.textContent=(i+1);labels.appendChild(t);}
   })();
 
-  let wheelAngle = 0;
-  gid('btnSpin').onclick = () => {
-    if(moving) return;
-    const steps = Math.floor(Math.random()*6)+1;  // 1..6
-    V.spinNum.textContent = `出目：${steps}`;
-    // 目標角度：ポインタが上にあるので、該当セクタの中心が上に来る角度へ
-    const targetIdx = steps-1; // 0..5
-    const targetSectorAngle = targetIdx * 60;     // 0,60,...,300
-    const base = 3*360;                           // 3周回してから止まる
-    const finalAngle = base + (360 - targetSectorAngle); // 上=0度へ合わせる
-    wheelAngle = finalAngle;
-    V.wheel.style.transform = `rotate(${finalAngle}deg)`;
-
-    // アニメーション終了後に移動
-    setTimeout(()=> animateMove(steps), 2300);
+  let wheelAngle=0;
+  gid('btnSpin').onclick=()=>{
+    if(moving)return;
+    const steps=Math.floor(Math.random()*6)+1;V.spinNum.textContent=`出目:${steps}`;
+    const targetIdx=steps-1;const centerAngle=-90+(targetIdx+0.5)*60;
+    const base=3*360;const finalAngle=base-centerAngle;
+    wheelAngle=finalAngle;V.wheel.style.transform=`rotate(${finalAngle}deg)`;
+    setTimeout(()=>animateMove(steps),2300);
   };
 
-  /* ========= アニメーション移動 ========= */
-  function animateMove(steps){
-    if(moving) return; moving = true;
-    let i=0;
-    const timer = setInterval(()=>{
-      if(pos < N) pos++;
-      renderChar();
-      i++;
-      if(i>=steps || pos===N){
-        clearInterval(timer);
-        moving=false;
-        onArrive();
-      }
-    }, 320);
-  }
+  function animateMove(steps){if(moving)return;moving=true;let moved=0;
+    const timer=setInterval(()=>{if(pos<N)pos++;renderChar();moved++;if(moved>=steps){clearInterval(timer);moving=false;}},300);}
+  gid('btnStart').onclick=()=>show('game');gid('toCover').onclick=()=>show('cover');
 
-  /* ========= 到着処理 ========= */
-  function onArrive(){
-    // アイテム取得判定
-    for(const [col,slot] of Object.entries(macSlots)){
-      if(!macGot[col] && slot === pos){
-        macGot[col] = true;
-        setCharImage();
-        log(`🍪 ${col} マカロンを手に入れた！`);
-      }
-    }
-    if(noteSlots.has(pos) && !notesGot.has(pos)){
-      notesGot.add(pos);
-      log(`🎵 音符を手に入れた！ (${notesGot.size}/5)`);
-    }
-    updateHUD();
-
-    // すべて集まったらドリンクへ
-    const allMac = Object.values(macGot).every(v=>v);
-    const allNote = (notesGot.size===5);
-    if(allMac && allNote){
-      show('drink');
-      // 少し待ってフィナーレ & ハッピーバースデー自動再生
-      setTimeout(()=>{ show('final'); try{ playHappyBirthday(); }catch(e){} }, 1000);
-      return;
-    }
-
-    // ゴール到達（演出だけ）
-    if(pos===N){
-      log('🏁 ゴールに到着！ まだ集めていないアイテムがあるようです。');
-    }
-  }
-
-  /* ========= 全初期化 / リプレイ ========= */
-  gid('hardReset').onclick = resetAll;
-  gid('replay').onclick = ()=>{ resetRun(); show('game'); };
-
-  function resetAll(){
-    pos=1; moving=false; macGot={pink:false,blue:false,green:false,purple:false}; notesGot.clear();
-    V.log.innerHTML=''; setCharImage(); renderChar(); updateHUD();
-    placeItems();
-    show('cover');
-  }
-  function resetRun(){
-    pos=1; moving=false; macGot={pink:false,blue:false,green:false,purple:false}; notesGot = new Set();
-    V.log.innerHTML=''; setCharImage(); renderChar(); updateHUD();
-    placeItems();
-  }
-
-  /* ========= サウンド ========= */
-  let audioCtx;
-  function ctx(){ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
-  function playToneSeq(seq){
-    const ac=ctx(); let t=ac.currentTime+0.02;
-    seq.forEach(s=>{
-      const o=ac.createOscillator(), g=ac.createGain();
-      o.type='sine'; o.frequency.value=s.freq;
-      g.gain.setValueAtTime(0.0001,t);
-      g.gain.linearRampToValueAtTime(0.18,t+0.02);
-      g.gain.exponentialRampToValueAtTime(0.001,t+s.dur);
-      o.connect(g).connect(ac.destination);
-      o.start(t); o.stop(t+s.dur+0.02);
-      t += s.dur + (s.gap||0.02);
-    });
-  }
-  function note(n){
-    const N={'C4':261.63,'C#4':277.18,'D4':293.66,'D#4':311.13,'E4':329.63,'F4':349.23,'F#4':369.99,'G4':392.00,'G#4':415.30,'A4':440.00,'A#4':466.16,'B4':493.88,
-             'C5':523.25,'C#5':554.37,'D5':587.33,'D#5':622.25,'E5':659.25,'F5':698.46,'F#5':739.99,'G5':783.99,'G#5':830.61,'A5':880.00,'A#5':932.33,'B5':987.77};
-    return N[n]||440;
-  }
-  function playHappyBirthday(){
-    const q=.30,e=.15, d=n=>({freq:note(n),dur:e}), qn=n=>({freq:note(n),dur:q});
-    const seq=[d('G4'),d('G4'),qn('A4'),qn('G4'),qn('C5'),qn('B4'),
-               d('G4'),d('G4'),qn('A4'),qn('G4'),qn('D5'),qn('C5'),
-               d('G4'),d('G4'),qn('G5'),qn('E5'),qn('C5'),qn('B4'),qn('A4'),
-               d('F5'),d('F5'),qn('E5'),qn('C5'),qn('D5'),qn('C5')];
-    playToneSeq(seq);
-  }
-
-  /* ========= 初期化 ========= */
-  // 盤面構築 → アイテム配置 → キャラを1へ
-  buildBoard();
-  placeItems();
-  setCharImage();
-  renderChar();
-  updateHUD();
-
-  // 画面遷移
-  show('cover');
-
-  // 名前決定でゲームへ
-  gid('btnSetName').onclick = () => { show('game'); };
+  buildBoard();renderChar();show('cover');
 })();
 </script>
 </body>
