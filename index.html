@@ -1,128 +1,213 @@
+<!-- FILE: dice_exact5_image.html -->
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WhoAI</title>
-  <meta name="color-scheme" content="dark light" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>">
-  <style>
-    :root{
-      --bg:#000;--fg:#fff;--muted:rgba(255,255,255,.8);--glass:rgba(255,255,255,.08);
-      --border:rgba(255,255,255,.2);--accent:#f5a3b6;--shadow:0 24px 80px rgba(0,0,0,.45)
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0}
-    body{
-      font-family: "Noto Sans JP", system-ui, -apple-system, Segoe UI, Roboto, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-      color:var(--fg);
-      background:#000 url('public/assets/stage1/space_background.png') center/cover fixed no-repeat;
-    }
-    .overlay{position:fixed;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.55))}
-    .wrap{min-height:100%;display:grid;place-items:center;padding:32px}
-    .panel{
-      width:min(980px,96vw); padding:32px 22px 26px; text-align:center; border-radius:28px;
-      background:var(--glass); border:1px solid var(--border); box-shadow:var(--shadow);
-      backdrop-filter:saturate(130%) blur(4px);
-    }
-    .heroImg{width:min(320px,60vw); max-width:360px; height:auto; border-radius:12px; background:#fff;
-      box-shadow:0 14px 36px rgba(0,0,0,.35); image-rendering:auto;
-    }
-    h1{font-size: clamp(28px, 6vw, 56px); margin:18px 0 10px; letter-spacing:.02em}
-    .lead{font-size: clamp(14px, 2.4vw, 20px); color:var(--muted); margin:0 auto 18px; max-width:780px; line-height:1.7}
-    .cta{display:flex; justify-content:center; margin: 10px 0 8px}
-    .btn{
-      background:var(--accent); color:#2a0c14; border:none; border-radius:14px; padding:14px 20px; font-weight:800;
-      box-shadow:0 10px 30px rgba(245,163,182,.35); cursor:pointer; font-size:16px;
-    }
-    .lang{margin-top:12px; font-size:14px}
-    .lang a{color:#fff; opacity:.95; text-decoration:underline; cursor:pointer; margin:0 6px}
-    .hint{opacity:.65; font-size:12px; margin-top:6px}
-    footer{position:fixed; inset:auto 0 8px 0; display:flex; justify-content:center; pointer-events:none}
-  </style>
-</head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>5マス・ぴったりでリンゴ</title>
+<style>
+  :root{ --fg:#fff; --glass:rgba(255,255,255,.08) }
+  html,body{height:100%;margin:0}
+  body{
+    font-family:"Noto Sans JP",system-ui,sans-serif;color:var(--fg);
+    background:#000 url("space_background.png") center/cover fixed no-repeat;
+    display:flex;flex-direction:column;align-items:center;gap:12px;padding:14px;
+  }
+  .wrap{ width:min(560px,96vw); display:flex; flex-direction:column; gap:10px }
+  .stage{
+    border:1px solid rgba(255,255,255,.15); border-radius:16px;
+    background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.35));
+    padding:14px 14px 10px;
+  }
+  .hud{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center}
+  .tags{display:flex;gap:8px;flex-wrap:wrap}
+  .tag{padding:.2em .7em;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:12px;opacity:.9;background:rgba(0,0,0,.25)}
+  .row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:8px}
+  .cell{
+    aspect-ratio:1/1; border-radius:12px; border:1px solid rgba(255,255,255,.18);
+    background:var(--glass); position:relative; overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .label{position:absolute;left:6px;top:6px;font-size:12px;opacity:.75}
+  .char{
+    width:70%; max-width:120px; object-fit:contain; filter:drop-shadow(0 2px 8px rgba(0,0,0,.5));
+    user-select:none; -webkit-user-drag:none;
+  }
+  .apple{font-size:clamp(28px,7vw,40px); animation:bounce 1.2s infinite}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+  .buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  button{
+    flex:1 1 auto; min-width:120px; padding:14px 16px; font-size:18px;
+    border-radius:999px; border:1px solid rgba(255,255,255,.18);
+    background:rgba(0,0,0,.35); color:#fff
+  }
+  button:active{transform:scale(.98)}
+  .log{
+    border:1px solid rgba(255,255,255,.15); border-radius:12px;
+    background:rgba(0,0,0,.25); padding:10px; min-height:64px; max-height:38vh; overflow:auto;
+    font-size:14px; line-height:1.5;
+  }
+  .ok{color:#9be08d} .ng{color:#ff9aa7}
+</style>
 <body>
-  <div class="overlay" aria-hidden="true"></div>
-  <div class="wrap">
-    <main class="panel" role="main">
-      <img src="public/assets/stage1/miwacchi_open.png" alt="companion" class="heroImg" loading="eager" decoding="async" fetchpriority="high" />
-      <h1 data-i18n="welcome_title">WhoAIへようこそ</h1>
-      <p class="lead" data-i18n="welcome_body">
-        まずはタネのタイプを選んで、名前を付けてから育てよう。ポイントが貯まるとマカロンで進化！
-      </p>
-      <div class="cta">
-        <button class="btn" id="btnStart" data-i18n="start_seed">はじめる（タネを選ぶ）</button>
+<div class="wrap">
+  <div class="stage">
+    <div class="hud">
+      <strong>5マス・ぴったりルール</strong>
+      <div class="tags">
+        <span id="posTag" class="tag">位置: 0/5</span>
+        <span id="willTag" class="tag">意志: 3</span>
+        <span id="dieTag" class="tag">ダイス: ―</span>
       </div>
-      <div class="lang">
-        <a data-lang="ja">日本語</a> ｜
-        <a data-lang="en">English</a> ｜
-        <a data-lang="zh-Hans">简体</a> ｜
-        <a data-lang="zh-Hant">繁體</a> ｜
-        <a data-lang="ko">한국어</a>
-      </div>
-      <div class="hint" data-i18n="lang_hint">言語設定は次回アクセス時も保存されます。</div>
-    </main>
+    </div>
+
+    <div class="row" id="board"></div>
+
+    <div class="tags" style="margin-top:10px">
+      <span class="tag">通り過ぎは無効</span>
+      <span class="tag">ぴったり5で🍎</span>
+      <span class="tag">意志±1は各1P</span>
+    </div>
   </div>
-  <footer><small class="hint">© WhoAI</small></footer>
 
-  <script>
-    // --- i18n dictionary ---
-    const I18N = {
-      ja:{
-        welcome_title:'WhoAIへようこそ',
-        welcome_body:'まずはタネのタイプを選んで、名前を付けてから育てよう。ポイントが貯まるとマカロンで進化！',
-        start_seed:'はじめる（タネを選ぶ）',
-        lang_hint:'言語設定は次回アクセス時も保存されます。'
-      },
-      en:{
-        welcome_title:'Welcome to WhoAI',
-        welcome_body:'Choose your seed type, give it a name, and start nurturing. Earn points and evolve with macarons!',
-        start_seed:'Get Started (Choose Seed)',
-        lang_hint:'Your language will be saved for next visits.'
-      },
-      'zh-Hans':{
-        welcome_title:'欢迎来到 WhoAI',
-        welcome_body:'先选择种子类型，取个名字再培养。积分累积后可用马卡龙进化！',
-        start_seed:'开始（选择种子）',
-        lang_hint:'语言设置会在下次访问时保存。'
-      },
-      'zh-Hant':{
-        welcome_title:'歡迎來到 WhoAI',
-        welcome_body:'先選擇種子類型，命名後開始培育。累積點數可用馬卡龍進化！',
-        start_seed:'開始（選擇種子）',
-        lang_hint:'語言設定會在下次造訪時保存。'
-      },
-      ko:{
-        welcome_title:'WhoAI에 오신 것을 환영해요',
-        welcome_body:'씨앗 타입을 고르고 이름을 지어 키워 보세요. 포인트가 쌓이면 마카롱으로 진화!',
-        start_seed:'시작하기 (씨앗 선택)',
-        lang_hint:'언어 설정은 다음 방문에도 유지됩니다.'
-      }
-    };
+  <div class="buttons">
+    <button id="rollBtn">🎲 サイコロ</button>
+    <button id="plusBtn">➕ 意志 +1</button>
+    <button id="minusBtn">➖ 意志 -1</button>
+    <button id="resetBtn">🔄 リセット</button>
+  </div>
 
-    function setLang(lang){ if(!I18N[lang]) lang='ja';
-      localStorage.setItem('whoai.lang', lang);
-      document.documentElement.lang = lang.startsWith('zh') ? 'zh' : lang;
-      const dict = I18N[lang];
-      document.querySelectorAll('[data-i18n]').forEach(el=>{
-        const k = el.getAttribute('data-i18n');
-        if(dict[k]) el.textContent = dict[k];
-      });
+  <div id="log" class="log"></div>
+</div>
+
+<script>
+(() => {
+  // ここだけ変更すれば画像差し替えOK
+  const CHAR_PATH = "public/assets/stage1/ako.png";   // キャラ画像
+  const USE_APPLE_EMOJI = true;                       // true=🍎絵文字 / false=画像にしたい場合は下2行を使う
+  const APPLE_IMG_PATH = "public/assets/stage1/apple.png"; // 使うなら配置して有効化
+  // 背景は body の CSS で "space_background.png" を参照しています
+
+  const N = 5;     // マス数
+  let pos = 0;     // 現在位置
+  let last = 0;    // 直近ダイス
+  let will = 3;    // 意志ポイント
+  let got = false; // 獲得済み
+
+  const boardEl = document.getElementById('board');
+  const logEl   = document.getElementById('log');
+  const posTag  = document.getElementById('posTag');
+  const willTag = document.getElementById('willTag');
+  const dieTag  = document.getElementById('dieTag');
+
+  function vibrate(ms){ if(navigator.vibrate) navigator.vibrate(ms); }
+
+  function log(msg, cls){
+    const line = document.createElement('div');
+    if(cls) line.className = cls;
+    line.textContent = msg;
+    logEl.prepend(line);
+  }
+
+  function appleNode(){
+    if(USE_APPLE_EMOJI){
+      const span = document.createElement('span');
+      span.className = 'apple';
+      span.textContent = '🍎';
+      return span;
+    }else{
+      const img = document.createElement('img');
+      img.src = APPLE_IMG_PATH;
+      img.alt = 'apple';
+      img.className = 'char apple';
+      return img;
     }
+  }
 
-    // init language
-    (function(){
-      const saved = localStorage.getItem('whoai.lang') || (navigator.language||'ja').slice(0,2);
-      setLang(saved);
-      document.querySelectorAll('.lang a').forEach(a=>{
-        a.addEventListener('click',()=> setLang(a.getAttribute('data-lang')) );
-      });
-      document.getElementById('btnStart').addEventListener('click',()=>{
-        // 次の画面がまだ無い場合の仮アクション
-        // 実装後は location.href = 'seed.html' 等に置換
-        alert('スタート！ 次の画面（タネ選択）へ遷移させてください。');
-      });
-    })();
-  </script>
+  function charNode(){
+    const img = document.createElement('img');
+    img.src = CHAR_PATH;
+    img.alt = 'char';
+    img.className = 'char';
+    img.onerror = () => { img.remove(); const sp=document.createElement('span'); sp.textContent='🟢'; sp.style.fontSize='32px'; sp.className='char'; boardEl.appendChild(sp); };
+    return img;
+  }
+
+  function render(){
+    boardEl.innerHTML = '';
+    for(let i=1;i<=N;i++){
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      const label = document.createElement('span');
+      label.className = 'label'; label.textContent = i;
+      cell.appendChild(label);
+
+      if(i===pos){
+        cell.appendChild(charNode());
+      }else if(i===N){
+        cell.appendChild(appleNode());
+      }
+
+      boardEl.appendChild(cell);
+    }
+    posTag.textContent  = `位置: ${pos}/${N}`;
+    willTag.textContent = `意志: ${will}`;
+    dieTag.textContent  = `ダイス: ${last||'―'}`;
+  }
+
+  function roll(){
+    if(got){ log('もう🍎を手に入れました。リセットして再挑戦できます。'); vibrate(30); return; }
+    last = Math.floor(Math.random()*6)+1;
+    const next = pos + last;
+    if(next === N){
+      pos = next; got = true;
+      log(`ダイス${last}。ぴったり${N}！🍎ゲット！`, 'ok'); vibrate(80);
+    }else if(next < N){
+      pos = next;
+      log(`ダイス${last} → 位置${pos}/${N}。あと${N-pos}。`);
+      vibrate(20);
+    }else{
+      log(`ダイス${last}は通り過ぎ（${pos}→${next}）。無効。`, 'ng'); vibrate(10);
+    }
+    render();
+  }
+
+  function adjust(delta){
+    if(got){ log('すでに🍎を獲得済みです。'); return; }
+    if(will<=0){ log('意志ポイントが足りません。', 'ng'); vibrate(10); return; }
+    if(last===0){ log('まずはサイコロを振ってください。', 'ng'); vibrate(10); return; }
+
+    const adj = last + delta;
+    if(adj<1 || adj>6){ log('調整は1〜6の範囲のみ有効です。', 'ng'); vibrate(10); return; }
+
+    const next = pos + adj;
+    will -= 1;
+
+    if(next === N){
+      pos = next; got = true;
+      log(`意志で${delta>0?'+1':'-1'} → ${adj}。ぴったり${N}！🍎`, 'ok'); vibrate(80);
+    }else if(next < N){
+      pos = next;
+      log(`意志で${delta>0?'+1':'-1'} → ${adj}。位置${pos}/${N}。あと${N-pos}。`, 'ok'); vibrate(20);
+    }else{
+      log(`意志で${delta>0?'+1':'-1'} → ${adj}でも通り過ぎ（${pos}→${next}）。無効。`, 'ng'); vibrate(10);
+    }
+    render();
+  }
+
+  function reset(){
+    pos=0; last=0; will=3; got=false;
+    log('リセット。ぴったり5を目指そう。');
+    render();
+  }
+
+  document.getElementById('rollBtn').addEventListener('click', roll);
+  document.getElementById('plusBtn').addEventListener('click', ()=>adjust(+1));
+  document.getElementById('minusBtn').addEventListener('click', ()=>adjust(-1));
+  document.getElementById('resetBtn').addEventListener('click', reset);
+
+  render();
+  log('🎲 サイコロで進み、通り過ぎは無効。ぴったり5で🍎。意志±1は1P。');
+})();
+</script>
 </body>
 </html>
