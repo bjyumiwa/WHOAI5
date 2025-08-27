@@ -1,212 +1,497 @@
-<!-- FILE: dice_exact5_image.html -->
+<!-- FILE: whoai_dice_exact5.html -->
 <!DOCTYPE html>
 <html lang="ja">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>5マス・ぴったりでリンゴ</title>
+<title>WhoAI Dice · 5マスぴったり</title>
 <style>
   :root{ --fg:#fff; --glass:rgba(255,255,255,.08) }
   html,body{height:100%;margin:0}
   body{
     font-family:"Noto Sans JP",system-ui,sans-serif;color:var(--fg);
     background:#000 url("space_background.png") center/cover fixed no-repeat;
-    display:flex;flex-direction:column;align-items:center;gap:12px;padding:14px;
+    display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px;
   }
-  .wrap{ width:min(560px,96vw); display:flex; flex-direction:column; gap:10px }
-  .stage{
-    border:1px solid rgba(255,255,255,.15); border-radius:16px;
+  .container{width:min(720px,96vw);display:flex;flex-direction:column;gap:12px}
+  .lang{position:fixed;right:10px;top:10px;display:flex;gap:6px;z-index:10}
+  .chip{padding:.35em .7em;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:12px;background:rgba(0,0,0,.35);cursor:pointer;user-select:none}
+  .active{border-color:#a7e3ff;color:#a7e3ff}
+  .card{
+    border:1px solid rgba(255,255,255,.15);border-radius:16px;
     background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.35));
-    padding:14px 14px 10px;
+    padding:18px;
   }
+  .title{font-size:clamp(22px,5.5vw,30px);font-weight:700;margin:6px 0}
+  .subtitle{opacity:.9}
+  .buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  button{
+    flex:1 1 auto;min-width:140px;padding:14px 16px;font-size:18px;
+    border-radius:999px;border:1px solid rgba(255,255,255,.18);
+    background:rgba(0,0,0,.35);color:#fff;cursor:pointer
+  }
+  button:active{transform:scale(.98)}
+  .row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px}
+  .cell{
+    aspect-ratio:1/1;border-radius:12px;border:1px solid rgba(255,255,255,.18);
+    background:var(--glass);position:relative;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .label{position:absolute;left:6px;top:6px;font-size:12px;opacity:.75}
+  .char{width:70%;max-width:120px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.5));user-select:none;-webkit-user-drag:none}
+  .apple{font-size:clamp(28px,7vw,40px);animation:bounce 1.2s infinite}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
   .hud{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center}
   .tags{display:flex;gap:8px;flex-wrap:wrap}
   .tag{padding:.2em .7em;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:12px;opacity:.9;background:rgba(0,0,0,.25)}
-  .row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:8px}
-  .cell{
-    aspect-ratio:1/1; border-radius:12px; border:1px solid rgba(255,255,255,.18);
-    background:var(--glass); position:relative; overflow:hidden;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .label{position:absolute;left:6px;top:6px;font-size:12px;opacity:.75}
-  .char{
-    width:70%; max-width:120px; object-fit:contain; filter:drop-shadow(0 2px 8px rgba(0,0,0,.5));
-    user-select:none; -webkit-user-drag:none;
-  }
-  .apple{font-size:clamp(28px,7vw,40px); animation:bounce 1.2s infinite}
-  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-  .buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-  button{
-    flex:1 1 auto; min-width:120px; padding:14px 16px; font-size:18px;
-    border-radius:999px; border:1px solid rgba(255,255,255,.18);
-    background:rgba(0,0,0,.35); color:#fff
-  }
-  button:active{transform:scale(.98)}
-  .log{
-    border:1px solid rgba(255,255,255,.15); border-radius:12px;
-    background:rgba(0,0,0,.25); padding:10px; min-height:64px; max-height:38vh; overflow:auto;
-    font-size:14px; line-height:1.5;
-  }
-  .ok{color:#9be08d} .ng{color:#ff9aa7}
+  .log{border:1px solid rgba(255,255,255,.15);border-radius:12px;background:rgba(0,0,0,.25);padding:10px;min-height:64px;max-height:38vh;overflow:auto;font-size:14px;line-height:1.5}
+  .ok{color:#9be08d}.ng{color:#ff9aa7}
+  .hidden{display:none}
+  .lead{line-height:1.8;white-space:pre-wrap}
+  .list{line-height:1.8;margin:8px 0 0 0;padding-left:1em}
 </style>
 <body>
-<div class="wrap">
-  <div class="stage">
+<div class="lang" id="langBar"></div>
+
+<div class="container">
+
+  <!-- 1) 表紙 -->
+  <section id="view-cover" class="card">
+    <div class="title" data-i18n="cover_title"></div>
+    <div class="subtitle" data-i18n="cover_sub"></div>
+    <div class="buttons">
+      <button id="btnStart" data-i18n="btn_start"></button>
+      <button id="btnAbout" data-i18n="btn_about"></button>
+    </div>
+  </section>
+
+  <!-- 2) ゲーム -->
+  <section id="view-game" class="card hidden">
     <div class="hud">
-      <strong>5マス・ぴったりルール</strong>
+      <strong data-i18n="game_title"></strong>
       <div class="tags">
-        <span id="posTag" class="tag">位置: 0/5</span>
-        <span id="willTag" class="tag">意志: 3</span>
-        <span id="dieTag" class="tag">ダイス: ―</span>
+        <span id="posTag" class="tag"></span>
+        <span id="willTag" class="tag"></span>
+        <span id="dieTag" class="tag"></span>
       </div>
     </div>
 
     <div class="row" id="board"></div>
 
     <div class="tags" style="margin-top:10px">
-      <span class="tag">通り過ぎは無効</span>
-      <span class="tag">ぴったり5で🍎</span>
-      <span class="tag">意志±1は各1P</span>
+      <span class="tag" data-i18n="rule_exact"></span>
+      <span class="tag" data-i18n="rule_over"></span>
+      <span class="tag" data-i18n="rule_will"></span>
     </div>
-  </div>
 
-  <div class="buttons">
-    <button id="rollBtn">🎲 サイコロ</button>
-    <button id="plusBtn">➕ 意志 +1</button>
-    <button id="minusBtn">➖ 意志 -1</button>
-    <button id="resetBtn">🔄 リセット</button>
-  </div>
+    <div class="buttons">
+      <button id="rollBtn" data-i18n="btn_roll"></button>
+      <button id="plusBtn" data-i18n="btn_plus"></button>
+      <button id="minusBtn" data-i18n="btn_minus"></button>
+      <button id="resetBtn" data-i18n="btn_reset"></button>
+      <button id="btnBackCover" data-i18n="btn_back_cover"></button>
+      <button id="btnToAbout" data-i18n="btn_to_about"></button>
+    </div>
 
-  <div id="log" class="log"></div>
+    <div id="log" class="log"></div>
+  </section>
+
+  <!-- 3) 研究説明 -->
+  <section id="view-about" class="card hidden">
+    <div class="title" data-i18n="about_title"></div>
+    <div class="lead" data-i18n="about_lead"></div>
+
+    <div class="subtitle" style="margin-top:14px" data-i18n="about_simple"></div>
+    <ul class="list">
+      <li data-i18n="about_rule"></li>
+      <li data-i18n="about_why_care"></li>
+      <li data-i18n="about_happy"></li>
+    </ul>
+
+    <div class="subtitle" style="margin-top:14px" data-i18n="about_research_q"></div>
+    <ul class="list">
+      <li data-i18n="about_rq1"></li>
+      <li data-i18n="about_rq2"></li>
+    </ul>
+
+    <div class="subtitle" style="margin-top:14px" data-i18n="about_logs"></div>
+    <ul class="list">
+      <li data-i18n="about_log1"></li>
+      <li data-i18n="about_log2"></li>
+    </ul>
+
+    <div class="buttons" style="margin-top:12px">
+      <button id="btnBackGame" data-i18n="btn_back_game"></button>
+      <button id="btnBackCover2" data-i18n="btn_back_cover"></button>
+    </div>
+  </section>
+
 </div>
 
 <script>
 (() => {
-  // ここだけ変更すれば画像差し替えOK
-  const CHAR_PATH = "public/assets/stage1/ako.png";   // キャラ画像
-  const USE_APPLE_EMOJI = true;                       // true=🍎絵文字 / false=画像にしたい場合は下2行を使う
-  const APPLE_IMG_PATH = "public/assets/stage1/apple.png"; // 使うなら配置して有効化
-  // 背景は body の CSS で "space_background.png" を参照しています
+  // ===== 設定（必要なら差し替え）=====
+  const CHAR_PATH = "public/assets/stage1/ako.png"; // キャラ画像
+  const N = 5;                                      // マス数
+  const LANGS = ["ja","en","zh-Hans","zh-Hant","ko"];
 
-  const N = 5;     // マス数
-  let pos = 0;     // 現在位置
-  let last = 0;    // 直近ダイス
-  let will = 3;    // 意志ポイント
-  let got = false; // 獲得済み
+  // ===== 多言語 =====
+  const I18N = {
+    "ja":{
+      cover_title:"WhoAI Dice（5マス・ぴったり）",
+      cover_sub:"サイコロで進む。ぴったりで小さなご褒美。偶然と意思のあいだを味わう短い旅。",
+      btn_start:"スタート",
+      btn_about:"研究の説明",
+      btn_back_cover:"表紙へ",
+      btn_to_about:"研究の説明へ",
+      btn_back_game:"ゲームへ戻る",
 
-  const boardEl = document.getElementById('board');
-  const logEl   = document.getElementById('log');
-  const posTag  = document.getElementById('posTag');
-  const willTag = document.getElementById('willTag');
-  const dieTag  = document.getElementById('dieTag');
+      game_title:"5マス・ぴったりルール",
+      rule_exact:"ぴったり5で🍎",
+      rule_over:"通り過ぎは無効",
+      rule_will:"意志±1は各1P",
+
+      btn_roll:"🎲 サイコロ",
+      btn_plus:"➕ 意志 +1",
+      btn_minus:"➖ 意志 -1",
+      btn_reset:"🔄 リセット",
+
+      about_title:"研究の説明",
+      about_lead:
+        "この試作は「なぜ人は意思を出して介入してしまうのか」を観察するための超短編ゲームです。サイコロ＝偶然、意志ポイント＝自分の介入。両者の交差で愛着や手応えがどのように生まれるかを見ます。",
+      about_simple:"シンプルな核",
+      about_rule:"1日（1プレイ）につき、サイコロを振るとキャラが進む。ぴったり止まったらご褒美。",
+      about_why_care:"世話をする理由は「自分の一手が確かに効いた」という手ざわりを得るため。",
+      about_happy:"うれしさは、偶然で届く日と、意思で届く日の両方が小さな物語になること。",
+
+      about_research_q:"リサーチクエスチョン",
+      about_rq1:"意思の投入はどんな状況で起きやすいか（惜しさ・共感・投資感覚など）。",
+      about_rq2:"意思による介入後、愛着・再訪意図はどのように変化するか。",
+
+      about_logs:"計測の例（匿名・端末内または集計送信なしの設定も可）",
+      about_log1:"ダイス結果・意志±1の使用回数・成功/通過・所要タップ数。",
+      about_log2:"成功直後の自己報告（楽しい/悔しい/発見があった など）※任意。"
+    },
+    "en":{
+      cover_title:"WhoAI Dice (Exact-5)",
+      cover_sub:"Roll to move. Land exactly to earn a tiny reward. A short trip between chance and will.",
+      btn_start:"Start",
+      btn_about:"Research Notes",
+      btn_back_cover:"Cover",
+      btn_to_about:"Research",
+      btn_back_game:"Back to Game",
+
+      game_title:"Exact-5 Rule",
+      rule_exact:"Exact 5 → 🍎",
+      rule_over:"Overshoot = invalid",
+      rule_will:"+/−1 uses 1 Will",
+
+      btn_roll:"🎲 Roll",
+      btn_plus:"➕ Will +1",
+      btn_minus:"➖ Will -1",
+      btn_reset:"🔄 Reset",
+
+      about_title:"Research Notes",
+      about_lead:
+        "This mini-game observes why players willingly intervene. Dice = chance, Will = deliberate intervention. We look at how the interplay yields attachment and a sense of agency.",
+      about_simple:"Simple core",
+      about_rule:"Per play: roll to move; land exactly to get a reward.",
+      about_why_care:"Why care: to feel that one’s small action truly worked.",
+      about_happy:"Joy: both lucky days and will-driven days form a tiny narrative.",
+
+      about_research_q:"Research questions",
+      about_rq1:"When is willful intervention triggered (near-miss, empathy, sunk-cost, etc.)?",
+      about_rq2:"How does intervention shift attachment and revisit intent?",
+
+      about_logs:"Possible logs (local-only or disabled)",
+      about_log1:"Dice results, ±1 uses, success/overshoot, taps.",
+      about_log2:"Optional self-report right after success (fun/frustration/discovery)."
+    },
+    "zh-Hans":{
+      cover_title:"WhoAI 骰子（正好到5）",
+      cover_sub:"掷骰前进。正好到达获得小奖励。体验“偶然与意志”的短旅程。",
+      btn_start:"开始",
+      btn_about:"研究说明",
+      btn_back_cover:"封面",
+      btn_to_about:"研究说明",
+      btn_back_game:"返回游戏",
+
+      game_title:"正好到5规则",
+      rule_exact:"正好5 → 🍎",
+      rule_over:"超出无效",
+      rule_will:"意志±1消耗1点",
+
+      btn_roll:"🎲 掷骰",
+      btn_plus:"➕ 意志 +1",
+      btn_minus:"➖ 意志 -1",
+      btn_reset:"🔄 重置",
+
+      about_title:"研究说明",
+      about_lead:"本原型用于观察“为何人会主动介入”。骰子=偶然，意志点=主动。两者交织如何产生“爱着感”和“作用感”。",
+      about_simple:"核心",
+      about_rule:"每回合：掷骰前进；正好停下获得奖励。",
+      about_why_care:"动机：想确认自己的小动作确实有效。",
+      about_happy:"快乐：幸运获得与意志获得都能形成小叙事。",
+
+      about_research_q:"研究问题",
+      about_rq1:"何时更容易触发主动介入（差一点、共情、投入感等）？",
+      about_rq2:"介入后，“爱着/再次游玩意图”如何变化？",
+
+      about_logs:"记录示例（可仅本地或关闭）",
+      about_log1:"骰子结果、±1使用次数、成功/超出、点击次数。",
+      about_log2:"成功后可选的自我报告（有趣/懊恼/发现等）。"
+    },
+    "zh-Hant":{
+      cover_title:"WhoAI 骰子（剛好到5）",
+      cover_sub:"擲骰前進。剛好停下獲得小獎勵。在「偶然與意志」之間的短旅程。",
+      btn_start:"開始",
+      btn_about:"研究說明",
+      btn_back_cover:"封面",
+      btn_to_about:"研究說明",
+      btn_back_game:"回到遊戲",
+
+      game_title:"剛好到5規則",
+      rule_exact:"剛好5 → 🍎",
+      rule_over:"超過作廢",
+      rule_will:"意志±1消耗1點",
+
+      btn_roll:"🎲 擲骰",
+      btn_plus:"➕ 意志 +1",
+      btn_minus:"➖ 意志 -1",
+      btn_reset:"🔄 重設",
+
+      about_title:"研究說明",
+      about_lead:"此原型觀察「為何人會主動介入」。骰子=偶然，意志=主動。兩者交織如何產生依附與能動感。",
+      about_simple:"核心",
+      about_rule:"每回合：擲骰前進；剛好停下即獲獎勵。",
+      about_why_care:"動機：確認自己的小動作確實有效。",
+      about_happy:"喜悅：幸運或意志達成都能形成小故事。",
+
+      about_research_q:"研究問題",
+      about_rq1:"何時較容易觸發主動介入（差一點、共感、投入感等）？",
+      about_rq2:"介入後，依附與回訪意圖如何改變？",
+
+      about_logs:"紀錄範例（可僅本機或關閉）",
+      about_log1:"骰子結果、±1次數、成功/超過、點擊數。",
+      about_log2:"成功後的可選自我回饋（有趣/懊惱/發現）。"
+    },
+    "ko":{
+      cover_title:"WhoAI Dice (정확히 5)",
+      cover_sub:"주사위를 굴려 전진. 정확히 도착하면 작은 보상. 우연과 의지 사이의 짧은 여행.",
+      btn_start:"시작",
+      btn_about:"연구 설명",
+      btn_back_cover:"표지",
+      btn_to_about:"연구",
+      btn_back_game:"게임으로",
+
+      game_title:"정확히 5 규칙",
+      rule_exact:"정확히 5 → 🍎",
+      rule_over:"초과 이동은 무효",
+      rule_will:"의지 ±1은 1포인트",
+
+      btn_roll:"🎲 굴리기",
+      btn_plus:"➕ 의지 +1",
+      btn_minus:"➖ 의지 -1",
+      btn_reset:"🔄 리셋",
+
+      about_title:"연구 설명",
+      about_lead:"이 프로토타입은 왜 사람이 자발적으로 개입하는지 관찰합니다. 주사위=우연, 의지=개입. 두 요소가 애착과 작동감을 어떻게 낳는지 봅니다.",
+      about_simple:"핵심",
+      about_rule:"플레이마다 주사위를 굴려 이동, 정확히 도착하면 보상.",
+      about_why_care:"돌보는 이유: 작은 행동이 실제로 효과 있었다는 감각.",
+      about_happy:"기쁨: 운으로 된 날과 의지로 된 날이 작은 이야기로 남음.",
+
+      about_research_q:"연구 질문",
+      about_rq1:"개입이 촉발되는 순간은 언제인가(아깝다, 공감, 투자감 등)?",
+      about_rq2:"개입 후 애착/재방문 의도는 어떻게 변하는가?",
+
+      about_logs:"기록 예시(로컬 전용 또는 비활성화 가능)",
+      about_log1:"주사위 결과, ±1 사용, 성공/초과, 탭 수.",
+      about_log2:"성공 직후 선택적 자기보고(재미/아쉬움/발견)."
+    }
+  };
+
+  // ===== ビュー切替 =====
+  const V = {
+    cover: document.getElementById('view-cover'),
+    game:  document.getElementById('view-game'),
+    about: document.getElementById('view-about')
+  };
+  function show(name){
+    V.cover.classList.toggle('hidden', name!=='cover');
+    V.game .classList.toggle('hidden', name!=='game');
+    V.about.classList.toggle('hidden', name!=='about');
+    localStorage.setItem('whoai_view', name);
+  }
+
+  // ===== 言語UI =====
+  const langBar = document.getElementById('langBar');
+  let lang = localStorage.getItem('whoai_lang') || 'ja';
+  if(!I18N[lang]) lang='ja';
+
+  function renderLang(){
+    langBar.innerHTML='';
+    LANGS.forEach(code=>{
+      const b=document.createElement('div');
+      b.className='chip'+(code===lang?' active':'');
+      b.textContent=code;
+      b.onclick=()=>{ lang=code; localStorage.setItem('whoai_lang', lang); applyI18N(); renderLang(); render(); };
+      langBar.appendChild(b);
+    });
+  }
+
+  function applyI18N(){
+    document.querySelectorAll('[data-i18n]').forEach(el=>{
+      const k=el.getAttribute('data-i18n');
+      el.textContent = (I18N[lang] && I18N[lang][k]) ? I18N[lang][k] : k;
+    });
+  }
+
+  // ===== ゲーム本体 =====
+  let pos=0,last=0,will=3,got=false;
+  const boardEl=document.getElementById('board');
+  const logEl=document.getElementById('log');
+  const posTag=document.getElementById('posTag');
+  const willTag=document.getElementById('willTag');
+  const dieTag=document.getElementById('dieTag');
 
   function vibrate(ms){ if(navigator.vibrate) navigator.vibrate(ms); }
 
   function log(msg, cls){
-    const line = document.createElement('div');
-    if(cls) line.className = cls;
-    line.textContent = msg;
+    const line=document.createElement('div');
+    if(cls) line.className=cls;
+    line.textContent=msg;
     logEl.prepend(line);
   }
 
   function appleNode(){
-    if(USE_APPLE_EMOJI){
-      const span = document.createElement('span');
-      span.className = 'apple';
-      span.textContent = '🍎';
-      return span;
-    }else{
-      const img = document.createElement('img');
-      img.src = APPLE_IMG_PATH;
-      img.alt = 'apple';
-      img.className = 'char apple';
-      return img;
-    }
+    const span=document.createElement('span');
+    span.className='apple';
+    span.textContent='🍎';
+    return span;
   }
-
   function charNode(){
-    const img = document.createElement('img');
-    img.src = CHAR_PATH;
-    img.alt = 'char';
-    img.className = 'char';
-    img.onerror = () => { img.remove(); const sp=document.createElement('span'); sp.textContent='🟢'; sp.style.fontSize='32px'; sp.className='char'; boardEl.appendChild(sp); };
+    const img=document.createElement('img');
+    img.src=CHAR_PATH; img.alt='char'; img.className='char';
+    img.onerror=()=>{img.remove(); const s=document.createElement('span'); s.textContent='🟢'; s.style.fontSize='32px'; s.className='char'; boardEl.appendChild(s);};
     return img;
   }
 
   function render(){
-    boardEl.innerHTML = '';
+    // HUD
+    posTag.textContent = (I18N[lang]?.posTag || 'Pos') + `: ${pos}/${N}`;
+    willTag.textContent = (I18N[lang]?.willTag || 'Will') + `: ${will}`;
+    dieTag.textContent = (I18N[lang]?.dieTag || 'Dice') + `: ${last||'―'}`;
+
+    // 盤
+    boardEl.innerHTML='';
     for(let i=1;i<=N;i++){
-      const cell = document.createElement('div');
-      cell.className = 'cell';
-      const label = document.createElement('span');
-      label.className = 'label'; label.textContent = i;
+      const cell=document.createElement('div');
+      cell.className='cell';
+      const label=document.createElement('span');
+      label.className='label'; label.textContent=i;
       cell.appendChild(label);
 
-      if(i===pos){
-        cell.appendChild(charNode());
-      }else if(i===N){
-        cell.appendChild(appleNode());
-      }
+      if(i===pos) cell.appendChild(charNode());
+      else if(i===N) cell.appendChild(appleNode());
 
       boardEl.appendChild(cell);
     }
-    posTag.textContent  = `位置: ${pos}/${N}`;
-    willTag.textContent = `意志: ${will}`;
-    dieTag.textContent  = `ダイス: ${last||'―'}`;
   }
 
   function roll(){
-    if(got){ log('もう🍎を手に入れました。リセットして再挑戦できます。'); vibrate(30); return; }
+    if(got){ log(msg('already'), null); vibrate(30); return; }
     last = Math.floor(Math.random()*6)+1;
     const next = pos + last;
     if(next === N){
       pos = next; got = true;
-      log(`ダイス${last}。ぴったり${N}！🍎ゲット！`, 'ok'); vibrate(80);
+      log(msg('exact', {n:last}), 'ok'); vibrate(80);
     }else if(next < N){
       pos = next;
-      log(`ダイス${last} → 位置${pos}/${N}。あと${N-pos}。`);
-      vibrate(20);
+      log(msg('forward', {n:last, remain:N-pos}), null); vibrate(20);
     }else{
-      log(`ダイス${last}は通り過ぎ（${pos}→${next}）。無効。`, 'ng'); vibrate(10);
+      log(msg('over', {n:last, to:next}), 'ng'); vibrate(10);
     }
     render();
   }
 
   function adjust(delta){
-    if(got){ log('すでに🍎を獲得済みです。'); return; }
-    if(will<=0){ log('意志ポイントが足りません。', 'ng'); vibrate(10); return; }
-    if(last===0){ log('まずはサイコロを振ってください。', 'ng'); vibrate(10); return; }
+    if(got){ log(msg('already'), null); return; }
+    if(will<=0){ log(msg('no_will'), 'ng'); vibrate(10); return; }
+    if(last===0){ log(msg('need_roll'), 'ng'); vibrate(10); return; }
 
     const adj = last + delta;
-    if(adj<1 || adj>6){ log('調整は1〜6の範囲のみ有効です。', 'ng'); vibrate(10); return; }
+    if(adj<1 || adj>6){ log(msg('range'), 'ng'); vibrate(10); return; }
 
-    const next = pos + adj;
-    will -= 1;
-
+    const next = pos + adj; will -= 1;
     if(next === N){
-      pos = next; got = true;
-      log(`意志で${delta>0?'+1':'-1'} → ${adj}。ぴったり${N}！🍎`, 'ok'); vibrate(80);
+      pos=next; got=true;
+      log(msg('adjust_exact', {d:delta>0?'+1':'-1', adj}), 'ok'); vibrate(80);
     }else if(next < N){
-      pos = next;
-      log(`意志で${delta>0?'+1':'-1'} → ${adj}。位置${pos}/${N}。あと${N-pos}。`, 'ok'); vibrate(20);
+      pos=next; log(msg('adjust_forward', {d:delta>0?'+1':'-1', adj, remain:N-pos}), 'ok'); vibrate(20);
     }else{
-      log(`意志で${delta>0?'+1':'-1'} → ${adj}でも通り過ぎ（${pos}→${next}）。無効。`, 'ng'); vibrate(10);
+      log(msg('adjust_over', {d:delta>0?'+1':'-1', adj, to:next}), 'ng'); vibrate(10);
     }
     render();
   }
 
   function reset(){
     pos=0; last=0; will=3; got=false;
-    log('リセット。ぴったり5を目指そう。');
-    render();
+    log(msg('reset')); render();
   }
 
-  document.getElementById('rollBtn').addEventListener('click', roll);
-  document.getElementById('plusBtn').addEventListener('click', ()=>adjust(+1));
-  document.getElementById('minusBtn').addEventListener('click', ()=>adjust(-1));
-  document.getElementById('resetBtn').addEventListener('click', reset);
+  // ログ文言（各言語）
+  function msg(key, p={}){
+    const T={
+      ja:{
+        already:"もう🍎を手に入れました。リセットして再挑戦できます。",
+        exact:(o)=>`ダイス${o.n}。ぴったり${N}！🍎ゲット！`,
+        forward:(o)=>`ダイス${o.n} → 位置${pos}/${N}。あと${o.remain}。`,
+        over:(o)=>`ダイス${o.n}は通り過ぎ（${pos}→${o.to}）。無効。`,
+        no_will:"意志ポイントが足りません。",
+        need_roll:"まずはサイコロを振ってください。",
+        range:"調整は1〜6の範囲のみ有効です。",
+        adjust_exact:(o)=>`意志で${o.d} → ${o.adj}。ぴったり${N}！🍎`,
+        adjust_forward:(o)=>`意志で${o.d} → ${o.adj}。位置${pos}/${N}。あと${o.remain}。`,
+        adjust_over:(o)=>`意志で${o.d} → ${o.adj}でも通り過ぎ（${pos}→${o.to}）。無効。`,
+        reset:"リセット。ぴったり5を目指そう。"
+      },
+      en:{
+        already:"🍎 already obtained. Reset to try again.",
+        exact:(o)=>`Dice ${o.n}. Exact ${N}! 🍎`,
+        forward:(o)=>`Dice ${o.n} → pos ${pos}/${N}. remain ${o.remain}.`,
+        over:(o)=>`Dice ${o.n} overshoot (${pos}→${o.to}). invalid.`,
+        no_will:"No Will points.",
+        need_roll:"Roll the dice first.",
+        range:"Adjust only within 1–6.",
+        adjust_exact:(o)=>`Will ${o.d} → ${o.adj}. Exact ${N}! 🍎`,
+        adjust_forward:(o)=>`Will ${o.d} → ${o.adj}. pos ${pos}/${N}. remain ${o.remain}.`,
+        adjust_over:(o)=>`Will ${o.d} → ${o.adj} overshoot (${pos}→${o.to}). invalid.`,
+        reset:"Reset. Aim for exact 5."
+      }
+    };
+    const pack = T[lang] || T.ja;
+    const val = pack[key];
+    return typeof val==="function" ? val(p) : val || key;
+  }
 
+  // ===== イベント =====
+  document.getElementById('rollBtn').onclick = roll;
+  document.getElementById('plusBtn').onclick = ()=>adjust(+1);
+  document.getElementById('minusBtn').onclick = ()=>adjust(-1);
+  document.getElementById('resetBtn').onclick = reset;
+
+  document.getElementById('btnStart').onclick = ()=>show('game');
+  document.getElementById('btnAbout').onclick = ()=>show('about');
+  document.getElementById('btnBackCover').onclick = ()=>show('cover');
+  document.getElementById('btnBackCover2').onclick = ()=>show('cover');
+  document.getElementById('btnBackGame').onclick = ()=>show('game');
+  document.getElementById('btnToAbout').onclick = ()=>show('about');
+
+  // ===== 初期化 =====
+  renderLang();
+  applyI18N();
   render();
-  log('🎲 サイコロで進み、通り過ぎは無効。ぴったり5で🍎。意志±1は1P。');
+  show(localStorage.getItem('whoai_view') || 'cover');
 })();
 </script>
 </body>
