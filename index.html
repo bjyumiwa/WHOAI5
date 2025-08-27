@@ -1,208 +1,123 @@
-<!-- index.html · WhoAI Evo -->
+<!-- index.html · WhoAI Evo（名前入力＋ゲーム） -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>WhoAI Evo</title>
+<title>WhoAI Evo · Game</title>
 <style>
   body{
     font-family:"Noto Sans JP",system-ui,sans-serif;color:#fff;
     background:#000 url("public/assets/stage1/space_background.png") center/cover fixed no-repeat;
     margin:0;padding:20px;display:flex;flex-direction:column;align-items:center;gap:16px;
   }
-  .container{width:min(820px,96vw);display:flex;flex-direction:column;gap:16px}
-  .card{
-    border:1px solid rgba(255,255,255,.18);border-radius:16px;
-    background:linear-gradient(180deg,rgba(0,0,0,.30),rgba(0,0,0,.36));
-    padding:20px;text-align:center
-  }
+  .card{border:1px solid rgba(255,255,255,.18);border-radius:16px;background:rgba(0,0,0,.36);padding:20px;text-align:center;max-width:820px;width:100%}
   .hidden{display:none}
-  h1{font-size:clamp(22px,5vw,32px);margin-top:0}
-  .subtitle{opacity:.9;margin-bottom:10px}
-  .buttons{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
-  button{
-    flex:1 1 auto;min-width:140px;padding:14px 16px;font-size:18px;
-    border-radius:999px;border:1px solid rgba(255,255,255,.18);
-    background:rgba(0,0,0,.35);color:#fff;cursor:pointer
-  }
-  button:active{transform:scale(.98)}
-
-  /* 盤面 */
   .row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:6px}
-  .cell{
-    aspect-ratio:1/1;border:1px solid rgba(255,255,255,.2);border-radius:12px;
-    display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);position:relative;
-  }
+  .cell{aspect-ratio:1/1;border:1px solid rgba(255,255,255,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);position:relative}
   .label{position:absolute;left:6px;top:6px;font-size:12px;opacity:.75}
   .char{width:72%;max-width:120px;object-fit:contain}
   .goal{width:62%;max-width:100px;object-fit:contain;animation:bounce 1.2s infinite}
   @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
   .log{border:1px solid rgba(255,255,255,.18);border-radius:12px;background:rgba(0,0,0,.25);padding:10px;min-height:64px;max-height:38vh;overflow:auto;font-size:14px;text-align:left}
-  .langbar{display:flex;gap:6px;margin-bottom:10px;justify-content:center}
-  .chip{padding:.3em .8em;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:13px;background:rgba(0,0,0,.35);cursor:pointer}
-  .active{border-color:#a7e3ff;color:#a7e3ff}
+  .buttons{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+  button{flex:1 1 auto;min-width:120px;padding:12px 14px;font-size:16px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.35);color:#fff;cursor:pointer}
+  button:active{transform:scale(.97)}
+  input{padding:10px;font-size:16px;border-radius:8px;border:1px solid rgba(255,255,255,.3);width:80%;max-width:300px}
 </style>
 </head>
 <body>
-<div class="container">
+<div class="card" id="view-name">
+  <h2>キャラクターに名前をつけよう</h2>
+  <input id="nameInput" type="text" placeholder="キャラの名前">
+  <div class="buttons">
+    <button id="btnSetName">OK</button>
+  </div>
+</div>
 
-  <!-- 表紙 -->
-  <section id="view-cover" class="card">
-    <img src="public/assets/stage1/code.png" alt="cover" style="max-width:420px;width:80%;border-radius:12px;filter:drop-shadow(0 6px 18px rgba(0,0,0,.6))">
-    <h1>WhoAI Evo</h1>
-    <div class="subtitle">偶然と意思のはざまで育つ、小さな進化の物語。</div>
-    <div class="buttons">
-      <button id="btnStart">スタート</button>
-      <button id="btnAbout">研究の説明</button>
-    </div>
-  </section>
-
-  <!-- ゲーム -->
-  <section id="view-game" class="card hidden">
-    <h2>Scene 1：みわっちの旅</h2>
-    <div id="board" class="row"></div>
-    <div class="buttons">
-      <button id="rollBtn">🎲 サイコロ</button>
-      <button id="resetBtn">🔄 リセット</button>
-      <button id="btnBackCover">表紙へ</button>
-    </div>
-    <div id="log" class="log"></div>
-  </section>
-
-  <!-- About / 研究説明 -->
-  <section id="view-about" class="card hidden">
-    <div class="langbar" id="langBar"></div>
-    <h2 id="title"></h2>
-    <div id="subtitle" class="subtitle"></div>
-    <div id="about"></div>
-    <div class="buttons">
-      <button id="btnBackGame">ゲームへ戻る</button>
-      <button id="btnBackCover2">表紙へ</button>
-    </div>
-  </section>
-
+<div class="card hidden" id="view-game">
+  <h1>WhoAI Evo 🎲</h1>
+  <p id="greet"></p>
+  <div id="board" class="row"></div>
+  <div class="buttons">
+    <button id="rollBtn">🎲 サイコロ</button>
+    <button id="resetBtn">🔄 リセット</button>
+    <a href="about.html"><button>📖 研究の説明</button></a>
+  </div>
+  <div id="log" class="log"></div>
 </div>
 
 <script>
-(() => {
-  // ===== 多言語研究説明 =====
-  const LANGS=["ja","en","zh-CN","zh-TW","ko"];
-  let lang="ja";
-  const I18N={
-    "ja":{
-      title:"WhoAI Evo",
-      subtitle:"偶然と意思のはざまで育つ、小さな進化の物語。",
-      about:`『WhoAI Evo』は、サイコロでキャラを進め、マカロンや音符を集めて進化していく実験的なゲームです。  
-中心の問いは「なぜ人は意思を出して介入してしまうのか」。  
-偶然（ダイス）と介入（意思ポイント）の交差から生まれる感情や愛着を観察し、  
-人とAIキャラクターの関係性、愛着形成のプロセスを探ります。`
-    },
-    "en":{
-      title:"WhoAI Evo",
-      subtitle:"A small story of evolution between chance and will.",
-      about:`“WhoAI Evo” is an experimental game where the player rolls dice to move a character,  
-collects macarons and notes, and evolves step by step.  
-It asks: *why do players intervene with their will?*  
-By observing emotions and attachment emerging between chance and intervention,  
-we explore how attachment forms between humans and AI characters.`
-    },
-    "zh-CN":{
-      title:"WhoAI Evo",
-      subtitle:"在偶然与意志之间成长的小小进化故事。",
-      about:`《WhoAI Evo》是一款实验性游戏，玩家掷骰子让角色前进，  
-收集马卡龙和音符，并逐步进化。  
-核心问题是：**为什么玩家会主动使用意志来干预？**  
-通过观察在偶然（骰子）与干预（意志点）之间产生的情感和依恋，  
-探讨人类与AI角色之间关系和依恋的形成过程。`
-    },
-    "zh-TW":{
-      title:"WhoAI Evo",
-      subtitle:"在偶然與意志之間成長的小小進化故事。",
-      about:`《WhoAI Evo》是一款實驗性遊戲，玩家擲骰子讓角色前進，  
-收集馬卡龍和音符，並逐步進化。  
-核心問題是：**為什麼玩家會主動使用意志來干預？**  
-透過觀察在偶然（骰子）與干預（意志點）之間產生的情感和依戀，  
-探討人類與AI角色之間的關係與依戀的形成過程。`
-    },
-    "ko":{
-      title:"WhoAI Evo",
-      subtitle:"우연과 의지 사이에서 자라는 작은 진화 이야기.",
-      about:`『WhoAI Evo』는 주사위를 굴려 캐릭터를 움직이고,  
-마카롱과 음표를 모으면서 점차 진화하는 실험적 게임입니다.  
-핵심 질문은 **“왜 플레이어는 굳이 의지를 사용해 개입할까?”** 입니다.  
-우연(주사위)과 개입(의지) 사이에서 생겨나는 감정과 애착을 관찰함으로써,  
-인간과 AI 캐릭터 간의 관계와 애착 형성을 탐구합니다.`
-    }
-  };
-  function renderLangBar(){
-    const bar=document.getElementById("langBar");
-    bar.innerHTML="";
-    LANGS.forEach(code=>{
-      const b=document.createElement("div");
-      b.className="chip"+(code===lang?" active":"");
-      b.textContent=code;
-      b.onclick=()=>{lang=code;renderAbout();};
-      bar.appendChild(b);
-    });
-  }
-  function renderAbout(){
-    const d=I18N[lang];
-    document.getElementById("title").textContent=d.title;
-    document.getElementById("subtitle").textContent=d.subtitle;
-    document.getElementById("about").innerHTML=d.about.replace(/\n/g,"<br>");
-    renderLangBar();
-  }
+let charName = localStorage.getItem("whoai_name") || "";
+const nameView = document.getElementById("view-name");
+const gameView = document.getElementById("view-game");
+const greet = document.getElementById("greet");
+const board=document.getElementById('board');
+const logEl=document.getElementById('log');
 
-  // ===== シーン制御 =====
-  const V={cover:document.getElementById('view-cover'),game:document.getElementById('view-game'),about:document.getElementById('view-about')};
-  function show(name){
-    V.cover.classList.toggle('hidden',name!=='cover');
-    V.game.classList.toggle('hidden',name!=='game');
-    V.about.classList.toggle('hidden',name!=='about');
-  }
+let pos=1,last=0;
 
-  // ===== 簡単なゲーム盤面（仮） =====
-  const board=document.getElementById('board');
-  const logEl=document.getElementById('log');
-  let pos=1,last=0;
-  function renderBoard(){
-    board.innerHTML='';
-    for(let i=1;i<=5;i++){
-      const cell=document.createElement('div');cell.className='cell';
-      const l=document.createElement('span');l.className='label';l.textContent=i;cell.appendChild(l);
-      if(i===pos){
-        const img=document.createElement('img');img.src="public/assets/stage1/miwacchi_open.png";img.className='char';cell.appendChild(img);
-      }
-      if(i===5){
-        const g=document.createElement('img');g.src="public/assets/stage1/macaron_pink.png";g.className='goal';cell.appendChild(g);
-      }
-      board.appendChild(cell);
+function show(view){
+  nameView.classList.toggle("hidden", view!=="name");
+  gameView.classList.toggle("hidden", view!=="game");
+}
+
+function renderBoard(){
+  board.innerHTML='';
+  for(let i=1;i<=5;i++){
+    const cell=document.createElement('div');cell.className='cell';
+    const l=document.createElement('span');l.className='label';l.textContent=i;cell.appendChild(l);
+    if(i===pos){
+      const img=document.createElement('img');img.src="public/assets/stage1/miwacchi_open.png";img.className='char';cell.appendChild(img);
     }
+    if(i===5){
+      const g=document.createElement('img');g.src="public/assets/stage1/macaron_pink.png";g.className='goal';cell.appendChild(g);
+    }
+    board.appendChild(cell);
   }
-  function roll(){
-    last=Math.floor(Math.random()*6)+1;
-    const next=pos+last;
-    if(next===5){pos=next;log("ぴったりマカロン！","ok");}
-    else if(next<5){pos=next;log("位置 "+pos);}
-    else{log("通り過ぎ","ng");}
+}
+
+function log(msg,cls){
+  const d=document.createElement("div");
+  if(cls)d.className=cls;
+  d.textContent=(charName? charName+"：":"")+msg;
+  logEl.prepend(d);
+}
+
+function roll(){
+  last=Math.floor(Math.random()*6)+1;
+  const next=pos+last;
+  if(next===5){pos=next;log("🎉 ぴったりマカロン！","ok");}
+  else if(next<5){pos=next;log("位置 "+pos);}
+  else{log("通り過ぎ","ng");}
+  renderBoard();
+}
+
+function reset(){pos=1;logEl.innerHTML="";renderBoard();}
+
+// 名前入力OK
+document.getElementById("btnSetName").onclick=()=>{
+  const val=document.getElementById("nameInput").value.trim();
+  if(val){
+    charName=val;
+    localStorage.setItem("whoai_name", charName);
+    greet.textContent = `${charName} の冒険が始まるよ！`;
+    show("game");
     renderBoard();
   }
-  function reset(){pos=1;logEl.innerHTML="";renderBoard();}
-  function log(msg,cls){const d=document.createElement("div");if(cls)d.className=cls;d.textContent=msg;logEl.prepend(d);}
+};
 
-  // ===== イベント配線 =====
-  document.getElementById("btnStart").onclick=()=>{show("game");renderBoard();};
-  document.getElementById("btnAbout").onclick=()=>{show("about");renderAbout();};
-  document.getElementById("btnBackCover").onclick=()=>{show("cover");};
-  document.getElementById("btnBackCover2").onclick=()=>{show("cover");};
-  document.getElementById("btnBackGame").onclick=()=>{show("game");renderBoard();};
-  document.getElementById("rollBtn").onclick=roll;
-  document.getElementById("resetBtn").onclick=reset;
+// ボタン操作
+document.getElementById("rollBtn").onclick=roll;
+document.getElementById("resetBtn").onclick=reset;
 
-  // 初期表示
-  show("cover");
-})();
+// 初期表示
+if(charName){
+  greet.textContent = `${charName} の冒険が始まるよ！`;
+  show("game"); renderBoard();
+}else{
+  show("name");
+}
 </script>
 </body>
 </html>
