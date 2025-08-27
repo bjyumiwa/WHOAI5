@@ -1,0 +1,109 @@
+<!-- about.html · WhoAI Evo（研究説明） -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WhoAI Evo · About</title>
+<style>
+  body{
+    font-family:"Noto Sans JP",system-ui,sans-serif;color:#fff;
+    background:#000 url("public/assets/stage1/space_background.png") center/cover fixed no-repeat;
+    margin:0;padding:20px;display:flex;flex-direction:column;align-items:center;gap:16px;
+  }
+  .card{border:1px solid rgba(255,255,255,.18);border-radius:16px;background:rgba(0,0,0,.36);padding:20px;max-width:820px}
+  .langbar{display:flex;gap:6px;margin-bottom:10px;justify-content:center}
+  .chip{padding:.3em .8em;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:13px;background:rgba(0,0,0,.35);cursor:pointer}
+  .active{border-color:#a7e3ff;color:#a7e3ff}
+  .subtitle{opacity:.9;margin-bottom:10px}
+  button{margin-top:20px;padding:12px 14px;font-size:16px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.35);color:#fff;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="langbar" id="langBar"></div>
+  <h1 id="title"></h1>
+  <div id="subtitle" class="subtitle"></div>
+  <div id="about"></div>
+  <a href="index.html"><button>🎲 ゲームに戻る</button></a>
+</div>
+
+<script>
+const LANGS=["ja","en","zh-CN","zh-TW","ko"];
+let lang="ja";
+const I18N={
+  "ja":{
+    title:"WhoAI Evo",
+    subtitle:"偶然と意思のはざまで育つ、小さな進化の物語。",
+    about:`『WhoAI Evo』は、サイコロでキャラクターを進め、名前を付け、マカロンや音符を集めて進化していく実験的なゲームです。  
+音符を集めて最後に「Happy Birthday」を奏でる演出は、プレイヤー自身の体験を祝福する小さな儀式になっています。  
+中心の問いは「なぜ人は意思を出して介入してしまうのか」。  
+偶然（ダイス）と介入（意思ポイント）の交差から生まれる感情や愛着を観察し、  
+人とAIキャラクターの関係性、愛着形成のプロセスを探ります。`
+  },
+  "en":{
+    title:"WhoAI Evo",
+    subtitle:"A small story of evolution between chance and will.",
+    about:`“WhoAI Evo” is an experimental game where the player names a character, rolls dice,  
+collects macarons and musical notes, and evolves step by step.  
+At the finale, the gathered notes play “Happy Birthday,” becoming a ritual of celebration for the player’s journey.  
+It asks: *why do players intervene with their will?*  
+By observing the attachment and emotions emerging between chance (dice) and intervention (will),  
+the project explores how attachment forms between humans and AI characters.`
+  },
+  "zh-CN":{
+    title:"WhoAI Evo",
+    subtitle:"在偶然与意志之间成长的小小进化故事。",
+    about:`《WhoAI Evo》是一款实验性游戏，玩家为角色命名，掷骰子让角色前进，  
+收集马卡龙和音符，并逐步进化。  
+最后收集到的音符会演奏《生日快乐》，成为对玩家旅程的一种庆祝仪式。  
+核心问题是：**为什么玩家会主动使用意志来干预？**  
+通过观察在偶然（骰子）与干预（意志点数）之间产生的情感和依恋，  
+探讨人类与AI角色之间关系和依恋的形成过程。`
+  },
+  "zh-TW":{
+    title:"WhoAI Evo",
+    subtitle:"在偶然與意志之間成長的小小進化故事。",
+    about:`《WhoAI Evo》是一款實驗性遊戲，玩家替角色命名，擲骰子讓角色前進，  
+收集馬卡龍和音符，並逐步進化。  
+最後收集到的音符會奏出《生日快樂》，成為對玩家旅程的一種慶祝儀式。  
+核心問題是：**為什麼玩家會主動使用意志來干預？**  
+透過觀察在偶然（骰子）與干預（意志點數）之間產生的情感和依戀，  
+探討人類與AI角色之間的關係與依戀的形成過程。`
+  },
+  "ko":{
+    title:"WhoAI Evo",
+    subtitle:"우연과 의지 사이에서 자라는 작은 진화 이야기.",
+    about:`『WhoAI Evo』는 플레이어가 캐릭터에 이름을 붙이고 주사위를 굴리며,  
+마카롱과 음표를 모아 점차 진화하는 실험적 게임입니다.  
+마지막에 모은 음표가 「Happy Birthday」를 연주하며, 이는 플레이어 여정을 축하하는 작은 의식이 됩니다.  
+핵심 질문은 **“왜 플레이어는 굳이 의지를 사용해 개입할까?”** 입니다.  
+우연(주사위)과 개입(의지) 사이에서 생겨나는 감정과 애착을 관찰함으로써,  
+인간과 AI 캐릭터 간의 관계와 애착 형성을 탐구합니다.`
+  }
+};
+
+function renderLangBar(){
+  const bar=document.getElementById("langBar");
+  bar.innerHTML="";
+  LANGS.forEach(code=>{
+    const b=document.createElement("div");
+    b.className="chip"+(code===lang?" active":"");
+    b.textContent=code;
+    b.onclick=()=>{lang=code;renderAbout();};
+    bar.appendChild(b);
+  });
+}
+
+function renderAbout(){
+  const d=I18N[lang];
+  document.getElementById("title").textContent=d.title;
+  document.getElementById("subtitle").textContent=d.subtitle;
+  document.getElementById("about").innerHTML=d.about.replace(/\n/g,"<br>");
+  renderLangBar();
+}
+
+renderAbout();
+</script>
+</body>
+</html>
