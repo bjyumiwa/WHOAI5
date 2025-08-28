@@ -66,6 +66,10 @@
     width:78%;height:auto;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.45));z-index:1}
   .cell .noteEmoji{position:absolute;left:50%;top:18%;transform:translate(-50%,-50%);font-size:30px;z-index:1}
   .cell .collected{opacity:.28;filter:grayscale(1) blur(.2px)}
+  /* マカロンをゲットしたら消える演出 */
+  .vanish{animation:vanish .28s ease forwards}
+  @keyframes vanish{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+                    100%{opacity:0;transform:translate(-50%,-50%) scale(.6)}}
 
   /* Character */
   .charWrap{position:absolute;pointer-events:none;width:calc(100% - 12px);height:calc(100% - 12px);left:6px;top:6px;z-index:2}
@@ -84,24 +88,10 @@
   .wheelBox{width:min(260px,84vw);aspect-ratio:1/1;position:relative;display:flex;align-items:center;justify-content:center}
   .wheel{width:100%;height:100%;transform:rotate(0deg);transition:transform 3.5s cubic-bezier(.17,.89,.32,1.27)}
   .wheel.locked{opacity:.6;filter:grayscale(.3)}
-  .pointer{position:absolute;top:-6px;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:16px solid #fff}
+  .pointer{position:absolute;top:-6px;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:16px solid #fff;filter:drop-shadow(0 0 8px rgba(255,255,255,.9))}
   .spinNum{margin-top:10px;font-size:20px}
   .slice-hit{stroke:#fff;stroke-width:2;filter:drop-shadow(0 2px 6px rgba(255,255,255,.7))}
   .label-hit{font-weight:700;text-shadow:0 0 6px rgba(255,255,255,.9)}
-
-  /* Goal overlay (ako2.png 透過) */
-  .overlay{
-    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    background:radial-gradient(120% 120% at 50% 50%, rgba(0,0,0,.25), rgba(0,0,0,.45));
-    z-index:10; opacity:0; pointer-events:none; transition:opacity .25s ease;
-  }
-  .overlay.show{ opacity:1; pointer-events:auto; }
-  .overlay img{
-    width:min(42vw,360px);height:auto;
-    filter:drop-shadow(0 12px 28px rgba(0,0,0,.6));
-    animation:sway 3s ease-in-out infinite;pointer-events:none;background:transparent;
-  }
-  @keyframes sway{0%{transform:rotate(-2deg)}50%{transform:rotate(2deg) translateY(-3px)}100%{transform:rotate(-2deg)}}
 </style>
 </head>
 <body>
@@ -281,7 +271,7 @@
   }
   function allMacCollected(){ return gotMac.pink && gotMac.blue && gotMac.green && gotMac.purple; }
 
-  /* ===== ルーレット（長くクルクル＋ハイライト） ===== */
+  /* ===== ルーレット（数字中央停止＋針スナップ） ===== */
   const WHEEL_COLORS=['#ff7ab6','#6aa6ff','#ffd166','#7ee6a2','#caa6ff','#ff9f6e'];
   const slicePaths=[], labelTexts=[];
   (function buildWheel(){
@@ -308,28 +298,55 @@
     const steps=Math.floor(Math.random()*6)+1;
     V.spinNum.textContent=`出目：${steps}`;
 
-    // 3〜6周してから指定のセクション中心で止まる
+    // 3〜6周してから指定のセクション中央で停止
     const idx=steps-1;
     const centerAngle=-90+(idx+0.5)*60;
-    const rev = 3 + Math.floor(Math.random()*4);    // 3,4,5,6 回転
+    const rev = 3 + Math.floor(Math.random()*4);               // 3..6回転
     const finalAngle = rev*360 - centerAngle;
+
+    // 本回転
+    V.wheel.style.transition='transform 3.5s cubic-bezier(.17,.89,.32,1.27)';
     V.wheel.style.transform=`rotate(${finalAngle}deg)`;
 
     setTimeout(()=>{
-      slicePaths[idx].classList.add('slice-hit');
-      labelTexts[idx].classList.add('label-hit');
-      moveWithLoop(steps);
-    }, 3600); // CSS 3.5s に少し余裕
+      // 針スナップ（少しオーバー→戻る）で「数字にピタッ」
+      V.wheel.style.transition='transform .22s ease-out';
+      V.wheel.style.transform=`rotate(${finalAngle+8}deg)`;
+      setTimeout(()=>{
+        V.wheel.style.transition='transform .18s ease-in';
+        V.wheel.style.transform=`rotate(${finalAngle}deg)`;
+
+        // 視覚ハイライト
+        slicePaths[idx].classList.add('slice-hit');
+        labelTexts[idx].classList.add('label-hit');
+
+        // 移動開始
+        moveWithLoop(steps);
+      }, 220);
+    }, 3500);
   };
 
   /* ===== 1歩ずつ進む（周回あり）＆収集は到着時のみ ===== */
   function collectOnArrive(i){
-    // マカロン：ぴったり到着でゲット＆進化
+    // マカロン：ぴったり到着でゲット＆進化＋見た目を消す
     for(const [col,slot] of Object.entries(macSlots)){
-      if(!gotMac[col] && slot===i){ gotMac[col]=true; setCharBy(col); }
+      if(!gotMac[col] && slot===i){
+        gotMac[col]=true; setCharBy(col);
+        const cell=V.board.querySelectorAll('.cell')[slot-1];
+        const img=cell.querySelector('.item');
+        if(img){
+          img.classList.add('vanish');        // 消える演出
+          setTimeout(()=>img.remove(), 280);  // 完全に削除
+        }
+      }
     }
-    // 音符：到着時に取得
-    if(notesSet.has(i) && !gotNotes.has(i)){ gotNotes.add(i); }
+    // 音符：到着時に取得（薄くする）
+    if(notesSet.has(i) && !gotNotes.has(i)){
+      gotNotes.add(i);
+      const cell=V.board.querySelectorAll('.cell')[i-1];
+      const note=cell.querySelector('.noteEmoji');
+      if(note){ note.classList.add('collected'); }
+    }
   }
 
   function moveWithLoop(steps){
