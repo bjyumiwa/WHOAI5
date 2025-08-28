@@ -38,7 +38,7 @@
   .layout{display:grid;grid-template-columns:2fr 1fr;gap:12px;width:100%;height:100%;align-items:center;justify-items:center}
   @media (max-width:780px){.layout{grid-template-columns:1fr;grid-template-rows:auto auto}}
 
-  /* Board 5x5 S字 */
+  /* Board 5x5 (S字) */
   .board{width:100%;max-width:640px;aspect-ratio:1/1;
     display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);gap:8px;padding:6px}
   .cell{position:relative;border-radius:14px;overflow:hidden;
@@ -47,16 +47,14 @@
     box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 6px 18px rgba(0,0,0,.35)}
   .idx{position:absolute;left:6px;top:6px;font-size:12px;font-weight:700;color:#24313a;
     background:#fff;border-radius:999px;padding:.1em .5em;box-shadow:0 2px 6px rgba(0,0,0,.25)}
-
-  /* START / GOAL */
+  .start-ribbon{
+    position:absolute;left:6px;top:6px;font-size:11px;font-weight:700;color:#163f2b;
+    background:#a5f3cf;padding:2px 6px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:2
+  }
   .cell.goal{transform:scale(1.06);box-shadow:0 0 12px rgba(255,255,200,.6), inset 0 0 0 2px #ffe066}
   .goal-ribbon{
     position:absolute;left:6px;top:6px;font-size:11px;font-weight:700;color:#4b3d00;
     background:#ffe066;padding:2px 6px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:2
-  }
-  .start-ribbon{
-    position:absolute;left:6px;top:6px;font-size:11px;font-weight:700;color:#163f2b;
-    background:#a5f3cf;padding:2px 6px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:2
   }
   .goal-img{
     position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
@@ -84,14 +82,14 @@
 
   /* Roulette */
   .wheelBox{width:min(260px,84vw);aspect-ratio:1/1;position:relative;display:flex;align-items:center;justify-content:center}
-  .wheel{width:100%;height:100%;transform:rotate(0deg);transition:transform 2.2s cubic-bezier(.17,.89,.32,1.27)}
+  .wheel{width:100%;height:100%;transform:rotate(0deg);transition:transform 3.5s cubic-bezier(.17,.89,.32,1.27)}
   .wheel.locked{opacity:.6;filter:grayscale(.3)}
   .pointer{position:absolute;top:-6px;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:16px solid #fff}
   .spinNum{margin-top:10px;font-size:20px}
   .slice-hit{stroke:#fff;stroke-width:2;filter:drop-shadow(0 2px 6px rgba(255,255,255,.7))}
   .label-hit{font-weight:700;text-shadow:0 0 6px rgba(255,255,255,.9)}
 
-  /* Goal overlay (ako2.png は透過) */
+  /* Goal overlay (ako2.png 透過) */
   .overlay{
     position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     background:radial-gradient(120% 120% at 50% 50%, rgba(0,0,0,.25), rgba(0,0,0,.45));
@@ -101,8 +99,7 @@
   .overlay img{
     width:min(42vw,360px);height:auto;
     filter:drop-shadow(0 12px 28px rgba(0,0,0,.6));
-    animation:sway 3s ease-in-out infinite;pointer-events:none;
-    background:transparent;
+    animation:sway 3s ease-in-out infinite;pointer-events:none;background:transparent;
   }
   @keyframes sway{0%{transform:rotate(-2deg)}50%{transform:rotate(2deg) translateY(-3px)}100%{transform:rotate(-2deg)}}
 </style>
@@ -126,19 +123,18 @@
     </div>
     <div id="movingFlag" class="moving hidden">移動中…</div>
 
-    <!-- Goal overlay -->
     <div id="goalOverlay" class="overlay">
       <img src="public/assets/stage1/ako2.png" alt="ako celebration">
     </div>
 
     <div class="layout">
-      <!-- Board -->
+      <!-- 盤面 -->
       <div id="boardWrap" style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
         <div id="board" class="board"></div>
         <div class="charWrap"><img id="char" src="public/assets/stage1/miwacchi_open.png" class="char" alt=""></div>
       </div>
 
-      <!-- Roulette -->
+      <!-- ルーレット -->
       <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
         <div class="wheelBox">
           <div class="pointer"></div>
@@ -151,6 +147,13 @@
         </div>
         <div class="spinNum" id="spinNum">—</div>
         <div class="buttons"><button id="btnSpin" class="btn btn-primary">🎡 ルーレットを回す</button></div>
+
+        <div class="buttons" style="gap:6px;margin-top:6px">
+          <span class="tag">ピンク:<b id="cntPink">0</b></span>
+          <span class="tag">ブルー:<b id="cntBlue">0</b></span>
+          <span class="tag">グリーン:<b id="cntGreen">0</b></span>
+          <span class="tag">パープル:<b id="cntPurple">0</b></span>
+        </div>
       </div>
     </div>
 
@@ -160,10 +163,14 @@
 
 <script>
 (()=> {
-  const V={cover:gid('view-cover'),game:gid('view-game'),board:gid('board'),char:gid('char'),
-    wheel:gid('wheel'),spinNum:gid('spinNum'),posTag:gid('posTag'),notesTag:gid('notesTag'),
-    macTag:gid('macTag'),btnSpin:gid('btnSpin'),movingFlag:gid('movingFlag'),
-    overlay:gid('goalOverlay'),btnStart:gid('btnStart'),toCover:gid('toCover')};
+  const V={
+    cover:gid('view-cover'), game:gid('view-game'), board:gid('board'), char:gid('char'),
+    wheel:gid('wheel'), spinNum:gid('spinNum'),
+    posTag:gid('posTag'), notesTag:gid('notesTag'), macTag:gid('macTag'),
+    btnSpin:gid('btnSpin'), movingFlag:gid('movingFlag'), overlay:gid('goalOverlay'),
+    cntPink:gid('cntPink'), cntBlue:gid('cntBlue'), cntGreen:gid('cntGreen'), cntPurple:gid('cntPurple'),
+    btnStart:gid('btnStart'), toCover:gid('toCover')
+  };
   function gid(id){return document.getElementById(id)}
 
   function showCover(){ V.game.classList.add('hidden'); V.cover.classList.remove('hidden'); }
@@ -172,23 +179,22 @@
   V.btnStart.addEventListener('click', ()=>{ resetAll(); showGame(); });
   V.toCover.addEventListener('click', ()=>{ showCover(); });
 
-  /* ===== Board mapping (S字) ===== */
-  const N=25,SIZE=5;
-
-  // i=1 → 左下、i=25 → 右上（S字）
+  /* ===== S字インデックス ===== */
+  const N=25, SIZE=5;
   function indexToRC(i){
-    const r = Math.floor((i-1)/SIZE);      // 0..4 下から上へ
+    const r = Math.floor((i-1)/SIZE);
     const cInRow = (i-1)%SIZE;
     const c = (r%2===0) ? cInRow : (SIZE-1-cInRow);
     const rowFromTop = SIZE-1-r;
-    return [rowFromTop, c];                 // CSS grid 用（上からの行番号）
+    return [rowFromTop, c];
   }
 
+  /* ===== 座標と盤面 ===== */
   let centersPx=[], cellW=0, charOffsetY=0;
   function computeCenters(){
     const rect=V.board.getBoundingClientRect();
     const gap=8, pad=6, cw=(rect.width-gap*4)/SIZE; cellW=cw;
-    charOffsetY = cw*0.22;                  // 少し下めに置く
+    charOffsetY = cw*0.22;
     centersPx.length=N+1;
     for(let i=1;i<=N;i++){
       const [r,c]=indexToRC(i);
@@ -215,9 +221,15 @@
     computeCenters();
   }
 
-  /* ===== Items ===== */
-  const MAC={pink:"public/assets/stage1/macaron_pink.png",blue:"public/assets/stage1/macaron_blue.png",green:"public/assets/stage1/macaron_green.png",purple:"public/assets/stage1/macaron_purple.png"};
+  /* ===== アイテム配置 ===== */
+  const MAC = {
+    pink :"public/assets/stage1/macaron_pink.png",
+    blue :"public/assets/stage1/macaron_blue.png",
+    green:"public/assets/stage1/macaron_green.png",
+    purple:"public/assets/stage1/macaron_purple.png"
+  };
   const NOTE_EMO=['🎵','🎶','♫','♬'];
+
   const macSlots={}, notesSet=new Set();
   function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}}
   function placeItems(){
@@ -225,23 +237,32 @@
     const cells=V.board.querySelectorAll('.cell');
     const pool=Array.from({length:N-2},(_,k)=>k+2); shuffle(pool);
     ['pink','blue','green','purple'].forEach((col,i)=>{
-      macSlots[col]=pool[i]; const t=cells[macSlots[col]-1];
-      const img=document.createElement('img'); img.src=MAC[col]; img.className='item'; t.appendChild(img);
+      macSlots[col]=pool[i];
+      const t=cells[macSlots[col]-1];
+      const img=document.createElement('img'); img.src=MAC[col]; img.className='item'; img.dataset.idx=String(macSlots[col]); t.appendChild(img);
     });
     notesSet.clear();
     pool.slice(4,9).forEach(idx=>{
       notesSet.add(idx);
-      const t=cells[idx-1]; const d=document.createElement('div'); d.className='noteEmoji'; d.textContent=NOTE_EMO[Math.floor(Math.random()*NOTE_EMO.length)]; t.appendChild(d);
+      const t=cells[idx-1]; const d=document.createElement('div'); d.className='noteEmoji';
+      d.textContent=NOTE_EMO[Math.floor(Math.random()*NOTE_EMO.length)];
+      d.dataset.idx=String(idx); t.appendChild(d);
     });
   }
 
-  /* ===== State ===== */
-  const CHAR={start:"public/assets/stage1/miwacchi_open.png",pink:"public/assets/stage1/pink_open.png",blue:"public/assets/stage1/blue_open.png",green:"public/assets/stage1/green_open.png",purple:"public/assets/stage1/purple_open.png"};
+  /* ===== 状態 ===== */
+  const CHAR={
+    start:"public/assets/stage1/miwacchi_open.png",
+    pink :"public/assets/stage1/pink_open.png",
+    blue :"public/assets/stage1/blue_open.png",
+    green:"public/assets/stage1/green_open.png",
+    purple:"public/assets/stage1/purple_open.png"
+  };
   let pos=1, moving=false, finished=false;
   const gotMac={pink:false,blue:false,green:false,purple:false};
   const gotNotes=new Set();
 
-  function setCharBy(col){ V.char.src=col?CHAR[col]:CHAR.start; }
+  function setCharBy(col){ V.char.src = col? CHAR[col] : CHAR.start; }
   function renderChar(){
     const p=centersPx[pos]; if(!p) return;
     const half=(V.char.getBoundingClientRect().width||64)/2;
@@ -253,9 +274,14 @@
     const mc = Object.values(gotMac).filter(v=>v).length;
     V.notesTag.textContent=`音符: ${gotNotes.size}/5`;
     V.macTag.textContent=`マカロン: ${mc}/4`;
+    V.cntPink.textContent = gotMac.pink?1:0;
+    V.cntBlue.textContent = gotMac.blue?1:0;
+    V.cntGreen.textContent= gotMac.green?1:0;
+    V.cntPurple.textContent=gotMac.purple?1:0;
   }
+  function allMacCollected(){ return gotMac.pink && gotMac.blue && gotMac.green && gotMac.purple; }
 
-  /* ===== Roulette ===== */
+  /* ===== ルーレット（長くクルクル＋ハイライト） ===== */
   const WHEEL_COLORS=['#ff7ab6','#6aa6ff','#ffd166','#7ee6a2','#caa6ff','#ff9f6e'];
   const slicePaths=[], labelTexts=[];
   (function buildWheel(){
@@ -267,7 +293,8 @@
       p.setAttribute('d',`M50,50 L${x0},${y0} A48,48 0 0 1 ${x1},${y1} Z`);
       p.setAttribute('fill',WHEEL_COLORS[i]); slices.appendChild(p); slicePaths.push(p);
       const mid=(-90+(i+0.5)*60)*Math.PI/180; const lx=50+30*Math.cos(mid), ly=50+30*Math.sin(mid);
-      const t=document.createElementNS('http://www.w3.org/2000/svg','text'); t.setAttribute('x',lx); t.setAttribute('y',ly); t.textContent=(i+1); labels.appendChild(t); labelTexts.push(t);
+      const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x',lx); t.setAttribute('y',ly); t.textContent=(i+1); labels.appendChild(t); labelTexts.push(t);
     }
   })();
   function clearHit(){ slicePaths.forEach(p=>p.classList.remove('slice-hit')); labelTexts.forEach(t=>t.classList.remove('label-hit')); }
@@ -276,40 +303,62 @@
   V.btnSpin.onclick=()=>{
     if(moving || finished) return;
     setSpinEnabled(false);
-    clearHit(); // 光りっぱなし対策
+    clearHit();
 
     const steps=Math.floor(Math.random()*6)+1;
     V.spinNum.textContent=`出目：${steps}`;
-    const idx=steps-1, centerAngle=-90+(idx+0.5)*60, finalAngle=3*360-centerAngle;
+
+    // 3〜6周してから指定のセクション中心で止まる
+    const idx=steps-1;
+    const centerAngle=-90+(idx+0.5)*60;
+    const rev = 3 + Math.floor(Math.random()*4);    // 3,4,5,6 回転
+    const finalAngle = rev*360 - centerAngle;
     V.wheel.style.transform=`rotate(${finalAngle}deg)`;
-    setTimeout(()=>{ slicePaths[idx].classList.add('slice-hit'); labelTexts[idx].classList.add('label-hit'); moveExact(steps); },2300);
+
+    setTimeout(()=>{
+      slicePaths[idx].classList.add('slice-hit');
+      labelTexts[idx].classList.add('label-hit');
+      moveWithLoop(steps);
+    }, 3600); // CSS 3.5s に少し余裕
   };
 
-  /* ===== Move / Collect ===== */
-  function checkCollect(i){
-    // 通過で進化（そのマスを踏めばOK）
+  /* ===== 1歩ずつ進む（周回あり）＆収集は到着時のみ ===== */
+  function collectOnArrive(i){
+    // マカロン：ぴったり到着でゲット＆進化
     for(const [col,slot] of Object.entries(macSlots)){
       if(!gotMac[col] && slot===i){ gotMac[col]=true; setCharBy(col); }
     }
+    // 音符：到着時に取得
     if(notesSet.has(i) && !gotNotes.has(i)){ gotNotes.add(i); }
   }
 
-  function moveExact(steps){
-    // ぴったり制：超える場合は動かない
-    const target = (pos + steps <= N) ? pos + steps : pos;
-    if(target===pos){ setSpinEnabled(true); return; }
+  function moveWithLoop(steps){
+    if(steps<=0){ setSpinEnabled(true); return; }
     moving=true;
+    let remain=steps;
     const timer=setInterval(()=>{
-      if(pos<target){ pos++; checkCollect(pos); renderChar(); updateHUD(); }
-      if(pos>=target){
+      pos++;
+      if(pos>N) pos=1;                // 周回
+      renderChar();
+
+      remain--;
+      if(remain<=0){
         clearInterval(timer);
-        moving=false;
-        if(pos===N) finish(); else setSpinEnabled(true);
+        collectOnArrive(pos);
+        updateHUD();
+
+        // ゴール判定：25にぴったり、かつ4色揃っているときだけ
+        if(pos===N && allMacCollected()){
+          finish();
+        }else{
+          moving=false;
+          setSpinEnabled(true);
+        }
       }
-    }, 360);
+    }, 300);
   }
 
-  /* ===== Goal (HB then back to cover) ===== */
+  /* ===== ゴール演出（HB後に自動で表紙へ） ===== */
   let audioCtx;
   function ctx(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
   function toneSeq(seq){
@@ -335,7 +384,7 @@
     setTimeout(()=>{ V.overlay.classList.remove('show'); showCover(); }, Math.max(6000, ms));
   }
 
-  /* ===== Reset ===== */
+  /* ===== 初期化 ===== */
   function resetAll(){
     pos=1; moving=false; finished=false;
     for(const k of Object.keys(gotMac)) gotMac[k]=false;
@@ -343,7 +392,6 @@
 
     buildBoard(); placeItems();
 
-    // レイアウト確定 → 座標 → 配置
     requestAnimationFrame(()=>{
       computeCenters();
       requestAnimationFrame(()=>{
@@ -357,7 +405,7 @@
     window.addEventListener('resize', ()=>{ computeCenters(); renderChar(); }, { passive:true });
   }
 
-  // 初期は表紙
+  // 初期表示は表紙
   showCover();
 })();
 </script>
