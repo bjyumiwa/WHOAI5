@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>WhoAI Evo · Sugoroku</title>
 
+<!-- favicon（404対策）-->
 <link rel="icon" type="image/png" href="public/assets/stage1/macaron_pink.png" />
 
 <style>
   :root{ --fg:#fff; --primaryFrom:#ff8cc7; --primaryTo:#ff63b2; }
   html,body{height:100%;margin:0}
   body{
-    font-family:"Noto Sans JP",system-ui,sans-serif;color:var(--fg);
+    font-family:"Noto Sans JP",system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:var(--fg);
     background:#000 url("public/assets/stage1/space_background.png") center/cover fixed no-repeat;
     display:flex;align-items:center;justify-content:center;padding:10px;
   }
@@ -25,42 +26,74 @@
   }
   .hidden{display:none}
 
-  .cover-hero{width:min(140px,22vw);margin-bottom:8px}
+  /* 表紙（みわっち小さめ） */
+  .cover-hero{width:min(140px,22vw);height:auto;filter:drop-shadow(0 6px 20px rgba(0,0,0,.55));margin-bottom:8px}
   .buttons{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px}
   .btn{border:none;border-radius:999px;cursor:pointer;transition:opacity .2s}
   .btn-primary{min-width:220px;padding:14px 18px;font-size:18px;color:#2b1630;
     background:linear-gradient(180deg,var(--primaryFrom),var(--primaryTo));
     box-shadow:0 10px 20px rgba(255,99,178,.35)}
-  .btn-mini{padding:6px 10px;font-size:12px;color:#24313a;background:rgba(255,255,255,.9)}
+  .btn-mini{min-width:auto;padding:6px 10px;font-size:12px;color:#24313a;background:rgba(255,255,255,.9)}
   .btn[disabled]{opacity:.55;cursor:not-allowed}
   .corner{position:absolute;right:10px;bottom:10px}
 
-  .layout{display:grid;grid-template-columns:2fr 1fr;gap:12px;width:100%;height:100%}
+  /* レイアウト */
+  .layout{display:grid;grid-template-columns:2fr 1fr;gap:12px;width:100%;height:100%;align-items:center;justify-items:center}
+  @media (max-width:780px){.layout{grid-template-columns:1fr;grid-template-rows:auto auto}}
+
+  /* 盤面 5x5 S字 */
   .board{width:100%;max-width:640px;aspect-ratio:1/1;
     display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);gap:8px;padding:6px}
   .cell{position:relative;border-radius:14px;overflow:hidden;
-    background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+    background:radial-gradient(120% 80% at 20% 20%, rgba(255,255,255,.22), transparent 55%),
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 6px 18px rgba(0,0,0,.35)}
   .idx{position:absolute;left:6px;top:6px;font-size:12px;font-weight:700;color:#24313a;
-    background:#fff;border-radius:999px;padding:.1em .5em}
-  .cell .item,.char{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:78%;height:auto;object-fit:contain}
-  .noteEmoji{position:absolute;left:50%;top:18%;transform:translate(-50%,-50%);font-size:30px}
-  .goal-img{position:absolute;right:6px;top:6px;width:40px}
+    background:#fff;border-radius:999px;padding:.1em .5em;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+  /* ゴールセル強調 */
+  .cell.goal{
+    transform:scale(1.1);
+    box-shadow:0 0 12px rgba(255,255,200,.6), inset 0 0 0 2px #ffe066;
+  }
+  /* マス内アイテム（存在感アップ） */
+  .cell .item{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:78%;height:auto;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.45))}
+  .cell .noteEmoji{position:absolute;left:50%;top:18%;transform:translate(-50%,-50%);font-size:30px}
+  .cell .collected{opacity:.25;filter:grayscale(1) blur(.2px)}
+  .goal-img{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.4))}
 
-  .charWrap{position:absolute;pointer-events:none;width:100%;height:100%;left:0;top:0;z-index:5}
-  .char{transition:left .25s ease, top .25s ease;width:64px;height:64px}
+  /* キャラ */
+  .charWrap{position:absolute;pointer-events:none;width:calc(100% - 12px);height:calc(100% - 12px);left:6px;top:6px;z-index:5}
+  .char{
+    position:absolute;width:64px;height:64px;object-fit:contain;
+    filter:drop-shadow(0 3px 10px rgba(0,0,0,.55));
+    transition:left .22s ease, top .22s ease
+  }
 
-  .wheelBox{width:240px;aspect-ratio:1/1;position:relative}
-  .wheel{width:100%;height:100%;transition:transform 2.2s cubic-bezier(.17,.89,.32,1.27)}
-  .pointer{position:absolute;top:-6px;left:50%;transform:translateX(-50%);
-    width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:16px solid #fff}
+  /* ルーレット */
+  .wheelBox{width:min(260px,84vw);aspect-ratio:1/1;position:relative;display:flex;align-items:center;justify-content:center}
+  .wheel{width:100%;height:100%;transform:rotate(0deg);transition:transform 2.2s cubic-bezier(.17,.89,.32,1.27)}
+  .wheel.locked{opacity:.6;filter:grayscale(.3)}
+  .pointer{position:absolute;top:-6px;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:16px solid #fff}
+  .spinNum{margin-top:10px;font-size:20px}
+
   .hud{position:absolute;left:14px;top:10px;display:flex;gap:6px;flex-wrap:wrap}
-  .tag{padding:.35em .6em;border-radius:999px;font-size:12px;background:rgba(255,255,255,.18)}
-  .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    background:rgba(0,0,0,.45);z-index:10;opacity:0;pointer-events:none;transition:opacity .3s}
-  .overlay.show{opacity:1;pointer-events:auto}
-  .overlay img{width:min(42vw,360px);animation:sway 3s ease-in-out infinite}
-  @keyframes sway{0%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}100%{transform:rotate(-2deg)}}
+  .tag{padding:.35em .6em;border-radius:999px;font-size:12px;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
+  .moving{position:absolute;right:12px;top:10px;font-size:12px;padding:.35em .6em;border-radius:999px;background:rgba(255,255,255,.18)}
+
+  /* ゴール演出 */
+  .overlay{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(120% 120% at 50% 50%, rgba(0,0,0,.25), rgba(0,0,0,.45));
+    z-index:10; opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .overlay.show{ opacity:1; pointer-events:auto; }
+  .overlay img{
+    width:min(42vw,360px);height:auto;filter:drop-shadow(0 12px 28px rgba(0,0,0,.6));
+    animation:sway 3s ease-in-out infinite;mix-blend-mode:multiply;pointer-events:none;
+  }
+  @keyframes sway{0%{transform:rotate(-2deg)}50%{transform:rotate(2deg) translateY(-3px)}100%{transform:rotate(-2deg)}}
 </style>
 </head>
 <body>
@@ -69,78 +102,300 @@
   <!-- Cover -->
   <section id="view-cover" class="card">
     <img src="public/assets/stage1/miwacchi_open.png" class="cover-hero" alt="">
-    <h1>WhoAI Evo</h1>
+    <h1 class="cover-title">WhoAI Evo</h1>
     <div class="buttons"><button id="btnStart" class="btn btn-primary">▶ スタート</button></div>
   </section>
 
   <!-- Game -->
   <section id="view-game" class="card hidden">
-    <div class="hud"><span id="posTag" class="tag">位置: 1/25</span></div>
-    <div id="goalOverlay" class="overlay"><img src="public/assets/stage1/ako.png"></div>
+    <div class="hud">
+      <span id="posTag" class="tag">位置: 1/25</span>
+      <span id="notesTag" class="tag">音符: 0/5</span>
+      <span id="macTag" class="tag">マカロン: 0/4</span>
+    </div>
+    <div id="movingFlag" class="moving hidden">移動中…</div>
+
+    <!-- ゴール時オーバーレイ -->
+    <div id="goalOverlay" class="overlay">
+      <img src="public/assets/stage1/ako.png" alt="ako celebration">
+    </div>
 
     <div class="layout">
-      <div style="position:relative;width:100%;height:100%;">
+      <!-- 盤面 -->
+      <div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
         <div id="board" class="board"></div>
-        <div class="charWrap"><img id="char" src="public/assets/stage1/miwacchi_open.png" class="char"></div>
+        <div class="charWrap"><img id="char" src="public/assets/stage1/miwacchi_open.png" class="char" alt=""></div>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:center">
+
+      <!-- ルーレット -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
         <div class="wheelBox">
           <div class="pointer"></div>
-          <svg id="wheel" class="wheel" viewBox="0 0 100 100"><g id="slices"></g><g id="labels"></g><circle cx="50" cy="50" r="4" fill="#fff"/></svg>
+          <svg id="wheel" class="wheel" viewBox="0 0 100 100" aria-label="roulette">
+            <circle cx="50" cy="50" r="48" fill="#222" />
+            <g id="slices"></g>
+            <g id="labels" font-size="10" text-anchor="middle" dominant-baseline="middle" fill="#fff"></g>
+            <circle cx="50" cy="50" r="4" fill="#fff"/>
+          </svg>
         </div>
-        <button id="btnSpin" class="btn btn-primary">🎡 回す</button>
+        <div class="spinNum" id="spinNum">—</div>
+        <div class="buttons"><button id="btnSpin" class="btn btn-primary">🎡 ルーレットを回す</button></div>
+
+        <div class="buttons" style="gap:6px;margin-top:6px">
+          <span class="tag">ピンク:<b id="cntPink">0</b></span>
+          <span class="tag">ブルー:<b id="cntBlue">0</b></span>
+          <span class="tag">グリーン:<b id="cntGreen">0</b></span>
+          <span class="tag">パープル:<b id="cntPurple">0</b></span>
+        </div>
       </div>
     </div>
+
     <div class="corner"><button id="toCover" class="btn btn-mini">⏮ スタートへ</button></div>
   </section>
 </div>
 
 <script>
 (()=> {
-  const V={cover:gid('view-cover'),game:gid('view-game'),
-           board:gid('board'),char:gid('char'),
-           wheel:gid('wheel'),btnSpin:gid('btnSpin'),
-           posTag:gid('posTag'),overlay:gid('goalOverlay'),
-           btnStart:gid('btnStart'),toCover:gid('toCover')};
+  const V={ cover:gid('view-cover'), game:gid('view-game'), board:gid('board'), char:gid('char'),
+    wheel:gid('wheel'), spinNum:gid('spinNum'), posTag:gid('posTag'), notesTag:gid('notesTag'), macTag:gid('macTag'),
+    btnSpin:gid('btnSpin'), movingFlag:gid('movingFlag'), overlay:gid('goalOverlay'),
+    cntPink:gid('cntPink'), cntBlue:gid('cntBlue'), cntGreen:gid('cntGreen'), cntPurple:gid('cntPurple'),
+    btnStart:gid('btnStart'), toCover:gid('toCover') };
   function gid(id){return document.getElementById(id)}
-  function showCover(){V.game.classList.add('hidden');V.cover.classList.remove('hidden');}
-  function showGame(){V.cover.classList.add('hidden');V.game.classList.remove('hidden');}
 
-  V.btnStart.onclick=()=>{pos=1;finished=false;V.overlay.classList.remove('show');showGame();init();}
-  V.toCover.onclick=()=>showCover();
+  function showCover(){ V.game.classList.add('hidden'); V.cover.classList.remove('hidden'); }
+  function showGame(){ V.cover.classList.add('hidden'); V.game.classList.remove('hidden'); }
 
-  /* 盤面 */
-  const N=25,SIZE=5;let centers=[];
-  function indexToRC(i){const r=Math.floor((i-1)/SIZE),cInRow=(i-1)%SIZE,c=(r%2===0)?cInRow:(SIZE-1-cInRow);return[SIZE-1-r,c];}
-  function computeCenters(){const rect=V.board.getBoundingClientRect(),gap=8,cw=(rect.width-gap*4)/SIZE;centers.length=N+1;
-    for(let i=1;i<=N;i++){const [r,c]=indexToRC(i);centers[i]={x:c*(cw+gap)+cw/2+6,y:(SIZE-1-r)*(cw+gap)+cw/2+6};}}
-  function buildBoard(){V.board.innerHTML='';for(let i=1;i<=N;i++){const cell=document.createElement('div');cell.className='cell';
-    const [r,c]=indexToRC(i);cell.style.gridRow=(r+1);cell.style.gridColumn=(c+1);
-    const idx=document.createElement('div');idx.className='idx';idx.textContent=i;cell.appendChild(idx);
-    if(i===N){const g=document.createElement('img');g.src="public/assets/stage1/drink_item.png";g.className="goal-img";cell.appendChild(g);}V.board.appendChild(cell);}computeCenters();}
-  function renderChar(){const p=centers[pos];if(!p)return;const half=32;V.char.style.left=(p.x-half)+"px";V.char.style.top=(p.y-half)+"px";V.posTag.textContent=`位置: ${pos}/25`;}
+  V.btnStart.addEventListener('click', ()=>{ finished=false; V.overlay.classList.remove('show'); showGame(); init(); });
+  V.toCover.addEventListener('click', ()=>{ showCover(); });
 
-  /* 状態 */
-  let pos=1,moving=false,finished=false;
+  /* ==== 盤面 ==== */
+  const N=25, SIZE=5;
+  function indexToRC(i){ const r=Math.floor((i-1)/SIZE), cInRow=(i-1)%SIZE; const c=(r%2===0)?cInRow:(SIZE-1-cInRow); return [SIZE-1-r, c]; }
+  let centersPx=[], cellW=0;
 
-  /* ルーレット */
-  const colors=['#ff7ab6','#6aa6ff','#ffd166','#7ee6a2','#caa6ff','#ff9f6e'];
-  (function(){const s=V.wheel.querySelector('#slices'),l=V.wheel.querySelector('#labels');for(let i=0;i<6;i++){
-    const a0=(-90+i*60)*Math.PI/180,a1=(-90+(i+1)*60)*Math.PI/180;
-    const x0=50+48*Math.cos(a0),y0=50+48*Math.sin(a0),x1=50+48*Math.cos(a1),y1=50+48*Math.sin(a1);
-    const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',`M50,50 L${x0},${y0} A48,48 0 0 1 ${x1},${y1} Z`);p.setAttribute('fill',colors[i]);s.appendChild(p);
-    const mid=(-90+(i+0.5)*60)*Math.PI/180;const lx=50+30*Math.cos(mid),ly=50+30*Math.sin(mid);
-    const t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x',lx);t.setAttribute('y',ly);t.textContent=(i+1);t.setAttribute('fill','#fff');l.appendChild(t);}})();
-  function setSpin(on){V.btnSpin.disabled=!on;V.wheel.classList.toggle('locked',!on);}
-  V.btnSpin.onclick=()=>{if(moving||finished)return;setSpin(false);const steps=Math.floor(Math.random()*6)+1;
-    const final=3*360-( -90+(steps-0.5)*60 );V.wheel.style.transform=`rotate(${final}deg)`;setTimeout(()=>animateMove(steps),2300);};
-  function animateMove(steps){moving=true;let moved=0;const t=setInterval(()=>{if(pos<N)pos++;renderChar();moved++;
-    if(pos===N||moved>=steps){clearInterval(t);moving=false;if(pos===N)celebrate();else setSpin(true);}},350);}
-  function celebrate(){finished=true;V.overlay.classList.add('show');setTimeout(()=>{V.overlay.classList.remove('show');showCover();},6000);}
+  function computeCenters(){
+    const rect=V.board.getBoundingClientRect();
+    const gap=8, pad=6, cw=(rect.width-gap*4)/SIZE;
+    cellW=cw;
+    centersPx.length=N+1;
+    for(let i=1;i<=N;i++){ const [r,c]=indexToRC(i); centersPx[i]={x:c*(cw+gap)+cw/2+pad,y:(SIZE-1-r)*(cw+gap)+cw/2+pad}; }
+    const s=Math.max(28, Math.round(cellW*0.78));
+    V.char.style.width=s+'px'; V.char.style.height=s+'px';
+  }
 
-  function init(){buildBoard();renderChar();setSpin(true);}
+  function buildBoard(){
+    V.board.innerHTML='';
+    for(let i=1;i<=N;i++){
+      const cell=document.createElement('div'); cell.className='cell';
+      if(i===N) cell.classList.add("goal");
+      const [r,c]=indexToRC(i); cell.style.gridRow=(r+1); cell.style.gridColumn=(c+1);
+      const idx=document.createElement('div'); idx.className='idx'; idx.textContent=i; cell.appendChild(idx);
+      if(i===N){
+        const goal=document.createElement('img'); goal.src="public/assets/stage1/drink_item.png"; goal.className='goal-img'; cell.appendChild(goal);
+      }
+      V.board.appendChild(cell);
+    }
+    computeCenters();
+  }
+
+  /* ==== アイテム配置 ==== */
+  const MAC ={ pink:"public/assets/stage1/macaron_pink.png",  blue:"public/assets/stage1/macaron_blue.png",  green:"public/assets/stage1/macaron_green.png",  purple:"public/assets/stage1/macaron_purple.png" };
+  const NOTE_EMO=['🎵','🎶','♫','♬'];
+  const macSlots={}; let noteSlots=new Set();
+  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}}
+  function placeItems(){
+    V.board.querySelectorAll('.item,.noteEmoji').forEach(e=>e.remove());
+    const cells=V.board.querySelectorAll('.cell');
+    const pool=Array.from({length:N-2},(_,k)=>k+2); shuffle(pool);
+    const cols=['pink','blue','green','purple'];
+    cols.forEach((col,i)=>{ macSlots[col]=pool[i]; const t=cells[macSlots[col]-1];
+      const img=document.createElement('img'); img.src=MAC[col]; img.className='item'; img.dataset.idx=String(macSlots[col]); t.appendChild(img); });
+    noteSlots=new Set(pool.slice(4,9));
+    noteSlots.forEach(idx=>{ const t=cells[idx-1]; const d=document.createElement('div'); d.className='noteEmoji'; d.textContent=NOTE_EMO[Math.floor(Math.random()*NOTE_EMO.length)]; d.dataset.idx=String(idx); t.appendChild(d); });
+  }
+
+  /* ==== 状態 ==== */
+  const CHAR={ start:"public/assets/stage1/miwacchi_open.png", pink:"public/assets/stage1/pink_open.png", blue:"public/assets/stage1/blue_open.png", green:"public/assets/stage1/green_open.png", purple:"public/assets/stage1/purple_open.png" };
+  let pos=1, moving=false, finished=false;
+  let macGot={pink:false,blue:false,green:false,purple:false};
+  let notesGot=new Set();
+
+  function setCharBy(col){ V.char.src = col? CHAR[col] : CHAR.start; }
+  function renderChar(){ const p=centersPx[pos]||{x:0,y:0}; const half=V.char.getBoundingClientRect().width/2||32; V.char.style.left=(p.x-half)+'px'; V.char.style.top=(p.y-half)+'px'; V.posTag.textContent=`位置: ${pos}/25`; }
+  function updateHUD(){ const got=Object.values(macGot).filter(v=>v).length; V.notesTag.textContent=`音符: ${notesGot.size}/5`; V.macTag.textContent=`マカロン: ${got}/4`;
+    V.cntPink.textContent=macGot.pink?1:0; V.cntBlue.textContent=macGot.blue?1:0; V.cntGreen.textContent=macGot.green?1:0; V.cntPurple.textContent=macGot.purple?1:0; }
+
+  /* ==== ルーレット ==== */
+  const WHEEL_COLORS=['#ff7ab6','#6aa6ff','#ffd166','#7ee6a2','#caa6ff','#ff9f6e'];
+  (function buildWheel(){
+    const slices=V.wheel.querySelector('#slices'), labels=V.wheel.querySelector('#labels');
+    for(let i=0;i<6;i++){
+      const a0=(-90+i*60)*Math.PI/180, a1=(-90+(i+1)*60)*Math.PI/180;
+      const x0=50+48*Math.cos(a0), y0=50+48*Math.sin(a0), x1=50+48*Math.cos(a1), y1=50+48*Math.sin(a1);
+      const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+      p.setAttribute('d',`M50,50 L${x0},${y0} A48,48 0 0 1 ${x1},${y1} Z`);
+      p.setAttribute('fill',WHEEL_COLORS[i%WHEEL_COLORS.length]);
+      slices.appendChild(p);
+
+      const mid=(-90+(i+0.5)*60)*Math.PI/180;
+      const lx=50+30*Math.cos(mid), ly=50+30*Math.sin(mid);
+      const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x',lx); t.setAttribute('y',ly);
+      t.textContent=(i+1); labels.appendChild(t);
+    }
+  })();
+
+  function setSpinEnabled(on){
+    V.btnSpin.disabled=!on;
+    V.wheel.classList.toggle('locked',!on);
+    V.movingFlag.classList.toggle('hidden',on);
+  }
+
+  // ルーレット → 数字の中央で停止
+  V.btnSpin.onclick=()=>{
+    if(moving || finished) return;
+    setSpinEnabled(false);
+
+    const steps=Math.floor(Math.random()*6)+1;
+    V.spinNum.textContent=`出目：${steps}`;
+
+    const targetIdx=steps-1;
+    const centerAngle=-90+(targetIdx+0.5)*60;
+    const finalAngle=3*360-centerAngle;           // 3回転＋該当数の中央で停止
+    V.wheel.style.transform=`rotate(${finalAngle}deg)`;
+
+    setTimeout(()=>animateMoveExact(steps),2300);
+  };
+
+  /* ==== 1マスずつ進む（ピッタリゴール制） ==== */
+  function animateMoveExact(steps){
+    if(moving || finished) return;
+    // overshoot は「動かない」：posのまま
+    const canMove = (pos + steps) <= N ? (pos + steps) : pos;
+    if(canMove === pos){
+      // 動かない（通り過ぎ）表示だけして終了
+      V.spinNum.textContent = `出目：${steps}（通り過ぎ）`;
+      setSpinEnabled(true);
+      return;
+    }
+
+    moving=true;
+    const stepMs=360;
+    const target=canMove;
+    const timer=setInterval(()=>{
+      if(pos < target) pos++;
+      renderChar(); updateHUD();
+      if(pos >= target){
+        clearInterval(timer);
+        moving=false;
+        onArriveExact(target);
+      }
+    }, stepMs);
+  }
+
+  /* ==== 到着処理（ピッタリのみゴール判定） ==== */
+  function onArriveExact(target){
+    // マカロン（ぴったり止まったときだけ）
+    for(const [col,slot] of Object.entries(macSlots)){
+      if(slot===pos && !macGot[col]){
+        macGot[col]=true; setCharBy(col);
+        const cell=V.board.querySelectorAll('.cell')[slot-1];
+        const img=cell.querySelector('.item'); if(img) img.classList.add('collected');
+      }
+    }
+    // 音符
+    if(noteSlots.has(pos) && !notesGot.has(pos)){
+      notesGot.add(pos);
+      const cell=V.board.querySelectorAll('.cell')[pos-1];
+      const n=cell.querySelector('.noteEmoji'); if(n) n.classList.add('collected');
+    }
+    updateHUD();
+
+    // ピッタリ25でのみクリア
+    if(pos===N && target===N){
+      celebrateOnBoard();
+      return;
+    }
+    setSpinEnabled(true);
+  }
+
+  /* ==== ゴール演出（ako＋HB→自動で表紙へ） ==== */
+  let audioCtx;
+  function ctx(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+  function playToneSeq(seq){
+    const ac=ctx(); let t=ac.currentTime+0.02;
+    seq.forEach(s=>{
+      const o=ac.createOscillator(), g=ac.createGain();
+      o.type='sine'; o.frequency.value=s.freq;
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.linearRampToValueAtTime(0.2,t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.001,t+s.dur);
+      o.connect(g).connect(ac.destination);
+      o.start(t); o.stop(t+s.dur+0.02);
+      t+=s.dur+(s.gap||0.02);
+    });
+    return Math.round((t - ac.currentTime) * 1000);
+  }
+  function note(n){
+    const Nmap={'C4':261.63,'D4':293.66,'E4':329.63,'F4':349.23,'G4':392.00,'A4':440.00,'B4':493.88,'C5':523.25,'D5':587.33,'E5':659.25,'F5':698.46,'G5':783.99};
+    return Nmap[n]||440;
+  }
+  function playHappyBirthday(){
+    const q=.30,e=.15, d=n=>({freq:note(n),dur:e}), qn=n=>({freq:note(n),dur:q});
+    const seq=[d('G4'),d('G4'),qn('A4'),qn('G4'),qn('C5'),qn('B4'),
+               d('G4'),d('G4'),qn('A4'),qn('G4'),qn('D5'),qn('C5'),
+               d('G4'),d('G4'),qn('G5'),qn('E5'),qn('C5'),qn('B4'),qn('A4'),
+               d('F5'),d('F5'),qn('E5'),qn('C5'),qn('D5'),qn('C5')];
+    return playToneSeq(seq);
+  }
+  function celebrateOnBoard(){
+    finished=true;
+    setSpinEnabled(false);
+    V.overlay.classList.add('show');
+    const ms = playHappyBirthday();
+    setTimeout(()=>{
+      V.overlay.classList.remove('show');
+      showCover();
+    }, Math.max(6000, ms));
+  }
+
+  /* ==== 初期化 ==== */
+  function init(){
+    pos=1; moving=false; finished=false;
+    macGot={pink:false,blue:false,green:false,purple:false};
+    notesGot=new Set(); setCharBy(null);
+
+    buildBoard();
+
+    // ゴールに「ぴったりゴール」バッジを付与
+    const goalCell = V.board.querySelector('.cell.goal');
+    const badge = document.createElement('div');
+    badge.textContent = 'ぴったりゴール';
+    badge.style.position='absolute';
+    badge.style.bottom='6px';
+    badge.style.left='50%';
+    badge.style.transform='translateX(-50%)';
+    badge.style.fontSize='12px';
+    badge.style.fontWeight='700';
+    badge.style.color='#4b3d00';
+    badge.style.background='#ffe066';
+    badge.style.padding='2px 8px';
+    badge.style.borderRadius='999px';
+    badge.style.boxShadow='0 2px 6px rgba(0,0,0,.25)';
+    goalCell.appendChild(badge);
+
+    placeItems();
+    computeCenters(); renderChar(); updateHUD();
+    setSpinEnabled(true);
+
+    window.addEventListener('resize', ()=>{ computeCenters(); renderChar(); }, { passive:true });
+  }
+
+  // 初期は表紙
   showCover();
 })();
 </script>
 </body>
 </html>
+ p
