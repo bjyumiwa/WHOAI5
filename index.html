@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>WhoAI Evo · Sugoroku</title>
 
-<!-- ★ ここでfaviconを明示指定（404対策） -->
+<!-- ★ faviconをマカロン画像で指定（404対策） -->
 <link rel="icon" type="image/png" href="public/assets/stage1/macaron_pink.png" />
 
 <style>
@@ -26,7 +26,9 @@
   }
   .hidden{display:none}
 
+  /* 表紙キャラ（小さめ1/4） */
   .cover-hero{width:min(140px,22vw);height:auto;filter:drop-shadow(0 6px 20px rgba(0,0,0,.55));margin-bottom:8px}
+
   .buttons{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px}
   .btn{border:none;border-radius:999px;cursor:pointer;transition:opacity .2s}
   .btn-primary{min-width:220px;padding:14px 18px;font-size:18px;color:#2b1630;
@@ -36,9 +38,11 @@
   .btn[disabled]{opacity:.55;cursor:not-allowed}
   .corner{position:absolute;right:10px;bottom:10px}
 
+  /* レイアウト */
   .layout{display:grid;grid-template-columns:2fr 1fr;gap:12px;width:100%;height:100%;align-items:center;justify-items:center}
   @media (max-width:780px){.layout{grid-template-columns:1fr;grid-template-rows:auto auto}}
 
+  /* 盤面：5x5 S字 */
   .board{width:100%;max-width:640px;aspect-ratio:1/1;
     display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);gap:8px;padding:6px}
   .cell{position:relative;border-radius:14px;overflow:hidden;
@@ -57,6 +61,7 @@
   .char{position:absolute;width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.55));
     transition:left .22s ease, top .22s ease, width .1s ease, height .1s ease}
 
+  /* ルーレット */
   .wheelBox{width:min(260px,84vw);aspect-ratio:1/1;position:relative;display:flex;align-items:center;justify-content:center}
   .wheel{width:100%;height:100%;transform:rotate(0deg);transition:transform 2.2s cubic-bezier(.17,.89,.32,1.27)}
   .wheel.locked{opacity:.6;filter:grayscale(.3)}
@@ -67,6 +72,7 @@
   .tag{padding:.35em .6em;border-radius:999px;font-size:12px;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
   .moving{position:absolute;right:12px;top:10px;font-size:12px;padding:.35em .6em;border-radius:999px;background:rgba(255,255,255,.18)}
 
+  /* ゴール演出 */
   .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     background:radial-gradient(120% 120% at 50% 50%, rgba(0,0,0,.25), rgba(0,0,0,.45));z-index:10}
   .overlay img{width:min(42vw,360px);height:auto;filter:drop-shadow(0 12px 28px rgba(0,0,0,.6));
@@ -75,7 +81,98 @@
 </style>
 </head>
 <body>
-<!-- ここ以降は前回のゲーム部分そのまま -->
-<!-- ...（省略。ゲームのJSやHTML構造は前のものと同じです）... -->
-</body>
-</html>
+<div class="container">
+
+  <!-- Cover -->
+  <section id="view-cover" class="card">
+    <img src="public/assets/stage1/miwacchi_open.png" class="cover-hero" alt="">
+    <h1 class="cover-title">WhoAI Evo</h1>
+    <div class="buttons"><button id="btnStart" class="btn btn-primary">▶ スタート</button></div>
+  </section>
+
+  <!-- Game -->
+  <section id="view-game" class="card hidden">
+    <div class="hud">
+      <span id="posTag" class="tag">位置: 1/25</span>
+      <span id="notesTag" class="tag">音符: 0/5</span>
+      <span id="macTag" class="tag">マカロン: 0/4</span>
+    </div>
+    <div id="movingFlag" class="moving hidden">移動中…</div>
+
+    <!-- ゴール時オーバーレイ -->
+    <div id="goalOverlay" class="overlay hidden">
+      <img src="public/assets/stage1/ako.png" alt="ako celebration">
+    </div>
+
+    <div class="layout">
+      <!-- 盤面 -->
+      <div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+        <div id="board" class="board"></div>
+        <div id="charLayer" class="charWrap">
+          <img id="char" src="public/assets/stage1/miwacchi_open.png" class="char" alt="">
+        </div>
+      </div>
+
+      <!-- ルーレット -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+        <div class="wheelBox">
+          <div class="pointer"></div>
+          <svg id="wheel" class="wheel" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#222" /><g id="slices"></g><g id="labels" font-size="10" text-anchor="middle" dominant-baseline="middle" fill="#fff"></g><circle cx="50" cy="50" r="4" fill="#fff"/></svg>
+        </div>
+        <div class="spinNum" id="spinNum">—</div>
+        <div class="buttons"><button id="btnSpin" class="btn btn-primary">🎡 ルーレットを回す</button></div>
+      </div>
+    </div>
+
+    <div class="corner"><button id="toCover" class="btn btn-mini">⏮ スタートへ</button></div>
+  </section>
+</div>
+
+<script>
+(()=> {
+  const V={cover:gid('view-cover'),game:gid('view-game'),board:gid('board'),char:gid('char'),
+    wheel:gid('wheel'),spinNum:gid('spinNum'),posTag:gid('posTag'),notesTag:gid('notesTag'),macTag:gid('macTag'),
+    btnSpin:gid('btnSpin'),movingFlag:gid('movingFlag'),overlay:gid('goalOverlay')};
+  function gid(id){return document.getElementById(id)}
+  gid('btnStart').onclick=()=>{ V.overlay.classList.add('hidden'); finished=false; V.cover.classList.add('hidden'); V.game.classList.remove('hidden'); init(); };
+
+  const N=25,SIZE=5;let pos=1,moving=false,finished=false;
+  function indexToRC(i){const r=Math.floor((i-1)/SIZE),cInRow=(i-1)%SIZE;const c=(r%2===0)?cInRow:(SIZE-1-cInRow);return [SIZE-1-r,c];}
+  let centersPx=[];let cellW=0;
+  function computeCenters(){const rect=V.board.getBoundingClientRect();const gap=8,pad=6,cw=(rect.width-gap*4)/SIZE;cellW=cw;
+    for(let i=1;i<=N;i++){const [r,c]=indexToRC(i);centersPx[i]={x:c*(cw+gap)+cw/2+pad,y:(SIZE-1-r)*(cw+gap)+cw/2+pad};}
+    V.char.style.width=Math.round(cellW*0.78)+'px';V.char.style.height=Math.round(cellW*0.78)+'px';}
+  function buildBoard(){V.board.innerHTML='';for(let i=1;i<=N;i++){const cell=document.createElement('div');cell.className='cell';
+    const [r,c]=indexToRC(i);cell.style.gridRow=(r+1);cell.style.gridColumn=(c+1);
+    const idx=document.createElement('div');idx.className='idx';idx.textContent=i;cell.appendChild(idx);
+    if(i===N){const goal=document.createElement('img');goal.src="public/assets/stage1/drink_item.png";goal.className='goal-img';cell.appendChild(goal);}V.board.appendChild(cell);}computeCenters();renderChar();}
+  function renderChar(){const p=centersPx[pos]||{x:0,y:0};const half=V.char.getBoundingClientRect().width/2||32;V.char.style.left=(p.x-half)+'px';V.char.style.top=(p.y-half)+'px';V.posTag.textContent=`位置: ${pos}/25`;}
+
+  const WHEEL_COLORS=['#ff7ab6','#6aa6ff','#ffd166','#7ee6a2','#caa6ff','#ff9f6e'];
+  (function buildWheel(){const slices=V.wheel.querySelector('#slices'),labels=V.wheel.querySelector('#labels');
+    for(let i=0;i<6;i++){const a0=(-90+i*60)*Math.PI/180,a1=(-90+(i+1)*60)*Math.PI/180;
+      const x0=50+48*Math.cos(a0),y0=50+48*Math.sin(a0),x1=50+48*Math.cos(a1),y1=50+48*Math.sin(a1);
+      const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',`M50,50 L${x0},${y0} A48,48 0 0 1 ${x1},${y1} Z`);p.setAttribute('fill',WHEEL_COLORS[i]);slices.appendChild(p);
+      const mid=(-90+(i+0.5)*60)*Math.PI/180;const lx=50+30*Math.cos(mid),ly=50+30*Math.sin(mid);
+      const t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x',lx);t.setAttribute('y',ly);t.textContent=(i+1);labels.appendChild(t);}})();
+
+  function setSpinEnabled(on){V.btnSpin.disabled=!on;V.wheel.classList.toggle('locked',!on);V.movingFlag.classList.toggle('hidden',on);}
+  V.btnSpin.onclick=()=>{if(moving||finished)return;setSpinEnabled(false);const steps=Math.floor(Math.random()*6)+1;V.spinNum.textContent=`出目：${steps}`;
+    const targetIdx=steps-1;const centerAngle=-90+(targetIdx+0.5)*60;const finalAngle=3*360-centerAngle;
+    V.wheel.style.transform=`rotate(${finalAngle}deg)`;setTimeout(()=>animateMove(steps),2300);};
+
+  function animateMove(steps){if(moving||finished)return;moving=true;let moved=0;const stepMs=360;const timer=setInterval(()=>{if(pos<N)pos++;renderChar();moved++;if(pos===N||moved>=steps){clearInterval(timer);moving=false;onArrive();}},stepMs);}
+  function onArrive(){if(pos===N){celebrateOnBoard();return;}setSpinEnabled(true);}
+
+  let audioCtx;function ctx(){if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+  function playToneSeq(seq){const ac=ctx();let t=ac.currentTime+0.02;seq.forEach(s=>{const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=s.freq;
+    g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(0.2,t+0.02);g.gain.exponentialRampToValueAtTime(0.001,t+s.dur);
+    o.connect(g).connect(ac.destination);o.start(t);o.stop(t+s.dur+0.02);t+=s.dur+(s.gap||0.02);});return Math.round((t-ac.currentTime)*1000);}
+  function note(n){const N={'C4':261.63,'D4':293.66,'E4':329.63,'F4':349.23,'G4':392.00,'A4':440.00,'B4':493.88,'C5':523.25,'D5':587.33,'E5':659.25,'F5':698.46,'G5':783.99};return N[n]||440;}
+  function playHappyBirthday(){const q=.30,e=.15,d=n=>({freq:note(n),dur:e}),qn=n=>({freq:note(n),dur:q});
+    const seq=[d('G4'),d('G4'),qn('A4'),qn('G4'),qn('C5'),qn('B4'),d('G4'),d('G4'),qn('A4'),qn('G4'),qn('D5'),qn('C5'),
+      d('G4'),d('G4'),qn('G5'),qn('E5'),qn('C5'),qn('B4'),qn('A4'),d('F5'),d('F5'),qn('E5'),qn('C5'),qn('D5'),qn('C5')];return playToneSeq(seq);}
+  function celebrateOnBoard(){finished=true;setSpinEnabled(false);V.overlay.classList.remove('hidden');const ms=playHappyBirthday();
+    setTimeout(()=>{V.overlay.classList.add('hidden');V.game.classList.add('hidden');V.cover.classList.remove('hidden');},Math.max(6000,ms));}
+
+  function init(){buildBoard();pos=1;renderChar();setSpinEnabled(true);}
