@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>WhoAI Evo · Sugoroku</title>
 
-<!-- favicon（404対策）-->
 <link rel="icon" type="image/png" href="public/assets/stage1/macaron_pink.png" />
 
 <style>
@@ -26,7 +25,7 @@
   }
   .hidden{display:none}
 
-  /* 表紙（みわっち小さめ） */
+  /* 表紙 */
   .cover-hero{width:min(140px,22vw);height:auto;filter:drop-shadow(0 6px 20px rgba(0,0,0,.55));margin-bottom:8px}
   .buttons{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px}
   .btn{border:none;border-radius:999px;cursor:pointer;transition:opacity .2s}
@@ -50,18 +49,23 @@
     box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 6px 18px rgba(0,0,0,.35)}
   .idx{position:absolute;left:6px;top:6px;font-size:12px;font-weight:700;color:#24313a;
     background:#fff;border-radius:999px;padding:.1em .5em;box-shadow:0 2px 6px rgba(0,0,0,.25)}
-  /* ゴールセル強調 */
-  .cell.goal{
-    transform:scale(1.1);
-    box-shadow:0 0 12px rgba(255,255,200,.6), inset 0 0 0 2px #ffe066;
+
+  /* ゴールセル強調（飲み物を隠さない小さなリボン） */
+  .cell.goal{transform:scale(1.06);box-shadow:0 0 12px rgba(255,255,200,.6), inset 0 0 0 2px #ffe066}
+  .goal-ribbon{
+    position:absolute;left:6px;top:6px;font-size:11px;font-weight:700;color:#4b3d00;
+    background:#ffe066;padding:2px 6px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:2
   }
-  /* マス内アイテム（存在感アップ） */
+  .goal-img{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:72px;height:72px;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))
+  }
+
+  /* マス内アイテム */
   .cell .item{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
     width:78%;height:auto;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.45))}
   .cell .noteEmoji{position:absolute;left:50%;top:18%;transform:translate(-50%,-50%);font-size:30px}
   .cell .collected{opacity:.25;filter:grayscale(1) blur(.2px)}
-  .goal-img{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.4))}
 
   /* キャラ */
   .charWrap{position:absolute;pointer-events:none;width:calc(100% - 12px);height:calc(100% - 12px);left:6px;top:6px;z-index:5}
@@ -77,6 +81,10 @@
   .wheel.locked{opacity:.6;filter:grayscale(.3)}
   .pointer{position:absolute;top:-6px;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:16px solid #fff}
   .spinNum{margin-top:10px;font-size:20px}
+
+  /* 当たりスライスの視覚強調 */
+  .slice-hit{stroke:#fff;stroke-width:2;filter:drop-shadow(0 2px 6px rgba(255,255,255,.7))}
+  .label-hit{font-weight:700;text-shadow:0 0 6px rgba(255,255,255,.9)}
 
   .hud{position:absolute;left:14px;top:10px;display:flex;gap:6px;flex-wrap:wrap}
   .tag{padding:.35em .6em;border-radius:999px;font-size:12px;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
@@ -166,7 +174,11 @@
   function showCover(){ V.game.classList.add('hidden'); V.cover.classList.remove('hidden'); }
   function showGame(){ V.cover.classList.add('hidden'); V.game.classList.remove('hidden'); }
 
-  V.btnStart.addEventListener('click', ()=>{ finished=false; V.overlay.classList.remove('show'); showGame(); init(); });
+  V.btnStart.addEventListener('click', ()=>{
+    // フルリセット＆1マスから開始
+    resetAll();
+    showGame();
+  });
   V.toCover.addEventListener('click', ()=>{ showCover(); });
 
   /* ==== 盤面 ==== */
@@ -192,7 +204,9 @@
       const [r,c]=indexToRC(i); cell.style.gridRow=(r+1); cell.style.gridColumn=(c+1);
       const idx=document.createElement('div'); idx.className='idx'; idx.textContent=i; cell.appendChild(idx);
       if(i===N){
-        const goal=document.createElement('img'); goal.src="public/assets/stage1/drink_item.png"; goal.className='goal-img'; cell.appendChild(goal);
+        const ribbon=document.createElement('div'); ribbon.className='goal-ribbon'; ribbon.textContent='ぴったりゴール';
+        const goal=document.createElement('img'); goal.src="public/assets/stage1/drink_item.png"; goal.className='goal-img';
+        cell.appendChild(goal); cell.appendChild(ribbon);
       }
       V.board.appendChild(cell);
     }
@@ -226,8 +240,9 @@
   function updateHUD(){ const got=Object.values(macGot).filter(v=>v).length; V.notesTag.textContent=`音符: ${notesGot.size}/5`; V.macTag.textContent=`マカロン: ${got}/4`;
     V.cntPink.textContent=macGot.pink?1:0; V.cntBlue.textContent=macGot.blue?1:0; V.cntGreen.textContent=macGot.green?1:0; V.cntPurple.textContent=macGot.purple?1:0; }
 
-  /* ==== ルーレット ==== */
+  /* ==== ルーレット（止まったスライスを強調） ==== */
   const WHEEL_COLORS=['#ff7ab6','#6aa6ff','#ffd166','#7ee6a2','#caa6ff','#ff9f6e'];
+  let slicePaths=[], labelTexts=[];
   (function buildWheel(){
     const slices=V.wheel.querySelector('#slices'), labels=V.wheel.querySelector('#labels');
     for(let i=0;i<6;i++){
@@ -236,87 +251,69 @@
       const p=document.createElementNS('http://www.w3.org/2000/svg','path');
       p.setAttribute('d',`M50,50 L${x0},${y0} A48,48 0 0 1 ${x1},${y1} Z`);
       p.setAttribute('fill',WHEEL_COLORS[i%WHEEL_COLORS.length]);
-      slices.appendChild(p);
+      slices.appendChild(p); slicePaths.push(p);
 
-      const mid=(-90+(i+0.5)*60)*Math.PI/180;
-      const lx=50+30*Math.cos(mid), ly=50+30*Math.sin(mid);
-      const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-      t.setAttribute('x',lx); t.setAttribute('y',ly);
-      t.textContent=(i+1); labels.appendChild(t);
+      const mid=(-90+(i+0.5)*60)*Math.PI/180; const lx=50+30*Math.cos(mid), ly=50+30*Math.sin(mid);
+      const t=document.createElementNS('http://www.w3.org/2000/svg','text'); t.setAttribute('x',lx); t.setAttribute('y',ly);
+      t.textContent=(i+1); labels.appendChild(t); labelTexts.push(t);
     }
   })();
 
+  function clearHitSlice(){
+    slicePaths.forEach(p=>p.classList.remove('slice-hit'));
+    labelTexts.forEach(t=>t.classList.remove('label-hit'));
+  }
   function setSpinEnabled(on){
-    V.btnSpin.disabled=!on;
-    V.wheel.classList.toggle('locked',!on);
-    V.movingFlag.classList.toggle('hidden',on);
+    V.btnSpin.disabled=!on; V.wheel.classList.toggle('locked',!on); V.movingFlag.classList.toggle('hidden',on);
   }
 
-  // ルーレット → 数字の中央で停止
   V.btnSpin.onclick=()=>{
     if(moving || finished) return;
     setSpinEnabled(false);
+    clearHitSlice();
 
-    const steps=Math.floor(Math.random()*6)+1;
+    const steps=Math.floor(Math.random()*6)+1;        // 1〜6
     V.spinNum.textContent=`出目：${steps}`;
 
     const targetIdx=steps-1;
     const centerAngle=-90+(targetIdx+0.5)*60;
-    const finalAngle=3*360-centerAngle;           // 3回転＋該当数の中央で停止
+    const finalAngle=3*360-centerAngle;
     V.wheel.style.transform=`rotate(${finalAngle}deg)`;
 
-    setTimeout(()=>animateMoveExact(steps),2300);
+    // 視覚的に「ここ！」を強調
+    setTimeout(()=>{
+      slicePaths[targetIdx].classList.add('slice-hit');
+      labelTexts[targetIdx].classList.add('label-hit');
+      animateMoveExact(steps);
+    }, 2300);
   };
 
-  /* ==== 1マスずつ進む（ピッタリゴール制） ==== */
+  /* ==== 1マスずつ進む（ぴったりゴール制） ==== */
   function animateMoveExact(steps){
     if(moving || finished) return;
-    // overshoot は「動かない」：posのまま
-    const canMove = (pos + steps) <= N ? (pos + steps) : pos;
-    if(canMove === pos){
-      // 動かない（通り過ぎ）表示だけして終了
+    // オーバーなら動かない（そのまま）
+    const target = (pos + steps <= N) ? (pos + steps) : pos;
+    if(target === pos){
       V.spinNum.textContent = `出目：${steps}（通り過ぎ）`;
       setSpinEnabled(true);
       return;
     }
-
     moving=true;
     const stepMs=360;
-    const target=canMove;
     const timer=setInterval(()=>{
       if(pos < target) pos++;
       renderChar(); updateHUD();
       if(pos >= target){
         clearInterval(timer);
         moving=false;
-        onArriveExact(target);
+        onArriveExact();
       }
     }, stepMs);
   }
 
-  /* ==== 到着処理（ピッタリのみゴール判定） ==== */
-  function onArriveExact(target){
-    // マカロン（ぴったり止まったときだけ）
-    for(const [col,slot] of Object.entries(macSlots)){
-      if(slot===pos && !macGot[col]){
-        macGot[col]=true; setCharBy(col);
-        const cell=V.board.querySelectorAll('.cell')[slot-1];
-        const img=cell.querySelector('.item'); if(img) img.classList.add('collected');
-      }
-    }
-    // 音符
-    if(noteSlots.has(pos) && !notesGot.has(pos)){
-      notesGot.add(pos);
-      const cell=V.board.querySelectorAll('.cell')[pos-1];
-      const n=cell.querySelector('.noteEmoji'); if(n) n.classList.add('collected');
-    }
-    updateHUD();
-
-    // ピッタリ25でのみクリア
-    if(pos===N && target===N){
-      celebrateOnBoard();
-      return;
-    }
+  function onArriveExact(){
+    // ここでマカロン・音符の取得処理を足す場合はこの中に
+    if(pos===N){ celebrateOnBoard(); return; }
     setSpinEnabled(true);
   }
 
@@ -325,22 +322,12 @@
   function ctx(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
   function playToneSeq(seq){
     const ac=ctx(); let t=ac.currentTime+0.02;
-    seq.forEach(s=>{
-      const o=ac.createOscillator(), g=ac.createGain();
-      o.type='sine'; o.frequency.value=s.freq;
-      g.gain.setValueAtTime(0.0001,t);
-      g.gain.linearRampToValueAtTime(0.2,t+0.02);
-      g.gain.exponentialRampToValueAtTime(0.001,t+s.dur);
-      o.connect(g).connect(ac.destination);
-      o.start(t); o.stop(t+s.dur+0.02);
-      t+=s.dur+(s.gap||0.02);
-    });
+    seq.forEach(s=>{ const o=ac.createOscillator(), g=ac.createGain(); o.type='sine'; o.frequency.value=s.freq;
+      g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.2,t+0.02); g.gain.exponentialRampToValueAtTime(0.001,t+s.dur);
+      o.connect(g).connect(ac.destination); o.start(t); o.stop(t+s.dur+0.02); t+=s.dur+(s.gap||0.02); });
     return Math.round((t - ac.currentTime) * 1000);
   }
-  function note(n){
-    const Nmap={'C4':261.63,'D4':293.66,'E4':329.63,'F4':349.23,'G4':392.00,'A4':440.00,'B4':493.88,'C5':523.25,'D5':587.33,'E5':659.25,'F5':698.46,'G5':783.99};
-    return Nmap[n]||440;
-  }
+  function note(n){ const Nmap={'C4':261.63,'D4':293.66,'E4':329.63,'F4':349.23,'G4':392.00,'A4':440.00,'B4':493.88,'C5':523.25,'D5':587.33,'E5':659.25,'F5':698.46,'G5':783.99}; return Nmap[n]||440; }
   function playHappyBirthday(){
     const q=.30,e=.15, d=n=>({freq:note(n),dur:e}), qn=n=>({freq:note(n),dur:q});
     const seq=[d('G4'),d('G4'),qn('A4'),qn('G4'),qn('C5'),qn('B4'),
@@ -354,41 +341,29 @@
     setSpinEnabled(false);
     V.overlay.classList.add('show');
     const ms = playHappyBirthday();
-    setTimeout(()=>{
-      V.overlay.classList.remove('show');
-      showCover();
-    }, Math.max(6000, ms));
+    setTimeout(()=>{ V.overlay.classList.remove('show'); showCover(); }, Math.max(6000, ms));
   }
 
-  /* ==== 初期化 ==== */
-  function init(){
+  /* ==== 初期化＆フルリセット ==== */
+  function resetAll(){
+    // 状態
     pos=1; moving=false; finished=false;
     macGot={pink:false,blue:false,green:false,purple:false};
     notesGot=new Set(); setCharBy(null);
 
-    buildBoard();
+    // UI：盤面/アイテム/位置/HUD
+    buildBoard(); placeItems(); computeCenters(); renderChar(); updateHUD();
 
-    // ゴールに「ぴったりゴール」バッジを付与
-    const goalCell = V.board.querySelector('.cell.goal');
-    const badge = document.createElement('div');
-    badge.textContent = 'ぴったりゴール';
-    badge.style.position='absolute';
-    badge.style.bottom='6px';
-    badge.style.left='50%';
-    badge.style.transform='translateX(-50%)';
-    badge.style.fontSize='12px';
-    badge.style.fontWeight='700';
-    badge.style.color='#4b3d00';
-    badge.style.background='#ffe066';
-    badge.style.padding='2px 8px';
-    badge.style.borderRadius='999px';
-    badge.style.boxShadow='0 2px 6px rgba(0,0,0,.25)';
-    goalCell.appendChild(badge);
-
-    placeItems();
-    computeCenters(); renderChar(); updateHUD();
+    // ルーレット初期化
+    clearHitSlice();
+    V.wheel.style.transform='rotate(0deg)';
+    V.spinNum.textContent='—';
     setSpinEnabled(true);
 
+    // オーバーレイは必ず消す
+    V.overlay.classList.remove('show');
+
+    // リサイズ対応
     window.addEventListener('resize', ()=>{ computeCenters(); renderChar(); }, { passive:true });
   }
 
@@ -398,4 +373,3 @@
 </script>
 </body>
 </html>
- p
