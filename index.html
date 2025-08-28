@@ -8,7 +8,6 @@
   :root{
     --fg:#fff; --glow:rgba(173,216,255,.45);
     --primaryFrom:#ff8cc7; --primaryTo:#ff63b2;
-    --ghostBg:rgba(255,255,255,.18);
   }
   html,body{height:100%;margin:0}
   body{
@@ -68,27 +67,35 @@
     background:#fff;border-radius:999px;padding:.1em .5em;box-shadow:0 2px 6px rgba(0,0,0,.25)
   }
 
+  /* マス内のアイテムを中央に */
+  .cell .item{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:60%; max-width:44px; height:auto; object-fit:contain;
+    filter:drop-shadow(0 3px 10px rgba(0,0,0,.45));
+  }
+  .cell .noteEmoji{
+    position:absolute; left:50%; top:18%; transform:translate(-50%,-50%);
+    font-size:20px;
+  }
+  .cell .collected{ opacity:.25; filter:grayscale(1) blur(.2px); }
+
   /* ゴール（ドリンク） */
   .goal-img{
     position:absolute; right:6px; top:6px; width:34px; height:34px; object-fit:contain;
     filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));
   }
 
-  /* キャラ（絶対座標をpxで制御） */
+  /* キャラ（絶対座標をpxで制御、やや小さめ） */
   .charWrap{
     position:absolute; pointer-events:none;
     width: calc(100% - 12px); height: calc(100% - 12px);
-    left: 6px; top: 6px;
+    left: 6px; top: 6px; z-index:5;
   }
   .char{
-    position:absolute; width:48px; height:48px; object-fit:contain;
+    position:absolute; width:32px; height:32px; object-fit:contain;
     filter:drop-shadow(0 3px 10px rgba(0,0,0,.55));
     transition: left .28s ease, top .28s ease;
   }
-
-  /* アイテム（マス中心に配置） */
-  .item{position:absolute; width:42px; height:42px; object-fit:contain; filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
-  .noteEmoji{position:absolute; font-size:22px}
 
   /* ルーレット */
   .wheelBox{width:min(260px,84vw);aspect-ratio:1/1;position:relative;display:flex;align-items:center;justify-content:center}
@@ -189,7 +196,7 @@
   function indexToRC(i){
     const r=Math.floor((i-1)/SIZE), cInRow=(i-1)%SIZE;
     const c=(r%2===0)?cInRow:(SIZE-1-cInRow);
-    return [SIZE-1-r, c]; // 上25→下1に並ぶ視覚
+    return [SIZE-1-r, c]; // 上25→下1の見え方
   }
 
   // セル中心のpx座標（board内左上基準）
@@ -220,36 +227,38 @@
     renderChar();
   }
 
-  /* ===== アセット/アイテム配置 ===== */
+  /* ===== アセット ===== */
   const CHAR={ start:"public/assets/stage1/miwacchi_open.png", pink:"public/assets/stage1/pink_open.png", blue:"public/assets/stage1/blue_open.png", green:"public/assets/stage1/green_open.png", purple:"public/assets/stage1/purple_open.png" };
   const MAC ={ pink:"public/assets/stage1/macaron_pink.png",  blue:"public/assets/stage1/macaron_blue.png",  green:"public/assets/stage1/macaron_green.png",  purple:"public/assets/stage1/macaron_purple.png" };
   const NOTE_EMO=['🎵','🎶','♫','♬'];
 
+  /* ===== アイテムを「各マスの中」に配置 ===== */
   const macSlots={}; let noteSlots=new Set();
   function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}}
   function placeItems(){
+    // 既存アイテム削除
+    V.board.querySelectorAll('.item,.noteEmoji').forEach(e=>e.remove());
+
+    const cells=V.board.querySelectorAll('.cell');
     const pool=Array.from({length:N-2},(_,k)=>k+2); // 2..24
     shuffle(pool);
-    const cols=['pink','blue','green','purple'];
-    cols.forEach((col,i)=>macSlots[col]=pool[i]);
-    noteSlots=new Set(pool.slice(4,9)); // 5つ
 
-    // 既存削除
-    V.board.querySelectorAll('.item,.noteEmoji').forEach(e=>e.remove());
-    // マカロン
-    cols.forEach(col=>{
-      const idx=macSlots[col]; const {x,y}=centersPx[idx];
+    const cols=['pink','blue','green','purple'];
+    cols.forEach((col,i)=>{
+      macSlots[col]=pool[i];
+      const target=cells[macSlots[col]-1];
       const img=document.createElement('img'); img.src=MAC[col]; img.className='item';
-      img.style.left=(x-21)+'px'; img.style.top=(y-21)+'px';
-      V.board.appendChild(img);
+      img.dataset.idx = String(macSlots[col]); // どのマスか覚えておく
+      target.appendChild(img);
     });
-    // 音符
+
+    noteSlots=new Set(pool.slice(4,9)); // 5つ
     noteSlots.forEach(idx=>{
-      const {x,y}=centersPx[idx];
+      const target=cells[idx-1];
       const d=document.createElement('div'); d.className='noteEmoji';
       d.textContent=NOTE_EMO[Math.floor(Math.random()*NOTE_EMO.length)];
-      d.style.left=(x-10)+'px'; d.style.top=(y-28)+'px';
-      V.board.appendChild(d);
+      d.dataset.idx = String(idx);
+      target.appendChild(d);
     });
   }
 
@@ -262,8 +271,8 @@
   function setCharBy(col){ currentChar = col? CHAR[col] : CHAR.start; V.char.src=currentChar; }
   function renderChar(){
     const {x,y}=centersPx[pos]||{x:0,y:0};
-    V.char.style.left=(x-24)+'px';
-    V.char.style.top =(y-24)+'px';
+    V.char.style.left=(x-16)+'px';
+    V.char.style.top =(y-16)+'px';
     V.posTag.textContent=`位置: ${pos}/25`;
   }
   function updateHUD(){
@@ -273,7 +282,7 @@
   }
 
   /* ===== ルーレット（数字の中央で停止） ===== */
-  const WHEEL_COLORS=['#ff7ab6','#6aa6ff','#ffd166','#7ee6a2','#caa6ff','#ff9f6e']; // 好みで変更OK
+  const WHEEL_COLORS=['#ff7ab6','#6aa6ff','#ffd166','#7ee6a2','#caa6ff','#ff9f6e'];
   (function buildWheel(){
     const slices=V.wheel.querySelector('#slices'), labels=V.wheel.querySelector('#labels');
     for(let i=0;i<6;i++){
@@ -299,10 +308,10 @@
     const steps=Math.floor(Math.random()*6)+1;
     V.spinNum.textContent=`出目：${steps}`;
 
-    // セクタの中心角にスナップして停止
+    // セクタ中央にスナップ
     const targetIdx=steps-1;
     const centerAngle = -90 + (targetIdx + 0.5) * 60;
-    const finalAngle  = 3*360 - centerAngle; // 3周して中央へ
+    const finalAngle  = 3*360 - centerAngle;
     V.wheel.style.transform = `rotate(${finalAngle}deg)`;
 
     // 回転終了後に前進
@@ -324,20 +333,24 @@
         moving=false;
         onArrive();  // 到着処理が終わるまでアンロックしない
       }
-    }, 300);
+    }, 260);
   }
 
   /* ===== 到着処理（ぴったりのみ取得・進化） ===== */
   function onArrive(){
-    // マカロン
+    // マカロン：該当セル内の画像に「collected」を付けて視覚反映
     for(const [col,slot] of Object.entries(macSlots)){
       if(slot===pos && !macGot[col]){
         macGot[col]=true; setCharBy(col);
+        const cell=V.board.querySelectorAll('.cell')[slot-1];
+        const img=cell.querySelector('.item'); if(img) img.classList.add('collected');
       }
     }
-    // 音符
+    // 音符：取得済み表示を薄く
     if(noteSlots.has(pos) && !notesGot.has(pos)){
       notesGot.add(pos);
+      const cell=V.board.querySelectorAll('.cell')[pos-1];
+      const n=cell.querySelector('.noteEmoji'); if(n) n.classList.add('collected');
     }
     updateHUD();
 
@@ -348,19 +361,11 @@
       return;
     }
 
-    // 次のスピンを解禁
+    // 次スピン解禁
     setSpinEnabled(true);
   }
   const allMac = ()=>Object.values(macGot).every(v=>v);
   const allNote= ()=>notesGot.size===5;
-
-  /* ===== リセット（1から再開） ===== */
-  function resetRun(){
-    pos=1; moving=false;
-    macGot={pink:false,blue:false,green:false,purple:false};
-    notesGot=new Set(); currentChar=CHAR.start; V.char.src=currentChar;
-    placeItems(); renderChar(); updateHUD(); setSpinEnabled(true);
-  }
 
   /* ===== サウンド（HB自動） ===== */
   let audioCtx; function ctx(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
@@ -392,13 +397,11 @@
   setSpinEnabled(true);
   show('cover');
 
-  // 画面サイズ変化で座標再計算＆再配置
+  // 画面サイズ変化で座標を再計算（アイテムはセル内なので再配置不要）
   window.addEventListener('resize', ()=>{
     computeCenters();
-    placeItems();   // 中心が変わるため再配置
     renderChar();
   });
-
 })();
 </script>
 </body>
