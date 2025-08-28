@@ -22,6 +22,10 @@
   }
   .hidden{display:none}
 
+  /* 表紙：みわっちを1/4くらいに控えめ表示 */
+  .cover-hero{width:min(140px,22vw);height:auto;filter:drop-shadow(0 6px 20px rgba(0,0,0,.55));margin-bottom:8px}
+
+  /* ボタン */
   .buttons{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px}
   .btn{border:none;border-radius:999px;cursor:pointer;transition:opacity .2s}
   .btn-primary{
@@ -33,9 +37,11 @@
   .btn[disabled]{opacity:.55;cursor:not-allowed}
   .corner{position:absolute;right:10px;bottom:10px}
 
+  /* レイアウト：左 盤面 / 右 ルーレット */
   .layout{display:grid;grid-template-columns:2fr 1fr;gap:12px;width:100%;height:100%;align-items:center;justify-items:center}
   @media (max-width:780px){.layout{grid-template-columns:1fr;grid-template-rows:auto auto}}
 
+  /* 盤面：5x5 S字 */
   .board{
     width:100%;max-width:640px;aspect-ratio:1/1;
     display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);gap:8px;padding:6px;
@@ -51,17 +57,30 @@
     position:absolute;left:6px;top:6px;font-size:12px;font-weight:700;color:#24313a;
     background:#fff;border-radius:999px;padding:.1em .5em;box-shadow:0 2px 6px rgba(0,0,0,.25)
   }
+
+  /* マス内アイテム（約2倍） */
   .cell .item{
     position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:60%;max-width:44px;height:auto;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.45));
+    width:80%;max-width:88px;height:auto;object-fit:contain;
+    filter:drop-shadow(0 3px 10px rgba(0,0,0,.45));
   }
-  .cell .noteEmoji{position:absolute;left:50%;top:18%;transform:translate(-50%,-50%);font-size:20px}
+  .cell .noteEmoji{
+    position:absolute;left:50%;top:18%;transform:translate(-50%,-50%);
+    font-size:32px; /* 2倍 */
+  }
   .cell .collected{opacity:.25;filter:grayscale(1) blur(.2px)}
-  .goal-img{position:absolute;right:6px;top:6px;width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))}
 
+  .goal-img{position:absolute;right:6px;top:6px;width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))}
+
+  /* キャラ（約2倍：32→64px） */
   .charWrap{position:absolute;pointer-events:none;width:calc(100% - 12px);height:calc(100% - 12px);left:6px;top:6px;z-index:5}
-  .char{position:absolute;width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.55));transition:left .22s ease, top .22s ease}
+  .char{
+    position:absolute;width:64px;height:64px;object-fit:contain;
+    filter:drop-shadow(0 3px 10px rgba(0,0,0,.55));
+    transition:left .22s ease, top .22s ease;
+  }
 
+  /* ルーレット */
   .wheelBox{width:min(260px,84vw);aspect-ratio:1/1;position:relative;display:flex;align-items:center;justify-content:center}
   .wheel{width:100%;height:100%;transform:rotate(0deg);transition:transform 2.2s cubic-bezier(.17,.89,.32,1.27)}
   .wheel.locked{opacity:.6;filter:grayscale(.3)}
@@ -71,17 +90,28 @@
   .hud{position:absolute;left:14px;top:10px;display:flex;gap:6px;flex-wrap:wrap}
   .tag{padding:.35em .6em;border-radius:999px;font-size:12px;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
   .moving{position:absolute;right:12px;top:10px;font-size:12px;padding:.35em .6em;border-radius:999px;background:rgba(255,255,255,.18)}
+
+  /* ゴール演出：オーバーレイでakoを中央に（画面はこのまま） */
+  .overlay{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(120% 120% at 50% 50%, rgba(0,0,0,.25), rgba(0,0,0,.45));
+    z-index:10;
+  }
+  .overlay img{width:min(42vw,360px);height:auto;animation:sway 3s ease-in-out infinite;filter:drop-shadow(0 12px 28px rgba(0,0,0,.6))}
+  @keyframes sway{0%{transform:rotate(-2deg)}50%{transform:rotate(2deg) translateY(-3px)}100%{transform:rotate(-2deg)}}
 </style>
 </head>
 <body>
 <div class="container">
 
+  <!-- Cover -->
   <section id="view-cover" class="card">
     <img src="public/assets/stage1/miwacchi_open.png" class="cover-hero" alt="">
     <h1 class="cover-title">WhoAI Evo</h1>
     <div class="buttons"><button id="btnStart" class="btn btn-primary">▶ スタート</button></div>
   </section>
 
+  <!-- Game -->
   <section id="view-game" class="card hidden">
     <div class="hud">
       <span id="posTag" class="tag">位置: 1/25</span>
@@ -90,7 +120,13 @@
     </div>
     <div id="movingFlag" class="moving hidden">移動中…</div>
 
+    <!-- ゴール時のオーバーレイ（最初は隠す） -->
+    <div id="goalOverlay" class="overlay hidden" aria-live="polite">
+      <img src="public/assets/stage1/ako.png" alt="ako celebration">
+    </div>
+
     <div class="layout">
+      <!-- 盤面 -->
       <div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
         <div id="board" class="board"></div>
         <div id="charLayer" class="charWrap">
@@ -98,6 +134,7 @@
         </div>
       </div>
 
+      <!-- ルーレット（数字の中央で停止） -->
       <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
         <div class="wheelBox">
           <div class="pointer"></div>
@@ -111,6 +148,7 @@
         <div class="spinNum" id="spinNum">—</div>
         <div class="buttons"><button id="btnSpin" class="btn btn-primary">🎡 ルーレットを回す</button></div>
 
+        <!-- 進捗バッジ -->
         <div class="buttons" style="gap:6px;margin-top:6px">
           <span class="tag">ピンク:<b id="cntPink">0</b></span>
           <span class="tag">ブルー:<b id="cntBlue">0</b></span>
@@ -122,30 +160,25 @@
 
     <div class="corner"><button id="toCover" class="btn btn-mini">⏮ スタートへ</button></div>
   </section>
-
-  <section id="view-drink" class="card hidden">
-    <img src="public/assets/stage1/drink_item.png" class="bigChar" alt="">
-  </section>
-
-  <section id="view-final" class="card hidden">
-    <img src="public/assets/stage1/ako.png" class="bigChar ako" alt="ako">
-  </section>
 </div>
 
 <script>
 (()=> {
   const V={
-    cover:gid('view-cover'),game:gid('view-game'),drink:gid('view-drink'),final:gid('view-final'),
+    cover:gid('view-cover'),game:gid('view-game'),
     board:gid('board'),char:gid('char'),wheel:gid('wheel'),spinNum:gid('spinNum'),
     posTag:gid('posTag'),notesTag:gid('notesTag'),macTag:gid('macTag'),
     btnSpin:gid('btnSpin'), movingFlag:gid('movingFlag'),
-    cntPink:gid('cntPink'),cntBlue:gid('cntBlue'),cntGreen:gid('cntGreen'),cntPurple:gid('cntPurple')
+    cntPink:gid('cntPink'),cntBlue:gid('cntBlue'),cntGreen:gid('cntGreen'),cntPurple:gid('cntPurple'),
+    overlay:gid('goalOverlay')
   };
   function gid(id){return document.getElementById(id)}
-  function show(s){['cover','game','drink','final'].forEach(k=>V[k].classList.toggle('hidden',k!==s))}
-  gid('btnStart').onclick=()=>show('game');
-  gid('toCover').onclick=()=>show('cover');
+  function show(s){['cover','game'].forEach(k=>({view_cover:V.cover,view_game:V.game}[k]));}
+  gid('btnStart').onclick=()=>{V.overlay.classList.add('hidden'); showGame();};
 
+  function showGame(){ V.cover.classList.add('hidden'); V.game.classList.remove('hidden'); }
+
+  /* ===== 盤面（5x5 S字） ===== */
   const N=25,SIZE=5;
   function indexToRC(i){
     const r=Math.floor((i-1)/SIZE), cInRow=(i-1)%SIZE;
@@ -173,10 +206,12 @@
     computeCenters(); renderChar();
   }
 
+  /* ===== アセット ===== */
   const CHAR={ start:"public/assets/stage1/miwacchi_open.png", pink:"public/assets/stage1/pink_open.png", blue:"public/assets/stage1/blue_open.png", green:"public/assets/stage1/green_open.png", purple:"public/assets/stage1/purple_open.png" };
   const MAC ={ pink:"public/assets/stage1/macaron_pink.png",  blue:"public/assets/stage1/macaron_blue.png",  green:"public/assets/stage1/macaron_green.png",  purple:"public/assets/stage1/macaron_purple.png" };
   const NOTE_EMO=['🎵','🎶','♫','♬'];
 
+  /* ===== アイテムを各マス内へ ===== */
   const macSlots={}; let noteSlots=new Set();
   function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}}
   function placeItems(){
@@ -190,14 +225,16 @@
     noteSlots.forEach(idx=>{ const t=cells[idx-1]; const d=document.createElement('div'); d.className='noteEmoji'; d.textContent=NOTE_EMO[Math.floor(Math.random()*NOTE_EMO.length)]; d.dataset.idx=String(idx); t.appendChild(d); });
   }
 
-  let pos=1, moving=false;
+  /* ===== 状態 ===== */
+  let pos=1, moving=false, finished=false;
   let macGot={pink:false,blue:false,green:false,purple:false};
   let notesGot=new Set();
   function setCharBy(col){ V.char.src = col? CHAR[col] : CHAR.start; }
-  function renderChar(){ const p=centersPx[pos]||{x:0,y:0}; V.char.style.left=(p.x-16)+'px'; V.char.style.top=(p.y-16)+'px'; V.posTag.textContent=`位置: ${pos}/25`; }
+  function renderChar(){ const p=centersPx[pos]||{x:0,y:0}; V.char.style.left=(p.x-32)+'px'; V.char.style.top=(p.y-32)+'px'; V.posTag.textContent=`位置: ${pos}/25`; }
   function updateHUD(){ const got=Object.values(macGot).filter(v=>v).length; V.notesTag.textContent=`音符: ${notesGot.size}/5`; V.macTag.textContent=`マカロン: ${got}/4`;
     V.cntPink.textContent=macGot.pink?1:0; V.cntBlue.textContent=macGot.blue?1:0; V.cntGreen.textContent=macGot.green?1:0; V.cntPurple.textContent=macGot.purple?1:0; }
 
+  /* ===== ルーレット（数字の中央で停止） ===== */
   const WHEEL_COLORS=['#ff7ab6','#6aa6ff','#ffd166','#7ee6a2','#caa6ff','#ff9f6e'];
   (function buildWheel(){
     const slices=V.wheel.querySelector('#slices'), labels=V.wheel.querySelector('#labels');
@@ -214,7 +251,7 @@
   function setSpinEnabled(on){ V.btnSpin.disabled=!on; V.wheel.classList.toggle('locked',!on); V.movingFlag.classList.toggle('hidden',on); }
 
   V.btnSpin.onclick=()=>{
-    if(moving) return;
+    if(moving || finished) return;
     setSpinEnabled(false);
     const steps=Math.floor(Math.random()*6)+1; V.spinNum.textContent=`出目：${steps}`;
     const targetIdx=steps-1; const centerAngle=-90+(targetIdx+0.5)*60; const finalAngle=3*360-centerAngle;
@@ -222,55 +259,82 @@
     setTimeout(()=>animateMove(steps),2300);
   };
 
-  /* —— ここが“1マスずつ踏む”実装 —— */
+  /* ===== 1マスずつ踏んで進む ===== */
   function animateMove(steps){
-    if(moving) return; moving=true;
+    if(moving || finished) return; moving=true;
     let moved=0;
-    const stepMs=380; // 1歩の時間
+    const stepMs=360;
     const timer=setInterval(()=>{
-      if(pos===N && !(allMac()&&allNote())) pos=0;
-      pos++; renderChar(); updateHUD();
+      if(pos<N) pos++; // 25を超えない
+      renderChar(); updateHUD();
       moved++;
-      if(moved>=steps){
+      if(pos===N || moved>=steps){
         clearInterval(timer); moving=false; onArrive();
       }
     }, stepMs);
   }
 
+  /* ===== 到着処理 ===== */
   function onArrive(){
+    // マカロン
     for(const [col,slot] of Object.entries(macSlots)){
       if(slot===pos && !macGot[col]){
         macGot[col]=true; setCharBy(col);
         const cell=V.board.querySelectorAll('.cell')[slot-1]; const img=cell.querySelector('.item'); if(img) img.classList.add('collected');
       }
     }
+    // 音符
     if(noteSlots.has(pos) && !notesGot.has(pos)){
       notesGot.add(pos);
       const cell=V.board.querySelectorAll('.cell')[pos-1]; const n=cell.querySelector('.noteEmoji'); if(n) n.classList.add('collected');
     }
     updateHUD();
 
-    if(allMac() && allNote()){
-      show('drink'); setTimeout(()=>{ show('final'); try{ playHappyBirthday(); }catch(e){} }, 900);
+    // ゴールに到達したら、その画面のまま祝う（常に）
+    if(pos===N){
+      celebrateOnBoard();
       return;
     }
     setSpinEnabled(true);
   }
-  const allMac=()=>Object.values(macGot).every(v=>v);
-  const allNote=()=>notesGot.size===5;
 
-  let audioCtx; function ctx(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
-  function playToneSeq(seq){ const ac=ctx(); let t=ac.currentTime+0.02;
+  /* ===== ゴール演出（画面はこのまま・ako表示＋HB再生） ===== */
+  let audioCtx;
+  function ctx(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+  function playToneSeq(seq){
+    const ac=ctx(); let t=ac.currentTime+0.02;
     seq.forEach(s=>{ const o=ac.createOscillator(), g=ac.createGain(); o.type='sine'; o.frequency.value=s.freq;
-      g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.18,t+0.02); g.gain.exponentialRampToValueAtTime(0.001,t+s.dur);
+      g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.2,t+0.02); g.gain.exponentialRampToValueAtTime(0.001,t+s.dur);
       o.connect(g).connect(ac.destination); o.start(t); o.stop(t+s.dur+0.02); t+=s.dur+(s.gap||0.02); });
   }
   function note(n){ const N={'C4':261.63,'C#4':277.18,'D4':293.66,'D#4':311.13,'E4':329.63,'F4':349.23,'F#4':369.99,'G4':392.00,'G#4':415.30,'A4':440.00,'A#4':466.16,'B4':493.88,'C5':523.25,'C#5':554.37,'D5':587.33,'D#5':622.25,'E5':659.25,'F5':698.46,'F#5':739.99,'G5':783.99,'G#5':830.61,'A5':880.00,'A#5':932.33,'B5':987.77}; return N[n]||440; }
-  function playHappyBirthday(){ const q=.30,e=.15,d=n=>({freq:note(n),dur:e}), qn=n=>({freq:note(n),dur:q});
-    const seq=[d('G4'),d('G4'),qn('A4'),qn('G4'),qn('C5'),qn('B4'),d('G4'),d('G4'),qn('A4'),qn('G4'),qn('D5'),qn('C5'),d('G4'),d('G4'),qn('G5'),qn('E5'),qn('C5'),qn('B4'),qn('A4'),d('F5'),d('F5'),qn('E5'),qn('C5'),qn('D5'),qn('C5')]; playToneSeq(seq); }
+  function playHappyBirthday(){
+    const q=.30,e=.15, d=n=>({freq:note(n),dur:e}), qn=n=>({freq:note(n),dur:q});
+    const seq=[d('G4'),d('G4'),qn('A4'),qn('G4'),qn('C5'),qn('B4'),
+               d('G4'),d('G4'),qn('A4'),qn('G4'),qn('D5'),qn('C5'),
+               d('G4'),d('G4'),qn('G5'),qn('E5'),qn('C5'),qn('B4'),qn('A4'),
+               d('F5'),d('F5'),qn('E5'),qn('C5'),qn('D5'),qn('C5')];
+    playToneSeq(seq);
+  }
+  function celebrateOnBoard(){
+    finished=true;
+    setSpinEnabled(false);
+    V.overlay.classList.remove('hidden'); // akoを中央に
+    try{ playHappyBirthday(); }catch(e){}
+  }
 
-  buildBoard(); placeItems(); renderChar(); updateHUD(); setSpinEnabled(true); show('cover');
+  /* ===== 初期化 & リサイズ対応 ===== */
+  function init(){
+    buildBoard();
+    placeItems();
+    renderChar();
+    updateHUD();
+    setSpinEnabled(true);
+  }
+  init();
+  V.game.classList.add('hidden'); // 最初は表紙
   window.addEventListener('resize', ()=>{ computeCenters(); renderChar(); });
+
 })();
 </script>
 </body>
