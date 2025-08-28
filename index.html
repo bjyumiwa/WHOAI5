@@ -50,7 +50,7 @@
   .idx{position:absolute;left:6px;top:6px;font-size:12px;font-weight:700;color:#24313a;
     background:#fff;border-radius:999px;padding:.1em .5em;box-shadow:0 2px 6px rgba(0,0,0,.25)}
 
-  /* ゴールセル強調（飲み物を隠さない小さなリボン） */
+  /* ゴールセル（ドリンクを隠さない角リボン） */
   .cell.goal{transform:scale(1.06);box-shadow:0 0 12px rgba(255,255,200,.6), inset 0 0 0 2px #ffe066}
   .goal-ribbon{
     position:absolute;left:6px;top:6px;font-size:11px;font-weight:700;color:#4b3d00;
@@ -67,13 +67,16 @@
   .cell .noteEmoji{position:absolute;left:50%;top:18%;transform:translate(-50%,-50%);font-size:30px}
   .cell .collected{opacity:.25;filter:grayscale(1) blur(.2px)}
 
-  /* キャラ */
-  .charWrap{position:absolute;pointer-events:none;width:calc(100% - 12px);height:calc(100% - 12px);left:6px;top:6px;z-index:5}
+  /* キャラ層：HUDより下（z-index:2） */
+  .charWrap{position:absolute;pointer-events:none;width:calc(100% - 12px);height:calc(100% - 12px);left:6px;top:6px;z-index:2}
   .char{
     position:absolute;width:64px;height:64px;object-fit:contain;
     filter:drop-shadow(0 3px 10px rgba(0,0,0,.55));
     transition:left .22s ease, top .22s ease
   }
+  .hud{position:absolute;left:14px;top:10px;display:flex;gap:6px;flex-wrap:wrap;z-index:3}
+  .tag{padding:.35em .6em;border-radius:999px;font-size:12px;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
+  .moving{position:absolute;right:12px;top:10px;font-size:12px;padding:.35em .6em;border-radius:999px;background:rgba(255,255,255,.18);z-index:3}
 
   /* ルーレット */
   .wheelBox{width:min(260px,84vw);aspect-ratio:1/1;position:relative;display:flex;align-items:center;justify-content:center}
@@ -81,14 +84,8 @@
   .wheel.locked{opacity:.6;filter:grayscale(.3)}
   .pointer{position:absolute;top:-6px;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:16px solid #fff}
   .spinNum{margin-top:10px;font-size:20px}
-
-  /* 当たりスライスの視覚強調 */
   .slice-hit{stroke:#fff;stroke-width:2;filter:drop-shadow(0 2px 6px rgba(255,255,255,.7))}
   .label-hit{font-weight:700;text-shadow:0 0 6px rgba(255,255,255,.9)}
-
-  .hud{position:absolute;left:14px;top:10px;display:flex;gap:6px;flex-wrap:wrap}
-  .tag{padding:.35em .6em;border-radius:999px;font-size:12px;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
-  .moving{position:absolute;right:12px;top:10px;font-size:12px;padding:.35em .6em;border-radius:999px;background:rgba(255,255,255,.18)}
 
   /* ゴール演出 */
   .overlay{
@@ -130,7 +127,7 @@
 
     <div class="layout">
       <!-- 盤面 -->
-      <div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+      <div id="boardWrap" style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
         <div id="board" class="board"></div>
         <div class="charWrap"><img id="char" src="public/assets/stage1/miwacchi_open.png" class="char" alt=""></div>
       </div>
@@ -168,17 +165,13 @@
     wheel:gid('wheel'), spinNum:gid('spinNum'), posTag:gid('posTag'), notesTag:gid('notesTag'), macTag:gid('macTag'),
     btnSpin:gid('btnSpin'), movingFlag:gid('movingFlag'), overlay:gid('goalOverlay'),
     cntPink:gid('cntPink'), cntBlue:gid('cntBlue'), cntGreen:gid('cntGreen'), cntPurple:gid('cntPurple'),
-    btnStart:gid('btnStart'), toCover:gid('toCover') };
+    btnStart:gid('btnStart'), toCover:gid('toCover'), boardWrap:gid('boardWrap') };
   function gid(id){return document.getElementById(id)}
 
   function showCover(){ V.game.classList.add('hidden'); V.cover.classList.remove('hidden'); }
   function showGame(){ V.cover.classList.add('hidden'); V.game.classList.remove('hidden'); }
 
-  V.btnStart.addEventListener('click', ()=>{
-    // フルリセット＆1マスから開始
-    resetAll();
-    showGame();
-  });
+  V.btnStart.addEventListener('click', ()=>{ resetAll(); showGame(); });
   V.toCover.addEventListener('click', ()=>{ showCover(); });
 
   /* ==== 盤面 ==== */
@@ -210,7 +203,6 @@
       }
       V.board.appendChild(cell);
     }
-    computeCenters();
   }
 
   /* ==== アイテム配置 ==== */
@@ -236,11 +228,20 @@
   let notesGot=new Set();
 
   function setCharBy(col){ V.char.src = col? CHAR[col] : CHAR.start; }
-  function renderChar(){ const p=centersPx[pos]||{x:0,y:0}; const half=V.char.getBoundingClientRect().width/2||32; V.char.style.left=(p.x-half)+'px'; V.char.style.top=(p.y-half)+'px'; V.posTag.textContent=`位置: ${pos}/25`; }
-  function updateHUD(){ const got=Object.values(macGot).filter(v=>v).length; V.notesTag.textContent=`音符: ${notesGot.size}/5`; V.macTag.textContent=`マカロン: ${got}/4`;
-    V.cntPink.textContent=macGot.pink?1:0; V.cntBlue.textContent=macGot.blue?1:0; V.cntGreen.textContent=macGot.green?1:0; V.cntPurple.textContent=macGot.purple?1:0; }
+  function renderChar(){
+    const p=centersPx[pos]; if(!p) return;
+    const half=(V.char.getBoundingClientRect().width||64)/2;
+    V.char.style.left=(p.x-half)+'px'; V.char.style.top=(p.y-half)+'px';
+    V.posTag.textContent=`位置: ${pos}/25`;
+  }
+  function updateHUD(){
+    const got=Object.values(macGot).filter(v=>v).length;
+    V.notesTag.textContent=`音符: ${notesGot.size}/5`;
+    V.macTag.textContent=`マカロン: ${got}/4`;
+    V.cntPink.textContent=macGot.pink?1:0; V.cntBlue.textContent=macGot.blue?1:0; V.cntGreen.textContent=macGot.green?1:0; V.cntPurple.textContent=macGot.purple?1:0;
+  }
 
-  /* ==== ルーレット（止まったスライスを強調） ==== */
+  /* ==== ルーレット（止まったスライス強調） ==== */
   const WHEEL_COLORS=['#ff7ab6','#6aa6ff','#ffd166','#7ee6a2','#caa6ff','#ff9f6e'];
   let slicePaths=[], labelTexts=[];
   (function buildWheel(){
@@ -258,29 +259,16 @@
       t.textContent=(i+1); labels.appendChild(t); labelTexts.push(t);
     }
   })();
-
-  function clearHitSlice(){
-    slicePaths.forEach(p=>p.classList.remove('slice-hit'));
-    labelTexts.forEach(t=>t.classList.remove('label-hit'));
-  }
-  function setSpinEnabled(on){
-    V.btnSpin.disabled=!on; V.wheel.classList.toggle('locked',!on); V.movingFlag.classList.toggle('hidden',on);
-  }
+  function clearHitSlice(){ slicePaths.forEach(p=>p.classList.remove('slice-hit')); labelTexts.forEach(t=>t.classList.remove('label-hit')); }
+  function setSpinEnabled(on){ V.btnSpin.disabled=!on; V.wheel.classList.toggle('locked',!on); V.movingFlag.classList.toggle('hidden',on); }
 
   V.btnSpin.onclick=()=>{
     if(moving || finished) return;
-    setSpinEnabled(false);
-    clearHitSlice();
-
-    const steps=Math.floor(Math.random()*6)+1;        // 1〜6
+    setSpinEnabled(false); clearHitSlice();
+    const steps=Math.floor(Math.random()*6)+1;
     V.spinNum.textContent=`出目：${steps}`;
-
-    const targetIdx=steps-1;
-    const centerAngle=-90+(targetIdx+0.5)*60;
-    const finalAngle=3*360-centerAngle;
+    const targetIdx=steps-1; const centerAngle=-90+(targetIdx+0.5)*60; const finalAngle=3*360-centerAngle;
     V.wheel.style.transform=`rotate(${finalAngle}deg)`;
-
-    // 視覚的に「ここ！」を強調
     setTimeout(()=>{
       slicePaths[targetIdx].classList.add('slice-hit');
       labelTexts[targetIdx].classList.add('label-hit');
@@ -288,10 +276,27 @@
     }, 2300);
   };
 
-  /* ==== 1マスずつ進む（ぴったりゴール制） ==== */
+  /* ==== 1マスずつ進む（マカロンは通過で進化＆取得、ゴールはぴったり） ==== */
+  function maybeCollectOn(posNow){
+    // マカロン：通過でOK
+    for(const [col,slot] of Object.entries(macSlots)){
+      if(slot===posNow && !macGot[col]){
+        macGot[col]=true; setCharBy(col);
+        const cell=V.board.querySelectorAll('.cell')[slot-1];
+        const img=cell.querySelector('.item'); if(img) img.classList.add('collected');
+      }
+    }
+    // 音符：通過でOK
+    if(noteSlots.has(posNow) && !notesGot.has(posNow)){
+      notesGot.add(posNow);
+      const cell=V.board.querySelectorAll('.cell')[posNow-1];
+      const n=cell.querySelector('.noteEmoji'); if(n) n.classList.add('collected');
+    }
+  }
+
   function animateMoveExact(steps){
     if(moving || finished) return;
-    // オーバーなら動かない（そのまま）
+    // オーバーなら動かない（ぴったりゴール制）
     const target = (pos + steps <= N) ? (pos + steps) : pos;
     if(target === pos){
       V.spinNum.textContent = `出目：${steps}（通り過ぎ）`;
@@ -301,20 +306,17 @@
     moving=true;
     const stepMs=360;
     const timer=setInterval(()=>{
-      if(pos < target) pos++;
+      if(pos < target){
+        pos++;
+        maybeCollectOn(pos); // 1歩ごとに通過判定
+      }
       renderChar(); updateHUD();
       if(pos >= target){
         clearInterval(timer);
         moving=false;
-        onArriveExact();
+        if(pos===N){ celebrateOnBoard(); } else { setSpinEnabled(true); }
       }
     }, stepMs);
-  }
-
-  function onArriveExact(){
-    // ここでマカロン・音符の取得処理を足す場合はこの中に
-    if(pos===N){ celebrateOnBoard(); return; }
-    setSpinEnabled(true);
   }
 
   /* ==== ゴール演出（ako＋HB→自動で表紙へ） ==== */
@@ -337,8 +339,7 @@
     return playToneSeq(seq);
   }
   function celebrateOnBoard(){
-    finished=true;
-    setSpinEnabled(false);
+    finished=true; setSpinEnabled(false);
     V.overlay.classList.add('show');
     const ms = playHappyBirthday();
     setTimeout(()=>{ V.overlay.classList.remove('show'); showCover(); }, Math.max(6000, ms));
@@ -346,24 +347,26 @@
 
   /* ==== 初期化＆フルリセット ==== */
   function resetAll(){
-    // 状態
     pos=1; moving=false; finished=false;
     macGot={pink:false,blue:false,green:false,purple:false};
     notesGot=new Set(); setCharBy(null);
 
-    // UI：盤面/アイテム/位置/HUD
-    buildBoard(); placeItems(); computeCenters(); renderChar(); updateHUD();
+    buildBoard(); placeItems();
 
-    // ルーレット初期化
-    clearHitSlice();
-    V.wheel.style.transform='rotate(0deg)';
-    V.spinNum.textContent='—';
-    setSpinEnabled(true);
+    // レイアウト確定後に座標計算 → 位置反映（2フレーム待ちで確実に）
+    requestAnimationFrame(()=>{
+      computeCenters();
+      requestAnimationFrame(()=>{
+        computeCenters();
+        renderChar();
+      });
+    });
 
-    // オーバーレイは必ず消す
-    V.overlay.classList.remove('show');
+    updateHUD(); clearHitSlice();
+    V.wheel.style.transform='rotate(0deg)'; V.spinNum.textContent='—';
+    V.overlay.classList.remove('show'); setSpinEnabled(true);
 
-    // リサイズ対応
+    // リサイズにも追従
     window.addEventListener('resize', ()=>{ computeCenters(); renderChar(); }, { passive:true });
   }
 
