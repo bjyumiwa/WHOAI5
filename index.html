@@ -22,7 +22,7 @@
   }
   .hidden{display:none}
 
-  /* 表紙：みわっちを1/4くらいに控えめ表示 */
+  /* 表紙キャラは1/4サイズ程度に控えめ */
   .cover-hero{width:min(140px,22vw);height:auto;filter:drop-shadow(0 6px 20px rgba(0,0,0,.55));margin-bottom:8px}
 
   /* ボタン */
@@ -37,7 +37,7 @@
   .btn[disabled]{opacity:.55;cursor:not-allowed}
   .corner{position:absolute;right:10px;bottom:10px}
 
-  /* レイアウト：左 盤面 / 右 ルーレット */
+  /* レイアウト */
   .layout{display:grid;grid-template-columns:2fr 1fr;gap:12px;width:100%;height:100%;align-items:center;justify-items:center}
   @media (max-width:780px){.layout{grid-template-columns:1fr;grid-template-rows:auto auto}}
 
@@ -57,27 +57,21 @@
     position:absolute;left:6px;top:6px;font-size:12px;font-weight:700;color:#24313a;
     background:#fff;border-radius:999px;padding:.1em .5em;box-shadow:0 2px 6px rgba(0,0,0,.25)
   }
-
-  /* マス内アイテム（約2倍） */
+  /* マス内アイテム（存在感アップ） */
   .cell .item{
     position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:80%;max-width:88px;height:auto;object-fit:contain;
-    filter:drop-shadow(0 3px 10px rgba(0,0,0,.45));
+    width:78%;height:auto;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.45));
   }
-  .cell .noteEmoji{
-    position:absolute;left:50%;top:18%;transform:translate(-50%,-50%);
-    font-size:32px; /* 2倍 */
-  }
+  .cell .noteEmoji{position:absolute;left:50%;top:18%;transform:translate(-50%,-50%);font-size:30px}
   .cell .collected{opacity:.25;filter:grayscale(1) blur(.2px)}
-
   .goal-img{position:absolute;right:6px;top:6px;width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))}
 
-  /* キャラ（約2倍：32→64px） */
+  /* キャラ（サイズはJSでセル幅に合わせる＝マカロンと同サイズ） */
   .charWrap{position:absolute;pointer-events:none;width:calc(100% - 12px);height:calc(100% - 12px);left:6px;top:6px;z-index:5}
   .char{
-    position:absolute;width:64px;height:64px;object-fit:contain;
+    position:absolute;width:64px;height:64px;object-fit:contain; /* 初期値。後でJSが上書き */
     filter:drop-shadow(0 3px 10px rgba(0,0,0,.55));
-    transition:left .22s ease, top .22s ease;
+    transition:left .22s ease, top .22s ease, width .1s ease, height .1s ease;
   }
 
   /* ルーレット */
@@ -91,13 +85,18 @@
   .tag{padding:.35em .6em;border-radius:999px;font-size:12px;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
   .moving{position:absolute;right:12px;top:10px;font-size:12px;padding:.35em .6em;border-radius:999px;background:rgba(255,255,255,.18)}
 
-  /* ゴール演出：オーバーレイでakoを中央に（画面はこのまま） */
+  /* ゴール演出：画面はこのまま。白抜き対策でmultiplyを適用 */
   .overlay{
     position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     background:radial-gradient(120% 120% at 50% 50%, rgba(0,0,0,.25), rgba(0,0,0,.45));
     z-index:10;
   }
-  .overlay img{width:min(42vw,360px);height:auto;animation:sway 3s ease-in-out infinite;filter:drop-shadow(0 12px 28px rgba(0,0,0,.6))}
+  .overlay img{
+    width:min(42vw,360px);height:auto;filter:drop-shadow(0 12px 28px rgba(0,0,0,.6));
+    animation:sway 3s ease-in-out infinite;
+    mix-blend-mode:multiply; /* 白背景が目立たないように乗算合成 */
+    pointer-events:none;
+  }
   @keyframes sway{0%{transform:rotate(-2deg)}50%{transform:rotate(2deg) translateY(-3px)}100%{transform:rotate(-2deg)}}
 </style>
 </head>
@@ -134,7 +133,7 @@
         </div>
       </div>
 
-      <!-- ルーレット（数字の中央で停止） -->
+      <!-- ルーレット -->
       <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
         <div class="wheelBox">
           <div class="pointer"></div>
@@ -173,25 +172,25 @@
     overlay:gid('goalOverlay')
   };
   function gid(id){return document.getElementById(id)}
-  function show(s){['cover','game'].forEach(k=>({view_cover:V.cover,view_game:V.game}[k]));}
-  gid('btnStart').onclick=()=>{V.overlay.classList.add('hidden'); showGame();};
-
   function showGame(){ V.cover.classList.add('hidden'); V.game.classList.remove('hidden'); }
+  gid('btnStart').onclick=()=>{ V.overlay.classList.add('hidden'); finished=false; showGame(); };
 
   /* ===== 盤面（5x5 S字） ===== */
   const N=25,SIZE=5;
-  function indexToRC(i){
-    const r=Math.floor((i-1)/SIZE), cInRow=(i-1)%SIZE;
-    const c=(r%2===0)?cInRow:(SIZE-1-cInRow);
-    return [SIZE-1-r, c];
-  }
+  function indexToRC(i){ const r=Math.floor((i-1)/SIZE), cInRow=(i-1)%SIZE; const c=(r%2===0)?cInRow:(SIZE-1-cInRow); return [SIZE-1-r, c]; }
 
+  let cellW=0; // セル幅（キャラ/マカロンのサイズ基準）
   const centersPx=new Array(N+1);
   function computeCenters(){
     const rect=V.board.getBoundingClientRect();
     const gap=8, pad=6, w=rect.width, h=rect.height;
     const cw=(w-gap*4)/SIZE, ch=(h-gap*4)/SIZE;
+    cellW=cw;
     for(let i=1;i<=N;i++){ const [r,c]=indexToRC(i); centersPx[i]={x:c*(cw+gap)+cw/2+pad, y:r*(ch+gap)+ch/2+pad}; }
+    // キャラ＝マカロンと同サイズ（約78%）
+    const sizePx=Math.max(28, Math.round(cellW*0.78));
+    V.char.style.width=sizePx+'px';
+    V.char.style.height=sizePx+'px';
   }
 
   function buildBoard(){
@@ -230,11 +229,11 @@
   let macGot={pink:false,blue:false,green:false,purple:false};
   let notesGot=new Set();
   function setCharBy(col){ V.char.src = col? CHAR[col] : CHAR.start; }
-  function renderChar(){ const p=centersPx[pos]||{x:0,y:0}; V.char.style.left=(p.x-32)+'px'; V.char.style.top=(p.y-32)+'px'; V.posTag.textContent=`位置: ${pos}/25`; }
+  function renderChar(){ const p=centersPx[pos]||{x:0,y:0}; const half=V.char.getBoundingClientRect().width/2||32; V.char.style.left=(p.x-half)+'px'; V.char.style.top=(p.y-half)+'px'; V.posTag.textContent=`位置: ${pos}/25`; }
   function updateHUD(){ const got=Object.values(macGot).filter(v=>v).length; V.notesTag.textContent=`音符: ${notesGot.size}/5`; V.macTag.textContent=`マカロン: ${got}/4`;
     V.cntPink.textContent=macGot.pink?1:0; V.cntBlue.textContent=macGot.blue?1:0; V.cntGreen.textContent=macGot.green?1:0; V.cntPurple.textContent=macGot.purple?1:0; }
 
-  /* ===== ルーレット（数字の中央で停止） ===== */
+  /* ===== ルーレット ===== */
   const WHEEL_COLORS=['#ff7ab6','#6aa6ff','#ffd166','#7ee6a2','#caa6ff','#ff9f6e'];
   (function buildWheel(){
     const slices=V.wheel.querySelector('#slices'), labels=V.wheel.querySelector('#labels');
@@ -265,7 +264,7 @@
     let moved=0;
     const stepMs=360;
     const timer=setInterval(()=>{
-      if(pos<N) pos++; // 25を超えない
+      if(pos<N) pos++;
       renderChar(); updateHUD();
       moved++;
       if(pos===N || moved>=steps){
@@ -290,15 +289,12 @@
     }
     updateHUD();
 
-    // ゴールに到達したら、その画面のまま祝う（常に）
-    if(pos===N){
-      celebrateOnBoard();
-      return;
-    }
+    // ゴール到達：画面そのままでako＋HB、終了後に自動でスタートへ
+    if(pos===N){ celebrateOnBoard(); return; }
     setSpinEnabled(true);
   }
 
-  /* ===== ゴール演出（画面はこのまま・ako表示＋HB再生） ===== */
+  /* ===== ゴール演出（ako＋HB→表紙へ） ===== */
   let audioCtx;
   function ctx(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
   function playToneSeq(seq){
@@ -306,6 +302,9 @@
     seq.forEach(s=>{ const o=ac.createOscillator(), g=ac.createGain(); o.type='sine'; o.frequency.value=s.freq;
       g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.2,t+0.02); g.gain.exponentialRampToValueAtTime(0.001,t+s.dur);
       o.connect(g).connect(ac.destination); o.start(t); o.stop(t+s.dur+0.02); t+=s.dur+(s.gap||0.02); });
+    // おおよそ曲長（ミリ秒）を返す
+    const totalMs = Math.round((t - ac.currentTime) * 1000);
+    return totalMs;
   }
   function note(n){ const N={'C4':261.63,'C#4':277.18,'D4':293.66,'D#4':311.13,'E4':329.63,'F4':349.23,'F#4':369.99,'G4':392.00,'G#4':415.30,'A4':440.00,'A#4':466.16,'B4':493.88,'C5':523.25,'C#5':554.37,'D5':587.33,'D#5':622.25,'E5':659.25,'F5':698.46,'F#5':739.99,'G5':783.99,'G#5':830.61,'A5':880.00,'A#5':932.33,'B5':987.77}; return N[n]||440; }
   function playHappyBirthday(){
@@ -314,13 +313,19 @@
                d('G4'),d('G4'),qn('A4'),qn('G4'),qn('D5'),qn('C5'),
                d('G4'),d('G4'),qn('G5'),qn('E5'),qn('C5'),qn('B4'),qn('A4'),
                d('F5'),d('F5'),qn('E5'),qn('C5'),qn('D5'),qn('C5')];
-    playToneSeq(seq);
+    return playToneSeq(seq); // 合計時間(ms)
   }
   function celebrateOnBoard(){
     finished=true;
     setSpinEnabled(false);
     V.overlay.classList.remove('hidden'); // akoを中央に
-    try{ playHappyBirthday(); }catch(e){}
+    const ms = playHappyBirthday();
+    // 曲が終わったら自動でスタートへ戻る
+    setTimeout(()=>{
+      V.overlay.classList.add('hidden');
+      V.game.classList.add('hidden');
+      V.cover.classList.remove('hidden');
+    }, Math.max(6000, ms)); // 念のため下限6秒
   }
 
   /* ===== 初期化 & リサイズ対応 ===== */
