@@ -50,11 +50,15 @@
   .idx{position:absolute;left:6px;top:6px;font-size:12px;font-weight:700;color:#24313a;
     background:#fff;border-radius:999px;padding:.1em .5em;box-shadow:0 2px 6px rgba(0,0,0,.25)}
 
-  /* ゴールセル（ドリンクを隠さない角リボン） */
+  /* START/GOAL（ドリンクを隠さない角リボン） */
   .cell.goal{transform:scale(1.06);box-shadow:0 0 12px rgba(255,255,200,.6), inset 0 0 0 2px #ffe066}
   .goal-ribbon{
     position:absolute;left:6px;top:6px;font-size:11px;font-weight:700;color:#4b3d00;
     background:#ffe066;padding:2px 6px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:2
+  }
+  .start-ribbon{
+    position:absolute;left:6px;top:6px;font-size:11px;font-weight:700;color:#163f2b;
+    background:#a5f3cf;padding:2px 6px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:2
   }
   .goal-img{
     position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
@@ -196,6 +200,11 @@
       if(i===N) cell.classList.add("goal");
       const [r,c]=indexToRC(i); cell.style.gridRow=(r+1); cell.style.gridColumn=(c+1);
       const idx=document.createElement('div'); idx.className='idx'; idx.textContent=i; cell.appendChild(idx);
+
+      if(i===1){
+        const start=document.createElement('div'); start.className='start-ribbon'; start.textContent='START';
+        cell.appendChild(start);
+      }
       if(i===N){
         const ribbon=document.createElement('div'); ribbon.className='goal-ribbon'; ribbon.textContent='ぴったりゴール';
         const goal=document.createElement('img'); goal.src="public/assets/stage1/drink_item.png"; goal.className='goal-img';
@@ -276,9 +285,8 @@
     }, 2300);
   };
 
-  /* ==== 1マスずつ進む（マカロンは通過で進化＆取得、ゴールはぴったり） ==== */
+  /* ==== 1マスずつ進む（マカロン通過で進化、ゴールはぴったり） ==== */
   function maybeCollectOn(posNow){
-    // マカロン：通過でOK
     for(const [col,slot] of Object.entries(macSlots)){
       if(slot===posNow && !macGot[col]){
         macGot[col]=true; setCharBy(col);
@@ -286,7 +294,6 @@
         const img=cell.querySelector('.item'); if(img) img.classList.add('collected');
       }
     }
-    // 音符：通過でOK
     if(noteSlots.has(posNow) && !notesGot.has(posNow)){
       notesGot.add(posNow);
       const cell=V.board.querySelectorAll('.cell')[posNow-1];
@@ -296,7 +303,6 @@
 
   function animateMoveExact(steps){
     if(moving || finished) return;
-    // オーバーなら動かない（ぴったりゴール制）
     const target = (pos + steps <= N) ? (pos + steps) : pos;
     if(target === pos){
       V.spinNum.textContent = `出目：${steps}（通り過ぎ）`;
@@ -308,7 +314,7 @@
     const timer=setInterval(()=>{
       if(pos < target){
         pos++;
-        maybeCollectOn(pos); // 1歩ごとに通過判定
+        maybeCollectOn(pos);
       }
       renderChar(); updateHUD();
       if(pos >= target){
@@ -353,11 +359,12 @@
 
     buildBoard(); placeItems();
 
-    // レイアウト確定後に座標計算 → 位置反映（2フレーム待ちで確実に）
+    // レイアウト確定後に座標計算 → 1マスへ配置（2フレーム待ち）
     requestAnimationFrame(()=>{
       computeCenters();
       requestAnimationFrame(()=>{
         computeCenters();
+        pos = 1;
         renderChar();
       });
     });
@@ -366,7 +373,6 @@
     V.wheel.style.transform='rotate(0deg)'; V.spinNum.textContent='—';
     V.overlay.classList.remove('show'); setSpinEnabled(true);
 
-    // リサイズにも追従
     window.addEventListener('resize', ()=>{ computeCenters(); renderChar(); }, { passive:true });
   }
 
