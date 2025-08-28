@@ -7,46 +7,61 @@
 <link rel="icon" type="image/png" href="public/assets/stage1/macaron_pink.png" />
 <style>
   :root{ --fg:#fff; --primaryFrom:#ff8cc7; --primaryTo:#ff63b2; }
-  html,body{height:100%;margin:0}
+  html,body{height:100%;margin:0;overflow:hidden}
   body{
     font-family:"Noto Sans JP",system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:var(--fg);
     background:#000 url("public/assets/stage1/space_background.png") center/cover fixed no-repeat;
-    display:flex;align-items:center;justify-content:center;padding:10px;
+    display:flex;align-items:center;justify-content:center;
+    padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom);
   }
-  .container{width:min(920px,96vw);height:min(96vh,940px);display:flex;flex-direction:column}
+  .container{
+    width:min(920px,98vw);
+    height:100svh; /* スマホのUIを除いた実視界高 */
+    display:flex;flex-direction:column;
+  }
   .card{
     flex:1;border-radius:20px;
     background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.04));
     box-shadow:0 12px 28px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.12);
-    backdrop-filter:blur(6px);padding:14px;position:relative;
+    backdrop-filter:blur(6px);padding:10px;position:relative;
     display:flex;flex-direction:column;align-items:center;justify-content:center
   }
   .hidden{display:none}
 
   /* Cover */
-  .cover-hero{width:min(140px,22vw);height:auto;filter:drop-shadow(0 6px 20px rgba(0,0,0,.55));margin-bottom:8px}
-  .buttons{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+  .cover-hero{width:min(140px,22vw);height:auto;filter:drop-shadow(0 6px 20px rgba(0,0,0,.55));margin-bottom:6px}
   .btn{border:none;border-radius:999px;cursor:pointer;transition:opacity .2s}
   .btn-primary{min-width:220px;padding:14px 18px;font-size:18px;color:#2b1630;
     background:linear-gradient(180deg,var(--primaryFrom),var(--primaryTo));
     box-shadow:0 10px 20px rgba(255,99,178,.35)}
-  .btn-mini{min-width:auto;padding:6px 10px;font-size:12px;color:#24313a;background:rgba(255,255,255,.9)}
-  .btn[disabled]{opacity:.55;cursor:not-allowed}
-  .corner{position:absolute;right:10px;bottom:10px}
 
-  /* Layout */
-  .layout{display:grid;grid-template-columns:2fr 1fr;gap:12px;width:100%;height:100%;align-items:center;justify-items:center}
-  @media (max-width:780px){.layout{grid-template-columns:1fr;grid-template-rows:auto auto}}
+  /* レイアウト（スクロールなしで収まるサイズ） */
+  .layout{
+    display:grid;grid-template-columns:1.7fr 1fr;gap:8px;
+    width:100%;height:100%;align-items:center;justify-items:center
+  }
+  @media (max-width:760px){
+    .layout{grid-template-columns:1fr;grid-template-rows:auto auto;gap:6px}
+  }
 
-  /* Board 5x5 (S字) */
-  .board{width:100%;max-width:640px;aspect-ratio:1/1;
-    display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);gap:8px;padding:6px}
-  .cell{position:relative;border-radius:14px;overflow:hidden;
+  /* 盤面 5x5（S字） */
+  .board{
+    width:100%;
+    max-width:600px;
+    aspect-ratio:1/1;
+    display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);
+    gap:6px;padding:4px
+  }
+  .cell{
+    position:relative;border-radius:14px;overflow:hidden;
     background:radial-gradient(120% 80% at 20% 20%, rgba(255,255,255,.22), transparent 55%),
-    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
-    box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 6px 18px rgba(0,0,0,.35)}
-  .idx{position:absolute;left:6px;top:6px;font-size:12px;font-weight:700;color:#24313a;
-    background:#fff;border-radius:999px;padding:.1em .5em;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+               linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 6px 18px rgba(0,0,0,.35)
+  }
+  .idx{
+    position:absolute;left:6px;top:6px;font-size:12px;font-weight:700;color:#24313a;
+    background:#fff;border-radius:999px;padding:.1em .5em;box-shadow:0 2px 6px rgba(0,0,0,.25)
+  }
   .start-ribbon{
     position:absolute;left:6px;top:6px;font-size:11px;font-weight:700;color:#163f2b;
     background:#a5f3cf;padding:2px 6px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:2
@@ -61,50 +76,77 @@
     width:72px;height:72px;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))
   }
 
-  /* Items */
-  .cell .item{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:78%;height:auto;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.45));z-index:1}
-  .cell .noteEmoji{position:absolute;left:50%;top:18%;transform:translate(-50%,-50%);font-size:30px;z-index:1}
+  /* アイテム */
+  .cell .item{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:78%;height:auto;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.45));z-index:1
+  }
+  .cell .noteEmoji{
+    position:absolute;left:50%;top:18%;transform:translate(-50%,-50%);
+    font-size:30px;z-index:1;color:#fff  /* 音符は白 */
+  }
   .cell .collected{opacity:.28;filter:grayscale(1) blur(.2px)}
-  /* マカロンをゲットしたら消える演出 */
   .vanish{animation:vanish .28s ease forwards}
-  @keyframes vanish{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}
-                    100%{opacity:0;transform:translate(-50%,-50%) scale(.6)}}
+  @keyframes vanish{
+    0%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(.6)}
+  }
 
-  /* Character */
-  .charWrap{position:absolute;pointer-events:none;width:calc(100% - 12px);height:calc(100% - 12px);left:6px;top:6px;z-index:2}
+  /* キャラ */
+  .charWrap{position:absolute;pointer-events:none;width:calc(100% - 8px);height:calc(100% - 8px);left:4px;top:4px;z-index:2}
   .char{
     position:absolute;width:64px;height:64px;object-fit:contain;
     filter:drop-shadow(0 3px 10px rgba(0,0,0,.55));
     transition:left .22s ease, top .22s ease
   }
 
-  /* HUD */
-  .hud{position:absolute;left:14px;top:10px;display:flex;gap:6px;flex-wrap:wrap;z-index:3}
-  .tag{padding:.35em .6em;border-radius:999px;font-size:12px;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
-  .moving{position:absolute;right:12px;top:10px;font-size:12px;padding:.35em .6em;border-radius:999px;background:rgba(255,255,255,.18);z-index:3}
+  /* HUD（控えめサイズ） */
+  .hud{position:absolute;left:10px;top:8px;display:flex;gap:6px;flex-wrap:wrap;z-index:3}
+  .tag{padding:.3em .55em;border-radius:999px;font-size:12px;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
+  .moving{position:absolute;right:10px;top:8px;font-size:12px;padding:.35em .6em;border-radius:999px;background:rgba(255,255,255,.18);z-index:3}
 
-  /* Roulette */
-  .wheelBox{width:min(260px,84vw);aspect-ratio:1/1;position:relative;display:flex;align-items:center;justify-content:center}
+  /* ルーレット（タップで回転） */
+  .wheelBox{
+    width:clamp(180px, 32vw, 260px);
+    aspect-ratio:1/1;position:relative;display:flex;align-items:center;justify-content:center;
+    touch-action:manipulation;cursor:pointer;user-select:none;
+  }
   .wheel{width:100%;height:100%;transform:rotate(0deg);transition:transform 3.5s cubic-bezier(.17,.89,.32,1.27)}
   .wheel.locked{opacity:.6;filter:grayscale(.3)}
-  .pointer{position:absolute;top:-6px;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:16px solid #fff;filter:drop-shadow(0 0 8px rgba(255,255,255,.9))}
-  .spinNum{margin-top:10px;font-size:20px}
+  .pointer{
+    position:absolute;top:-6px;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:16px solid #fff;
+    filter:drop-shadow(0 0 8px rgba(255,255,255,.9))
+  }
+  .spinNum{margin-top:8px;font-size:18px;min-height:1.2em}
   .slice-hit{stroke:#fff;stroke-width:2;filter:drop-shadow(0 2px 6px rgba(255,255,255,.7))}
   .label-hit{font-weight:700;text-shadow:0 0 6px rgba(255,255,255,.9)}
+
+  /* ゴール演出（HB時のみ表示） */
+  .overlay{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(120% 120% at 50% 50%, rgba(0,0,0,.25), rgba(0,0,0,.45));
+    z-index:10; opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .overlay.show{ opacity:1; pointer-events:auto; }
+  .overlay img{
+    width:min(42vw,360px);height:auto;
+    filter:drop-shadow(0 12px 28px rgba(0,0,0,.6));
+    animation:sway 3s ease-in-out infinite;pointer-events:none;background:transparent;
+  }
+  @keyframes sway{0%{transform:rotate(-2deg)}50%{transform:rotate(2deg) translateY(-3px)}100%{transform:rotate(-2deg)}}
 </style>
 </head>
 <body>
 <div class="container">
 
-  <!-- Cover -->
+  <!-- 表紙 -->
   <section id="view-cover" class="card">
-    <img src="public/assets/stage1/miwacchi_open.png" class="cover-hero" alt="">
+    <img src="public/assets/stage1/ako2.png" class="cover-hero" alt="">
     <h1 class="cover-title">WhoAI Evo</h1>
-    <div class="buttons"><button id="btnStart" class="btn btn-primary">▶ スタート</button></div>
+    <button id="btnStart" class="btn btn-primary">▶ スタート</button>
   </section>
 
-  <!-- Game -->
+  <!-- ゲーム -->
   <section id="view-game" class="card hidden">
     <div class="hud">
       <span id="posTag" class="tag">位置: 1/25</span>
@@ -113,6 +155,7 @@
     </div>
     <div id="movingFlag" class="moving hidden">移動中…</div>
 
+    <!-- ゴール演出（最後にだけ出現） -->
     <div id="goalOverlay" class="overlay">
       <img src="public/assets/stage1/ako2.png" alt="ako celebration">
     </div>
@@ -121,24 +164,23 @@
       <!-- 盤面 -->
       <div id="boardWrap" style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
         <div id="board" class="board"></div>
-        <div class="charWrap"><img id="char" src="public/assets/stage1/miwacchi_open.png" class="char" alt=""></div>
+        <div class="charWrap"><img id="char" src="public/assets/stage1/ako2.png" class="char" alt=""></div>
       </div>
 
-      <!-- ルーレット -->
-      <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
-        <div class="wheelBox">
+      <!-- ルーレット（タップで回転） -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div id="wheelBox" class="wheelBox" aria-label="tap to spin">
           <div class="pointer"></div>
-          <svg id="wheel" class="wheel" viewBox="0 0 100 100" aria-label="roulette">
+          <svg id="wheel" class="wheel" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="48" fill="#222" />
             <g id="slices"></g>
             <g id="labels" font-size="10" text-anchor="middle" dominant-baseline="middle" fill="#fff"></g>
             <circle cx="50" cy="50" r="4" fill="#fff"/>
           </svg>
         </div>
-        <div class="spinNum" id="spinNum">—</div>
-        <div class="buttons"><button id="btnSpin" class="btn btn-primary">🎡 ルーレットを回す</button></div>
+        <div class="spinNum" id="spinNum">タップでルーレット</div>
 
-        <div class="buttons" style="gap:6px;margin-top:6px">
+        <div class="hud-collect" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
           <span class="tag">ピンク:<b id="cntPink">0</b></span>
           <span class="tag">ブルー:<b id="cntBlue">0</b></span>
           <span class="tag">グリーン:<b id="cntGreen">0</b></span>
@@ -146,8 +188,6 @@
         </div>
       </div>
     </div>
-
-    <div class="corner"><button id="toCover" class="btn btn-mini">⏮ スタートへ</button></div>
   </section>
 </div>
 
@@ -155,21 +195,19 @@
 (()=> {
   const V={
     cover:gid('view-cover'), game:gid('view-game'), board:gid('board'), char:gid('char'),
-    wheel:gid('wheel'), spinNum:gid('spinNum'),
+    wheel:gid('wheel'), wheelBox:gid('wheelBox'), spinNum:gid('spinNum'),
     posTag:gid('posTag'), notesTag:gid('notesTag'), macTag:gid('macTag'),
-    btnSpin:gid('btnSpin'), movingFlag:gid('movingFlag'), overlay:gid('goalOverlay'),
+    movingFlag:gid('movingFlag'), overlay:gid('goalOverlay'),
     cntPink:gid('cntPink'), cntBlue:gid('cntBlue'), cntGreen:gid('cntGreen'), cntPurple:gid('cntPurple'),
-    btnStart:gid('btnStart'), toCover:gid('toCover')
+    btnStart:gid('btnStart')
   };
   function gid(id){return document.getElementById(id)}
-
   function showCover(){ V.game.classList.add('hidden'); V.cover.classList.remove('hidden'); }
   function showGame(){ V.cover.classList.add('hidden'); V.game.classList.remove('hidden'); }
 
   V.btnStart.addEventListener('click', ()=>{ resetAll(); showGame(); });
-  V.toCover.addEventListener('click', ()=>{ showCover(); });
 
-  /* ===== S字インデックス ===== */
+  /* ===== 盤面S字マップ ===== */
   const N=25, SIZE=5;
   function indexToRC(i){
     const r = Math.floor((i-1)/SIZE);
@@ -179,18 +217,18 @@
     return [rowFromTop, c];
   }
 
-  /* ===== 座標と盤面 ===== */
+  /* ===== 座標計算 ===== */
   let centersPx=[], cellW=0, charOffsetY=0;
   function computeCenters(){
     const rect=V.board.getBoundingClientRect();
-    const gap=8, pad=6, cw=(rect.width-gap*4)/SIZE; cellW=cw;
+    const gap=6, pad=4, cw=(rect.width-gap*4)/SIZE; cellW=cw;
     charOffsetY = cw*0.22;
     centersPx.length=N+1;
     for(let i=1;i<=N;i++){
       const [r,c]=indexToRC(i);
       centersPx[i]={x:c*(cw+gap)+cw/2+pad, y:r*(cw+gap)+cw/2+pad};
     }
-    const s=Math.max(28, Math.round(cellW*0.72));
+    const s=Math.max(26, Math.round(cellW*0.72));
     V.char.style.width=s+'px'; V.char.style.height=s+'px';
   }
 
@@ -218,8 +256,7 @@
     green:"public/assets/stage1/macaron_green.png",
     purple:"public/assets/stage1/macaron_purple.png"
   };
-  const NOTE_EMO=['🎵','🎶','♫','♬'];
-
+  const NOTE_EMO=['♪','♫','♬']; // 白表示用の記号
   const macSlots={}, notesSet=new Set();
   function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}}
   function placeItems(){
@@ -242,7 +279,7 @@
 
   /* ===== 状態 ===== */
   const CHAR={
-    start:"public/assets/stage1/miwacchi_open.png",
+    start:"public/assets/stage1/ako2.png",   // スタートをako2に
     pink :"public/assets/stage1/pink_open.png",
     blue :"public/assets/stage1/blue_open.png",
     green:"public/assets/stage1/green_open.png",
@@ -264,14 +301,14 @@
     const mc = Object.values(gotMac).filter(v=>v).length;
     V.notesTag.textContent=`音符: ${gotNotes.size}/5`;
     V.macTag.textContent=`マカロン: ${mc}/4`;
-    V.cntPink.textContent = gotMac.pink?1:0;
-    V.cntBlue.textContent = gotMac.blue?1:0;
-    V.cntGreen.textContent= gotMac.green?1:0;
-    V.cntPurple.textContent=gotMac.purple?1:0;
+    gid('cntPink').textContent = gotMac.pink?1:0;
+    gid('cntBlue').textContent = gotMac.blue?1:0;
+    gid('cntGreen').textContent= gotMac.green?1:0;
+    gid('cntPurple').textContent=gotMac.purple?1:0;
   }
   function allMacCollected(){ return gotMac.pink && gotMac.blue && gotMac.green && gotMac.purple; }
 
-  /* ===== ルーレット（数字中央停止＋針スナップ） ===== */
+  /* ===== ルーレット（タップで回転、数字中央停止＋スナップ） ===== */
   const WHEEL_COLORS=['#ff7ab6','#6aa6ff','#ffd166','#7ee6a2','#caa6ff','#ff9f6e'];
   const slicePaths=[], labelTexts=[];
   (function buildWheel(){
@@ -288,9 +325,9 @@
     }
   })();
   function clearHit(){ slicePaths.forEach(p=>p.classList.remove('slice-hit')); labelTexts.forEach(t=>t.classList.remove('label-hit')); }
-  function setSpinEnabled(on){ V.btnSpin.disabled=!on; V.wheel.classList.toggle('locked',!on); V.movingFlag.classList.toggle('hidden',on); }
+  function setSpinEnabled(on){ V.wheel.classList.toggle('locked',!on); V.movingFlag.classList.toggle('hidden',on); }
 
-  V.btnSpin.onclick=()=>{
+  V.wheelBox.addEventListener('click', ()=>{
     if(moving || finished) return;
     setSpinEnabled(false);
     clearHit();
@@ -298,10 +335,9 @@
     const steps=Math.floor(Math.random()*6)+1;
     V.spinNum.textContent=`出目：${steps}`;
 
-    // 3〜6周してから指定のセクション中央で停止
     const idx=steps-1;
     const centerAngle=-90+(idx+0.5)*60;
-    const rev = 3 + Math.floor(Math.random()*4);               // 3..6回転
+    const rev = 3 + Math.floor(Math.random()*4);         // 3..6回転
     const finalAngle = rev*360 - centerAngle;
 
     // 本回転
@@ -309,38 +345,32 @@
     V.wheel.style.transform=`rotate(${finalAngle}deg)`;
 
     setTimeout(()=>{
-      // 針スナップ（少しオーバー→戻る）で「数字にピタッ」
+      // スナップ演出（オーバー→戻り）
       V.wheel.style.transition='transform .22s ease-out';
       V.wheel.style.transform=`rotate(${finalAngle+8}deg)`;
       setTimeout(()=>{
         V.wheel.style.transition='transform .18s ease-in';
         V.wheel.style.transform=`rotate(${finalAngle}deg)`;
 
-        // 視覚ハイライト
         slicePaths[idx].classList.add('slice-hit');
         labelTexts[idx].classList.add('label-hit');
-
-        // 移動開始
         moveWithLoop(steps);
       }, 220);
     }, 3500);
-  };
+  });
 
-  /* ===== 1歩ずつ進む（周回あり）＆収集は到着時のみ ===== */
+  /* ===== 1歩ずつ進む（周回あり）＆到着判定 ===== */
   function collectOnArrive(i){
-    // マカロン：ぴったり到着でゲット＆進化＋見た目を消す
+    // マカロン：ぴったり着地でゲット＆進化＋盤面から消す
     for(const [col,slot] of Object.entries(macSlots)){
       if(!gotMac[col] && slot===i){
         gotMac[col]=true; setCharBy(col);
         const cell=V.board.querySelectorAll('.cell')[slot-1];
         const img=cell.querySelector('.item');
-        if(img){
-          img.classList.add('vanish');        // 消える演出
-          setTimeout(()=>img.remove(), 280);  // 完全に削除
-        }
+        if(img){ img.classList.add('vanish'); setTimeout(()=>img.remove(), 280); }
       }
     }
-    // 音符：到着時に取得（薄くする）
+    // 音符：着地で取得（白アイコンを薄く）
     if(notesSet.has(i) && !gotNotes.has(i)){
       gotNotes.add(i);
       const cell=V.board.querySelectorAll('.cell')[i-1];
@@ -370,9 +400,10 @@
         }else{
           moving=false;
           setSpinEnabled(true);
+          V.spinNum.textContent='タップでルーレット';
         }
       }
-    }, 300);
+    }, 280);
   }
 
   /* ===== ゴール演出（HB後に自動で表紙へ） ===== */
@@ -396,7 +427,7 @@
   }
   function finish(){
     finished=true; setSpinEnabled(false);
-    V.overlay.classList.add('show');
+    V.overlay.classList.add('show');     // ← ゴール時だけ出現
     const ms=happyBirthday();
     setTimeout(()=>{ V.overlay.classList.remove('show'); showCover(); }, Math.max(6000, ms));
   }
@@ -414,11 +445,12 @@
       requestAnimationFrame(()=>{
         computeCenters();
         renderChar(); updateHUD();
-        clearHit(); V.wheel.style.transform='rotate(0deg)'; V.spinNum.textContent='—';
+        clearHit(); V.wheel.style.transform='rotate(0deg)'; V.spinNum.textContent='タップでルーレット';
         V.overlay.classList.remove('show'); setSpinEnabled(true);
       });
     });
 
+    // 画面回転・リサイズでもスクロールなしで収める
     window.addEventListener('resize', ()=>{ computeCenters(); renderChar(); }, { passive:true });
   }
 
