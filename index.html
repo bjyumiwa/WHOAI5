@@ -37,7 +37,7 @@
   .layout{display:grid;grid-template-columns:1.7fr 1fr;gap:8px;width:100%;height:100%;align-items:center;justify-items:center}
   @media (max-width:760px){.layout{grid-template-columns:1fr;grid-template-rows:auto auto;gap:6px}}
 
-  /* Board 5x5（S字） */
+  /* Board */
   .board{width:100%;max-width:600px;aspect-ratio:1/1;
     display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);gap:6px;padding:4px}
   .cell{position:relative;border-radius:14px;overflow:hidden;
@@ -73,7 +73,6 @@
   .spinNum{margin-top:8px;font-size:18px;min-height:1.2em}
   .slice-hit{stroke:#fff;stroke-width:2;filter:drop-shadow(0 2px 6px rgba(255,255,255,.7))}
   .label-hit{font-weight:700;text-shadow:0 0 6px rgba(255,255,255,.9)}
-  /* 当たりセクター（白） */
   .hitSector{fill:rgba(255,255,255,.22);stroke:rgba(255,255,255,.9);stroke-width:.4;opacity:0;transition:opacity .12s ease}
   .hitSector.show{opacity:1}
 
@@ -106,26 +105,22 @@
     </div>
     <div id="movingFlag" class="moving hidden">移動中…</div>
 
-    <!-- ゴール演出 -->
     <div id="goalOverlay" class="overlay">
       <img src="public/assets/stage1/ako2.png" alt="ako celebration">
     </div>
 
     <div class="layout">
-      <!-- 盤面 -->
       <div id="boardWrap" style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
         <div id="board" class="board"></div>
         <div class="charWrap"><img id="char" src="public/assets/stage1/ako2.png" class="char" alt=""></div>
       </div>
 
-      <!-- ルーレット -->
       <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
         <div id="wheelBox" class="wheelBox" aria-label="tap to spin">
           <div class="pointer"></div>
           <svg id="wheel" class="wheel" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="48" fill="#222" />
             <g id="slices"></g>
-            <!-- 当たりセクション（白）を slices と labels の間に置く -->
             <path id="hitSector" class="hitSector" d=""/>
             <g id="labels" font-size="10" text-anchor="middle" dominant-baseline="middle" fill="#fff"></g>
             <circle cx="50" cy="50" r="4" fill="#fff"/>
@@ -160,7 +155,7 @@
 
   V.btnStart.addEventListener('click', ()=>{ resetAll(); showGame(); });
 
-  /* ===== S字マップ ===== */
+  /* S字マップ */
   const N=25, SIZE=5;
   function indexToRC(i){
     const r=Math.floor((i-1)/SIZE), cInRow=(i-1)%SIZE;
@@ -169,7 +164,7 @@
     return [rowFromTop, c];
   }
 
-  /* ===== 座標 ===== */
+  /* 座標 */
   let centersPx=[], cellW=0, charOffsetY=0;
   function computeCenters(){
     const rect=V.board.getBoundingClientRect();
@@ -190,7 +185,6 @@
       const cell=document.createElement('div'); cell.className='cell';
       const [r,c]=indexToRC(i); cell.style.gridRow=(r+1); cell.style.gridColumn=(c+1);
 
-      // ゴール（25）は番号やテキストを置かず、ドリンクだけに
       if(i===N){
         cell.classList.add('goal');
         const goal=document.createElement('img'); goal.src="public/assets/stage1/drink_item.png";
@@ -204,7 +198,7 @@
     computeCenters();
   }
 
-  /* ===== アイテム配置 ===== */
+  /* アイテム配置 */
   const MAC={pink:"public/assets/stage1/macaron_pink.png", blue:"public/assets/stage1/macaron_blue.png", green:"public/assets/stage1/macaron_green.png", purple:"public/assets/stage1/macaron_purple.png"};
   const NOTE_EMO=['♪','♫','♬'];
   const macSlots={}, notesSet=new Set();
@@ -220,7 +214,7 @@
       d.textContent=NOTE_EMO[Math.floor(Math.random()*NOTE_EMO.length)]; d.dataset.idx=String(idx); t.appendChild(d); });
   }
 
-  /* ===== 状態 ===== */
+  /* 状態 */
   const CHAR={ start:"public/assets/stage1/ako2.png", pink:"public/assets/stage1/pink_open.png", blue:"public/assets/stage1/blue_open.png", green:"public/assets/stage1/green_open.png", purple:"public/assets/stage1/purple_open.png" };
   let pos=1, moving=false, finished=false;
   const gotMac={pink:false,blue:false,green:false,purple:false};
@@ -233,7 +227,7 @@
     gid('cntPink').textContent=gotMac.pink?1:0; gid('cntBlue').textContent=gotMac.blue?1:0; gid('cntGreen').textContent=gotMac.green?1:0; gid('cntPurple').textContent=gotMac.purple?1:0; }
   function allMacCollected(){ return gotMac.pink && gotMac.blue && gotMac.green && gotMac.purple; }
 
-  /* ===== ルーレット ===== */
+  /* ルーレット */
   const WHEEL_COLORS=['#ff7ab6','#6aa6ff','#ffd166','#7ee6a2','#caa6ff','#ff9f6e'];
   const slicePaths=[], labelTexts=[]; const hitPath = document.getElementById('hitSector');
   (function buildWheel(){
@@ -247,18 +241,16 @@
       const mid=(-90+(i+0.5)*60)*Math.PI/180; const lx=50+30*Math.cos(mid), ly=50+30*Math.sin(mid);
       const t=document.createElementNS('http://www.w3.org/2000/svg','text'); t.setAttribute('x',lx); t.setAttribute('y',ly); t.textContent=(i+1); labels.appendChild(t); labelTexts.push(t);
     }
-    // 初期は非表示
     hitPath.classList.remove('show');
   })();
 
-  function sectorPathFor(idx){ // idx: 0..5
+  function sectorPathFor(idx){
     const a0=(-90+idx*60)*Math.PI/180, a1=(-90+(idx+1)*60)*Math.PI/180;
     const R=48, r=16;
     const x0o=50+R*Math.cos(a0), y0o=50+R*Math.sin(a0);
     const x1o=50+R*Math.cos(a1), y1o=50+R*Math.sin(a1);
     const x1i=50+r*Math.cos(a1), y1i=50+r*Math.sin(a1);
     const x0i=50+r*Math.cos(a0), y0i=50+r*Math.sin(a0);
-    // ドーナツ状の扇形（外周→内周で戻る）
     return `M${x0o},${y0o} A${R},${R} 0 0 1 ${x1o},${y1o} L${x1i},${y1i} A${r},${r} 0 0 0 ${x0i},${y0i} Z`;
   }
 
@@ -293,7 +285,6 @@
 
         slicePaths[idx].classList.add('slice-hit');
         labelTexts[idx].classList.add('label-hit');
-        // 白い当たりセクターを該当扇形に更新して表示
         hitPath.setAttribute('d', sectorPathFor(idx));
         hitPath.classList.add('show');
 
@@ -302,8 +293,7 @@
     },3500);
   });
 
-  /* ===== 1歩ずつ進む（周回あり） ===== */
-  const gotMac={}, gotNotes=new Set(); // 宣言は上にありますが念のため
+  /* 1歩ずつ進む */
   function collectOnArrive(i){
     for(const [col,slot] of Object.entries(macSlots)){
       if(!gotMac[col] && slot===i){
@@ -337,7 +327,7 @@
     },280);
   }
 
-  /* ===== ゴール演出 ===== */
+  /* ゴール演出 */
   let audioCtx;
   function ctx(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
   function toneSeq(seq){ const ac=ctx(); let t=ac.currentTime+0.02;
@@ -355,8 +345,7 @@
   function finish(){ finished=true; setSpinEnabled(false); V.overlay.classList.add('show');
     const ms=happyBirthday(); setTimeout(()=>{ V.overlay.classList.remove('show'); showCover(); }, Math.max(6000, ms)); }
 
-  /* ===== 初期化 ===== */
-  const macSlots={}, notesSet=new Set();
+  /* 初期化 */
   function resetAll(){
     pos=1; moving=false; finished=false;
     ['pink','blue','green','purple'].forEach(k=>gotMac[k]=false);
@@ -373,7 +362,6 @@
     window.addEventListener('resize', ()=>{ computeCenters(); renderChar(); }, { passive:true });
   }
 
-  // 初期表示は表紙
   showCover();
 })();
 </script>
