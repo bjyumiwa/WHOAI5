@@ -34,6 +34,9 @@
   .btn-primary{min-width:220px;padding:14px 18px;font-size:18px;color:#2b1630;
     background:linear-gradient(180deg,var(--primaryFrom),var(--primaryTo));
     box-shadow:0 10px 20px rgba(255,99,178,.35)}
+  /* ← 追加（最小変更）：説明ボタン用の控えめスタイル */
+  .btn-ghost{padding:10px 14px;font-size:14px;margin-left:8px;color:#fff;
+    background:rgba(255,255,255,.14);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22);text-decoration:none}
 
   /* レイアウト（スクロールなしで収まるサイズ） */
   .layout{
@@ -143,7 +146,11 @@
   <section id="view-cover" class="card">
     <img src="public/assets/stage1/ako2.png" class="cover-hero" alt="">
     <h1 class="cover-title">WhoAI Evo</h1>
-    <button id="btnStart" class="btn btn-primary">▶ スタート</button>
+    <div>
+      <button id="btnStart" class="btn btn-primary">▶ スタート</button>
+      <!-- ← 追加（最小変更）：説明ページへリンク -->
+      <a href="about.html" class="btn btn-ghost" role="button" aria-label="説明へ">説明</a>
+    </div>
   </section>
 
   <!-- ゲーム -->
@@ -272,7 +279,7 @@
     pool.slice(4,9).forEach(idx=>{
       notesSet.add(idx);
       const t=cells[idx-1]; const d=document.createElement('div'); d.className='noteEmoji';
-      d.textContent=NOTE_EMO[Math.floor(Math.random()*NOTE_EMO.length)];
+      d.textContent=NOTE_EMO[Math.floor(Math.random()*(NOTE_EMO.length))];
       d.dataset.idx=String(idx); t.appendChild(d);
     });
   }
