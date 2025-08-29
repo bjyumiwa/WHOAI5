@@ -14,11 +14,7 @@
     display:flex;align-items:center;justify-content:center;
     padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom);
   }
-  .container{
-    width:min(920px,98vw);
-    height:100svh; /* スマホのUIを除いた実視界高 */
-    display:flex;flex-direction:column;
-  }
+  .container{width:min(920px,98vw);height:100svh;display:flex;flex-direction:column}
   .card{
     flex:1;border-radius:20px;
     background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.04));
@@ -34,108 +30,57 @@
   .btn-primary{min-width:220px;padding:14px 18px;font-size:18px;color:#2b1630;
     background:linear-gradient(180deg,var(--primaryFrom),var(--primaryTo));
     box-shadow:0 10px 20px rgba(255,99,178,.35)}
-  /* ← 追加（最小変更）：説明ボタン用の控えめスタイル */
   .btn-ghost{padding:10px 14px;font-size:14px;margin-left:8px;color:#fff;
     background:rgba(255,255,255,.14);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22);text-decoration:none}
 
-  /* レイアウト（スクロールなしで収まるサイズ） */
-  .layout{
-    display:grid;grid-template-columns:1.7fr 1fr;gap:8px;
-    width:100%;height:100%;align-items:center;justify-items:center
-  }
-  @media (max-width:760px){
-    .layout{grid-template-columns:1fr;grid-template-rows:auto auto;gap:6px}
-  }
+  /* Layout */
+  .layout{display:grid;grid-template-columns:1.7fr 1fr;gap:8px;width:100%;height:100%;align-items:center;justify-items:center}
+  @media (max-width:760px){.layout{grid-template-columns:1fr;grid-template-rows:auto auto;gap:6px}}
 
-  /* 盤面 5x5（S字） */
-  .board{
-    width:100%;
-    max-width:600px;
-    aspect-ratio:1/1;
-    display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);
-    gap:6px;padding:4px
-  }
-  .cell{
-    position:relative;border-radius:14px;overflow:hidden;
+  /* Board 5x5（S字） */
+  .board{width:100%;max-width:600px;aspect-ratio:1/1;
+    display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);gap:6px;padding:4px}
+  .cell{position:relative;border-radius:14px;overflow:hidden;
     background:radial-gradient(120% 80% at 20% 20%, rgba(255,255,255,.22), transparent 55%),
                linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
-    box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 6px 18px rgba(0,0,0,.35)
-  }
-  .idx{
-    position:absolute;left:6px;top:6px;font-size:12px;font-weight:700;color:#24313a;
-    background:#fff;border-radius:999px;padding:.1em .5em;box-shadow:0 2px 6px rgba(0,0,0,.25)
-  }
-  .start-ribbon{
-    position:absolute;left:6px;top:6px;font-size:11px;font-weight:700;color:#163f2b;
-    background:#a5f3cf;padding:2px 6px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:2
-  }
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 6px 18px rgba(0,0,0,.35)}
+  .idx{position:absolute;left:6px;top:6px;font-size:12px;font-weight:700;color:#24313a;background:#fff;border-radius:999px;padding:.1em .5em;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+  .start-ribbon{position:absolute;left:6px;top:6px;font-size:11px;font-weight:700;color:#163f2b;background:#a5f3cf;padding:2px 6px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:2}
   .cell.goal{transform:scale(1.06);box-shadow:0 0 12px rgba(255,255,200,.6), inset 0 0 0 2px #ffe066}
-  .goal-ribbon{
-    position:absolute;left:6px;top:6px;font-size:11px;font-weight:700;color:#4b3d00;
-    background:#ffe066;padding:2px 6px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:2
-  }
-  .goal-img{
-    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:72px;height:72px;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))
-  }
+  .goal-img{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:72px;height:72px;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5));z-index:2}
 
-  /* アイテム */
-  .cell .item{
-    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:78%;height:auto;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.45));z-index:1
-  }
-  .cell .noteEmoji{
-    position:absolute;left:50%;top:18%;transform:translate(-50%,-50%);
-    font-size:30px;z-index:1;color:#fff  /* 音符は白 */
-  }
+  /* Items */
+  .cell .item{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:78%;height:auto;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.45));z-index:1}
+  .cell .noteEmoji{position:absolute;left:50%;top:18%;transform:translate(-50%,-50%);font-size:30px;z-index:1;color:#fff}
   .cell .collected{opacity:.28;filter:grayscale(1) blur(.2px)}
   .vanish{animation:vanish .28s ease forwards}
-  @keyframes vanish{
-    0%{opacity:1;transform:translate(-50%,-50%) scale(1)}
-    100%{opacity:0;transform:translate(-50%,-50%) scale(.6)}
-  }
+  @keyframes vanish{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.6)}}
 
-  /* キャラ */
+  /* Character */
   .charWrap{position:absolute;pointer-events:none;width:calc(100% - 8px);height:calc(100% - 8px);left:4px;top:4px;z-index:2}
-  .char{
-    position:absolute;width:64px;height:64px;object-fit:contain;
-    filter:drop-shadow(0 3px 10px rgba(0,0,0,.55));
-    transition:left .22s ease, top .22s ease
-  }
+  .char{position:absolute;width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.55));transition:left .22s ease, top .22s ease}
 
-  /* HUD（控えめサイズ） */
+  /* HUD */
   .hud{position:absolute;left:10px;top:8px;display:flex;gap:6px;flex-wrap:wrap;z-index:3}
   .tag{padding:.3em .55em;border-radius:999px;font-size:12px;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
   .moving{position:absolute;right:10px;top:8px;font-size:12px;padding:.35em .6em;border-radius:999px;background:rgba(255,255,255,.18);z-index:3}
 
-  /* ルーレット（タップで回転） */
-  .wheelBox{
-    width:clamp(180px, 32vw, 260px);
-    aspect-ratio:1/1;position:relative;display:flex;align-items:center;justify-content:center;
-    touch-action:manipulation;cursor:pointer;user-select:none;
-  }
+  /* Roulette */
+  .wheelBox{width:clamp(180px, 32vw, 260px);aspect-ratio:1/1;position:relative;display:flex;align-items:center;justify-content:center;touch-action:manipulation;cursor:pointer;user-select:none}
   .wheel{width:100%;height:100%;transform:rotate(0deg);transition:transform 3.5s cubic-bezier(.17,.89,.32,1.27)}
   .wheel.locked{opacity:.6;filter:grayscale(.3)}
-  .pointer{
-    position:absolute;top:-6px;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:16px solid #fff;
-    filter:drop-shadow(0 0 8px rgba(255,255,255,.9))
-  }
+  .pointer{position:absolute;top:-6px;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:16px solid #fff;filter:drop-shadow(0 0 8px rgba(255,255,255,.9))}
   .spinNum{margin-top:8px;font-size:18px;min-height:1.2em}
   .slice-hit{stroke:#fff;stroke-width:2;filter:drop-shadow(0 2px 6px rgba(255,255,255,.7))}
   .label-hit{font-weight:700;text-shadow:0 0 6px rgba(255,255,255,.9)}
+  /* 当たりセクター（白） */
+  .hitSector{fill:rgba(255,255,255,.22);stroke:rgba(255,255,255,.9);stroke-width:.4;opacity:0;transition:opacity .12s ease}
+  .hitSector.show{opacity:1}
 
-  /* ゴール演出（HB時のみ表示） */
-  .overlay{
-    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    background:radial-gradient(120% 120% at 50% 50%, rgba(0,0,0,.25), rgba(0,0,0,.45));
-    z-index:10; opacity:0; pointer-events:none; transition:opacity .25s ease;
-  }
-  .overlay.show{ opacity:1; pointer-events:auto; }
-  .overlay img{
-    width:min(42vw,360px);height:auto;
-    filter:drop-shadow(0 12px 28px rgba(0,0,0,.6));
-    animation:sway 3s ease-in-out infinite;pointer-events:none;background:transparent;
-  }
+  /* Goal overlay */
+  .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 120% at 50% 50%, rgba(0,0,0,.25), rgba(0,0,0,.45));z-index:10;opacity:0;pointer-events:none;transition:opacity .25s ease}
+  .overlay.show{opacity:1;pointer-events:auto}
+  .overlay img{width:min(42vw,360px);height:auto;filter:drop-shadow(0 12px 28px rgba(0,0,0,.6));animation:sway 3s ease-in-out infinite;pointer-events:none;background:transparent}
   @keyframes sway{0%{transform:rotate(-2deg)}50%{transform:rotate(2deg) translateY(-3px)}100%{transform:rotate(-2deg)}}
 </style>
 </head>
@@ -148,7 +93,6 @@
     <h1 class="cover-title">WhoAI Evo</h1>
     <div>
       <button id="btnStart" class="btn btn-primary">▶ スタート</button>
-      <!-- ← 追加（最小変更）：説明ページへリンク -->
       <a href="about.html" class="btn btn-ghost" role="button" aria-label="説明へ">説明</a>
     </div>
   </section>
@@ -162,7 +106,7 @@
     </div>
     <div id="movingFlag" class="moving hidden">移動中…</div>
 
-    <!-- ゴール演出（最後にだけ出現） -->
+    <!-- ゴール演出 -->
     <div id="goalOverlay" class="overlay">
       <img src="public/assets/stage1/ako2.png" alt="ako celebration">
     </div>
@@ -174,13 +118,15 @@
         <div class="charWrap"><img id="char" src="public/assets/stage1/ako2.png" class="char" alt=""></div>
       </div>
 
-      <!-- ルーレット（タップで回転） -->
+      <!-- ルーレット -->
       <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
         <div id="wheelBox" class="wheelBox" aria-label="tap to spin">
           <div class="pointer"></div>
           <svg id="wheel" class="wheel" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="48" fill="#222" />
             <g id="slices"></g>
+            <!-- 当たりセクション（白）を slices と labels の間に置く -->
+            <path id="hitSector" class="hitSector" d=""/>
             <g id="labels" font-size="10" text-anchor="middle" dominant-baseline="middle" fill="#fff"></g>
             <circle cx="50" cy="50" r="4" fill="#fff"/>
           </svg>
@@ -214,22 +160,21 @@
 
   V.btnStart.addEventListener('click', ()=>{ resetAll(); showGame(); });
 
-  /* ===== 盤面S字マップ ===== */
+  /* ===== S字マップ ===== */
   const N=25, SIZE=5;
   function indexToRC(i){
-    const r = Math.floor((i-1)/SIZE);
-    const cInRow = (i-1)%SIZE;
-    const c = (r%2===0) ? cInRow : (SIZE-1-cInRow);
-    const rowFromTop = SIZE-1-r;
+    const r=Math.floor((i-1)/SIZE), cInRow=(i-1)%SIZE;
+    const c=(r%2===0)?cInRow:(SIZE-1-cInRow);
+    const rowFromTop=SIZE-1-r;
     return [rowFromTop, c];
   }
 
-  /* ===== 座標計算 ===== */
+  /* ===== 座標 ===== */
   let centersPx=[], cellW=0, charOffsetY=0;
   function computeCenters(){
     const rect=V.board.getBoundingClientRect();
     const gap=6, pad=4, cw=(rect.width-gap*4)/SIZE; cellW=cw;
-    charOffsetY = cw*0.22;
+    charOffsetY=cw*0.22;
     centersPx.length=N+1;
     for(let i=1;i<=N;i++){
       const [r,c]=indexToRC(i);
@@ -242,14 +187,17 @@
   function buildBoard(){
     V.board.innerHTML='';
     for(let i=1;i<=N;i++){
-      const cell=document.createElement('div');cell.className='cell';
-      const [r,c]=indexToRC(i);cell.style.gridRow=(r+1);cell.style.gridColumn=(c+1);
-      const idx=document.createElement('div');idx.className='idx';idx.textContent=i;cell.appendChild(idx);
-      if(i===1){const start=document.createElement('div');start.className='start-ribbon';start.textContent='START';cell.appendChild(start);}
+      const cell=document.createElement('div'); cell.className='cell';
+      const [r,c]=indexToRC(i); cell.style.gridRow=(r+1); cell.style.gridColumn=(c+1);
+
+      // ゴール（25）は番号やテキストを置かず、ドリンクだけに
       if(i===N){
         cell.classList.add('goal');
-        const goal=document.createElement('img');goal.src="public/assets/stage1/drink_item.png";goal.className='goal-img';cell.appendChild(goal);
-        const rib=document.createElement('div');rib.className='goal-ribbon';rib.textContent='ぴったりゴール';cell.appendChild(rib);
+        const goal=document.createElement('img'); goal.src="public/assets/stage1/drink_item.png";
+        goal.className='goal-img'; cell.appendChild(goal);
+      }else{
+        const idx=document.createElement('div'); idx.className='idx'; idx.textContent=i; cell.appendChild(idx);
+        if(i===1){ const start=document.createElement('div'); start.className='start-ribbon'; start.textContent='START'; cell.appendChild(start); }
       }
       V.board.appendChild(cell);
     }
@@ -257,67 +205,37 @@
   }
 
   /* ===== アイテム配置 ===== */
-  const MAC = {
-    pink :"public/assets/stage1/macaron_pink.png",
-    blue :"public/assets/stage1/macaron_blue.png",
-    green:"public/assets/stage1/macaron_green.png",
-    purple:"public/assets/stage1/macaron_purple.png"
-  };
-  const NOTE_EMO=['♪','♫','♬']; // 白表示用の記号
+  const MAC={pink:"public/assets/stage1/macaron_pink.png", blue:"public/assets/stage1/macaron_blue.png", green:"public/assets/stage1/macaron_green.png", purple:"public/assets/stage1/macaron_purple.png"};
+  const NOTE_EMO=['♪','♫','♬'];
   const macSlots={}, notesSet=new Set();
   function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}}
   function placeItems(){
     V.board.querySelectorAll('.item,.noteEmoji').forEach(e=>e.remove());
     const cells=V.board.querySelectorAll('.cell');
     const pool=Array.from({length:N-2},(_,k)=>k+2); shuffle(pool);
-    ['pink','blue','green','purple'].forEach((col,i)=>{
-      macSlots[col]=pool[i];
-      const t=cells[macSlots[col]-1];
-      const img=document.createElement('img'); img.src=MAC[col]; img.className='item'; img.dataset.idx=String(macSlots[col]); t.appendChild(img);
-    });
+    ['pink','blue','green','purple'].forEach((col,i)=>{ macSlots[col]=pool[i]; const t=cells[macSlots[col]-1];
+      const img=document.createElement('img'); img.src=MAC[col]; img.className='item'; img.dataset.idx=String(macSlots[col]); t.appendChild(img); });
     notesSet.clear();
-    pool.slice(4,9).forEach(idx=>{
-      notesSet.add(idx);
-      const t=cells[idx-1]; const d=document.createElement('div'); d.className='noteEmoji';
-      d.textContent=NOTE_EMO[Math.floor(Math.random()*(NOTE_EMO.length))];
-      d.dataset.idx=String(idx); t.appendChild(d);
-    });
+    pool.slice(4,9).forEach(idx=>{ notesSet.add(idx); const t=cells[idx-1]; const d=document.createElement('div'); d.className='noteEmoji';
+      d.textContent=NOTE_EMO[Math.floor(Math.random()*NOTE_EMO.length)]; d.dataset.idx=String(idx); t.appendChild(d); });
   }
 
   /* ===== 状態 ===== */
-  const CHAR={
-    start:"public/assets/stage1/ako2.png",   // スタートをako2に
-    pink :"public/assets/stage1/pink_open.png",
-    blue :"public/assets/stage1/blue_open.png",
-    green:"public/assets/stage1/green_open.png",
-    purple:"public/assets/stage1/purple_open.png"
-  };
+  const CHAR={ start:"public/assets/stage1/ako2.png", pink:"public/assets/stage1/pink_open.png", blue:"public/assets/stage1/blue_open.png", green:"public/assets/stage1/green_open.png", purple:"public/assets/stage1/purple_open.png" };
   let pos=1, moving=false, finished=false;
   const gotMac={pink:false,blue:false,green:false,purple:false};
   const gotNotes=new Set();
 
   function setCharBy(col){ V.char.src = col? CHAR[col] : CHAR.start; }
-  function renderChar(){
-    const p=centersPx[pos]; if(!p) return;
-    const half=(V.char.getBoundingClientRect().width||64)/2;
-    V.char.style.left=(p.x-half)+'px';
-    V.char.style.top =(p.y-half+charOffsetY)+'px';
-    V.posTag.textContent=`位置: ${pos}/25`;
-  }
-  function updateHUD(){
-    const mc = Object.values(gotMac).filter(v=>v).length;
-    V.notesTag.textContent=`音符: ${gotNotes.size}/5`;
-    V.macTag.textContent=`マカロン: ${mc}/4`;
-    gid('cntPink').textContent = gotMac.pink?1:0;
-    gid('cntBlue').textContent = gotMac.blue?1:0;
-    gid('cntGreen').textContent= gotMac.green?1:0;
-    gid('cntPurple').textContent=gotMac.purple?1:0;
-  }
+  function renderChar(){ const p=centersPx[pos]; if(!p) return; const half=(V.char.getBoundingClientRect().width||64)/2;
+    V.char.style.left=(p.x-half)+'px'; V.char.style.top=(p.y-half+charOffsetY)+'px'; V.posTag.textContent=`位置: ${pos}/25`; }
+  function updateHUD(){ const mc=Object.values(gotMac).filter(v=>v).length; V.notesTag.textContent=`音符: ${gotNotes.size}/5`; V.macTag.textContent=`マカロン: ${mc}/4`;
+    gid('cntPink').textContent=gotMac.pink?1:0; gid('cntBlue').textContent=gotMac.blue?1:0; gid('cntGreen').textContent=gotMac.green?1:0; gid('cntPurple').textContent=gotMac.purple?1:0; }
   function allMacCollected(){ return gotMac.pink && gotMac.blue && gotMac.green && gotMac.purple; }
 
-  /* ===== ルーレット（タップで回転、数字中央停止＋スナップ） ===== */
+  /* ===== ルーレット ===== */
   const WHEEL_COLORS=['#ff7ab6','#6aa6ff','#ffd166','#7ee6a2','#caa6ff','#ff9f6e'];
-  const slicePaths=[], labelTexts=[];
+  const slicePaths=[], labelTexts=[]; const hitPath = document.getElementById('hitSector');
   (function buildWheel(){
     const slices=V.wheel.querySelector('#slices'), labels=V.wheel.querySelector('#labels');
     for(let i=0;i<6;i++){
@@ -327,32 +245,46 @@
       p.setAttribute('d',`M50,50 L${x0},${y0} A48,48 0 0 1 ${x1},${y1} Z`);
       p.setAttribute('fill',WHEEL_COLORS[i]); slices.appendChild(p); slicePaths.push(p);
       const mid=(-90+(i+0.5)*60)*Math.PI/180; const lx=50+30*Math.cos(mid), ly=50+30*Math.sin(mid);
-      const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-      t.setAttribute('x',lx); t.setAttribute('y',ly); t.textContent=(i+1); labels.appendChild(t); labelTexts.push(t);
+      const t=document.createElementNS('http://www.w3.org/2000/svg','text'); t.setAttribute('x',lx); t.setAttribute('y',ly); t.textContent=(i+1); labels.appendChild(t); labelTexts.push(t);
     }
+    // 初期は非表示
+    hitPath.classList.remove('show');
   })();
-  function clearHit(){ slicePaths.forEach(p=>p.classList.remove('slice-hit')); labelTexts.forEach(t=>t.classList.remove('label-hit')); }
+
+  function sectorPathFor(idx){ // idx: 0..5
+    const a0=(-90+idx*60)*Math.PI/180, a1=(-90+(idx+1)*60)*Math.PI/180;
+    const R=48, r=16;
+    const x0o=50+R*Math.cos(a0), y0o=50+R*Math.sin(a0);
+    const x1o=50+R*Math.cos(a1), y1o=50+R*Math.sin(a1);
+    const x1i=50+r*Math.cos(a1), y1i=50+r*Math.sin(a1);
+    const x0i=50+r*Math.cos(a0), y0i=50+r*Math.sin(a0);
+    // ドーナツ状の扇形（外周→内周で戻る）
+    return `M${x0o},${y0o} A${R},${R} 0 0 1 ${x1o},${y1o} L${x1i},${y1i} A${r},${r} 0 0 0 ${x0i},${y0i} Z`;
+  }
+
+  function clearHit(){
+    slicePaths.forEach(p=>p.classList.remove('slice-hit'));
+    labelTexts.forEach(t=>t.classList.remove('label-hit'));
+    hitPath.classList.remove('show');
+  }
   function setSpinEnabled(on){ V.wheel.classList.toggle('locked',!on); V.movingFlag.classList.toggle('hidden',on); }
 
   V.wheelBox.addEventListener('click', ()=>{
     if(moving || finished) return;
-    setSpinEnabled(false);
-    clearHit();
+    setSpinEnabled(false); clearHit();
 
     const steps=Math.floor(Math.random()*6)+1;
     V.spinNum.textContent=`出目：${steps}`;
 
     const idx=steps-1;
     const centerAngle=-90+(idx+0.5)*60;
-    const rev = 3 + Math.floor(Math.random()*4);         // 3..6回転
-    const finalAngle = rev*360 - centerAngle;
+    const rev=3+Math.floor(Math.random()*4);
+    const finalAngle=rev*360-centerAngle;
 
-    // 本回転
     V.wheel.style.transition='transform 3.5s cubic-bezier(.17,.89,.32,1.27)';
     V.wheel.style.transform=`rotate(${finalAngle}deg)`;
 
     setTimeout(()=>{
-      // スナップ演出（オーバー→戻り）
       V.wheel.style.transition='transform .22s ease-out';
       V.wheel.style.transform=`rotate(${finalAngle+8}deg)`;
       setTimeout(()=>{
@@ -361,103 +293,83 @@
 
         slicePaths[idx].classList.add('slice-hit');
         labelTexts[idx].classList.add('label-hit');
+        // 白い当たりセクターを該当扇形に更新して表示
+        hitPath.setAttribute('d', sectorPathFor(idx));
+        hitPath.classList.add('show');
+
         moveWithLoop(steps);
-      }, 220);
-    }, 3500);
+      },220);
+    },3500);
   });
 
-  /* ===== 1歩ずつ進む（周回あり）＆到着判定 ===== */
+  /* ===== 1歩ずつ進む（周回あり） ===== */
+  const gotMac={}, gotNotes=new Set(); // 宣言は上にありますが念のため
   function collectOnArrive(i){
-    // マカロン：ぴったり着地でゲット＆進化＋盤面から消す
     for(const [col,slot] of Object.entries(macSlots)){
       if(!gotMac[col] && slot===i){
         gotMac[col]=true; setCharBy(col);
-        const cell=V.board.querySelectorAll('.cell')[slot-1];
-        const img=cell.querySelector('.item');
-        if(img){ img.classList.add('vanish'); setTimeout(()=>img.remove(), 280); }
+        const cell=V.board.querySelectorAll('.cell')[slot-1]; const img=cell.querySelector('.item');
+        if(img){ img.classList.add('vanish'); setTimeout(()=>img.remove(),280); }
       }
     }
-    // 音符：着地で取得（白アイコンを薄く）
     if(notesSet.has(i) && !gotNotes.has(i)){
       gotNotes.add(i);
-      const cell=V.board.querySelectorAll('.cell')[i-1];
-      const note=cell.querySelector('.noteEmoji');
+      const cell=V.board.querySelectorAll('.cell')[i-1]; const note=cell.querySelector('.noteEmoji');
       if(note){ note.classList.add('collected'); }
     }
   }
 
   function moveWithLoop(steps){
     if(steps<=0){ setSpinEnabled(true); return; }
-    moving=true;
-    let remain=steps;
+    moving=true; let remain=steps;
     const timer=setInterval(()=>{
-      pos++;
-      if(pos>N) pos=1;                // 周回
+      pos++; if(pos>N) pos=1;
       renderChar();
-
       remain--;
       if(remain<=0){
         clearInterval(timer);
         collectOnArrive(pos);
         updateHUD();
 
-        // ゴール判定：25にぴったり、かつ4色揃っているときだけ
-        if(pos===N && allMacCollected()){
-          finish();
-        }else{
-          moving=false;
-          setSpinEnabled(true);
-          V.spinNum.textContent='タップでルーレット';
-        }
+        if(pos===N && allMacCollected()){ finish(); }
+        else{ moving=false; setSpinEnabled(true); V.spinNum.textContent='タップでルーレット'; }
       }
-    }, 280);
+    },280);
   }
 
-  /* ===== ゴール演出（HB後に自動で表紙へ） ===== */
+  /* ===== ゴール演出 ===== */
   let audioCtx;
   function ctx(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
-  function toneSeq(seq){
-    const ac=ctx(); let t=ac.currentTime+0.02;
+  function toneSeq(seq){ const ac=ctx(); let t=ac.currentTime+0.02;
     seq.forEach(s=>{ const o=ac.createOscillator(), g=ac.createGain(); o.type='sine'; o.frequency.value=s.f;
       g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.22,t+0.03); g.gain.exponentialRampToValueAtTime(0.001,t+s.d);
       o.connect(g).connect(ac.destination); o.start(t); o.stop(t+s.d+0.04); t+=s.d+(s.g||0.04); });
-    return Math.round((t-ac.currentTime)*1000);
-  }
+    return Math.round((t-ac.currentTime)*1000); }
   function f(n){const M={'C4':261.63,'D4':293.66,'E4':329.63,'F4':349.23,'G4':392.00,'A4':440.00,'B4':493.88,'C5':523.25,'D5':587.33,'E5':659.25,'F5':698.46,'G5':783.99};return M[n]||440;}
-  function happyBirthday(){
-    const q=.30,e=.15, Q=n=>({f:f(n),d:q}), E=n=>({f:f(n),d:e});
+  function happyBirthday(){ const q=.30,e=.15, Q=n=>({f:f(n),d:q}), E=n=>({f:f(n),d:e});
     const seq=[E('G4'),E('G4'),Q('A4'),Q('G4'),Q('C5'),Q('B4'),
                E('G4'),E('G4'),Q('A4'),Q('G4'),Q('D5'),Q('C5'),
                E('G4'),E('G4'),Q('G5'),Q('E5'),Q('C5'),Q('B4'),Q('A4'),
                E('F5'),E('F5'),Q('E5'),Q('C5'),Q('D5'),Q('C5')];
-    return toneSeq(seq);
-  }
-  function finish(){
-    finished=true; setSpinEnabled(false);
-    V.overlay.classList.add('show');     // ← ゴール時だけ出現
-    const ms=happyBirthday();
-    setTimeout(()=>{ V.overlay.classList.remove('show'); showCover(); }, Math.max(6000, ms));
-  }
+    return toneSeq(seq); }
+  function finish(){ finished=true; setSpinEnabled(false); V.overlay.classList.add('show');
+    const ms=happyBirthday(); setTimeout(()=>{ V.overlay.classList.remove('show'); showCover(); }, Math.max(6000, ms)); }
 
   /* ===== 初期化 ===== */
+  const macSlots={}, notesSet=new Set();
   function resetAll(){
     pos=1; moving=false; finished=false;
-    for(const k of Object.keys(gotMac)) gotMac[k]=false;
+    ['pink','blue','green','purple'].forEach(k=>gotMac[k]=false);
     gotNotes.clear(); setCharBy(null);
 
     buildBoard(); placeItems();
 
-    requestAnimationFrame(()=>{
-      computeCenters();
-      requestAnimationFrame(()=>{
-        computeCenters();
-        renderChar(); updateHUD();
-        clearHit(); V.wheel.style.transform='rotate(0deg)'; V.spinNum.textContent='タップでルーレット';
-        V.overlay.classList.remove('show'); setSpinEnabled(true);
-      });
-    });
+    requestAnimationFrame(()=>{ computeCenters(); requestAnimationFrame(()=>{
+      computeCenters(); renderChar(); updateHUD(); clearHit();
+      V.wheel.style.transform='rotate(0deg)'; V.spinNum.textContent='タップでルーレット';
+      V.overlay.classList.remove('show'); setSpinEnabled(true);
+    });});
 
-    // 画面回転・リサイズでもスクロールなしで収める
     window.addEventListener('resize', ()=>{ computeCenters(); renderChar(); }, { passive:true });
   }
 
