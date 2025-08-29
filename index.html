@@ -40,36 +40,66 @@
   /* Board */
   .board{width:100%;max-width:600px;aspect-ratio:1/1;
     display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);gap:6px;padding:4px}
-  .cell{position:relative;border-radius:14px;overflow:hidden;
+  .cell{
+    position:relative;border-radius:14px;overflow:hidden;
     background:radial-gradient(120% 80% at 20% 20%, rgba(255,255,255,.22), transparent 55%),
                linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
-    box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 6px 18px rgba(0,0,0,.35)}
-  .idx{position:absolute;left:6px;top:6px;font-size:12px;font-weight:700;color:#24313a;background:#fff;border-radius:999px;padding:.1em .5em;box-shadow:0 2px 6px rgba(0,0,0,.25)}
-  .start-ribbon{position:absolute;left:6px;top:6px;font-size:11px;font-weight:700;color:#163f2b;background:#a5f3cf;padding:2px 6px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:2}
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 6px 18px rgba(0,0,0,.35)
+  }
+  .idx{
+    position:absolute;left:6px;top:6px;font-size:12px;font-weight:700;color:#24313a;
+    background:#fff;border-radius:999px;padding:.1em .5em;box-shadow:0 2px 6px rgba(0,0,0,.25)
+  }
+  .start-ribbon{
+    position:absolute;left:6px;top:6px;font-size:11px;font-weight:700;color:#163f2b;
+    background:#a5f3cf;padding:2px 6px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:2
+  }
   .cell.goal{transform:scale(1.06);box-shadow:0 0 12px rgba(255,255,200,.6), inset 0 0 0 2px #ffe066}
-  .goal-img{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:72px;height:72px;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5));z-index:2}
+  .goal-img{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:72px;height:72px;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5));z-index:2
+  }
 
-  /* Items */
-  .cell .item{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:78%;height:auto;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.45));z-index:1}
-  .cell .noteEmoji{position:absolute;left:50%;top:18%;transform:translate(-50%,-50%);font-size:30px;z-index:1;color:#fff}
+  /* Items （すべて中央）*/
+  .cell .item{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:78%;height:auto;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.45));z-index:1
+  }
+  .cell .noteEmoji{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    font-size:30px;z-index:1;color:#fff
+  }
   .cell .collected{opacity:.28;filter:grayscale(1) blur(.2px)}
   .vanish{animation:vanish .28s ease forwards}
   @keyframes vanish{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.6)}}
 
-  /* Character */
+  /* Character（中央＆少し大きめ） */
   .charWrap{position:absolute;pointer-events:none;width:calc(100% - 8px);height:calc(100% - 8px);left:4px;top:4px;z-index:2}
-  .char{position:absolute;width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.55));transition:left .22s ease, top .22s ease}
+  .char{
+    position:absolute;width:72px;height:72px; /* ←前より少し大きめ */
+    object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.55));
+    transition:left .22s ease, top .22s ease
+  }
 
   /* HUD */
   .hud{position:absolute;left:10px;top:8px;display:flex;gap:6px;flex-wrap:wrap;z-index:3}
   .tag{padding:.3em .55em;border-radius:999px;font-size:12px;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
   .moving{position:absolute;right:10px;top:8px;font-size:12px;padding:.35em .6em;border-radius:999px;background:rgba(255,255,255,.18);z-index:3}
 
-  /* Roulette */
-  .wheelBox{width:clamp(180px, 32vw, 260px);aspect-ratio:1/1;position:relative;display:flex;align-items:center;justify-content:center;touch-action:manipulation;cursor:pointer;user-select:none}
+  /* Roulette（ポインタを右側へ） */
+  .wheelBox{
+    width:clamp(180px, 32vw, 260px);
+    aspect-ratio:1/1;position:relative;display:flex;align-items:center;justify-content:center;
+    touch-action:manipulation;cursor:pointer;user-select:none;
+  }
   .wheel{width:100%;height:100%;transform:rotate(0deg);transition:transform 3.5s cubic-bezier(.17,.89,.32,1.27)}
   .wheel.locked{opacity:.6;filter:grayscale(.3)}
-  .pointer{position:absolute;top:-6px;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:16px solid #fff;filter:drop-shadow(0 0 8px rgba(255,255,255,.9))}
+  /* ▶ 右向き三角（左を指す） */
+  .pointer{
+    position:absolute;right:-6px;top:50%;transform:translateY(-50%);
+    width:0;height:0;border-top:12px solid transparent;border-bottom:12px solid transparent;border-left:16px solid #fff;
+    filter:drop-shadow(0 0 8px rgba(255,255,255,.9))
+  }
   .spinNum{margin-top:8px;font-size:18px;min-height:1.2em}
   .slice-hit{stroke:#fff;stroke-width:2;filter:drop-shadow(0 2px 6px rgba(255,255,255,.7))}
   .label-hit{font-weight:700;text-shadow:0 0 6px rgba(255,255,255,.9)}
@@ -152,7 +182,6 @@
   function gid(id){return document.getElementById(id)}
   function showCover(){ V.game.classList.add('hidden'); V.cover.classList.remove('hidden'); }
   function showGame(){ V.cover.classList.add('hidden'); V.game.classList.remove('hidden'); }
-
   V.btnStart.addEventListener('click', ()=>{ resetAll(); showGame(); });
 
   /* S字マップ */
@@ -164,18 +193,17 @@
     return [rowFromTop, c];
   }
 
-  /* 座標 */
-  let centersPx=[], cellW=0, charOffsetY=0;
+  /* 座標（キャラ真ん中＆少し大きめ） */
+  let centersPx=[], cellW=0;
   function computeCenters(){
     const rect=V.board.getBoundingClientRect();
     const gap=6, pad=4, cw=(rect.width-gap*4)/SIZE; cellW=cw;
-    charOffsetY=cw*0.22;
     centersPx.length=N+1;
     for(let i=1;i<=N;i++){
       const [r,c]=indexToRC(i);
       centersPx[i]={x:c*(cw+gap)+cw/2+pad, y:r*(cw+gap)+cw/2+pad};
     }
-    const s=Math.max(26, Math.round(cellW*0.72));
+    const s=Math.max(28, Math.round(cellW*0.86));   // 大きめ
     V.char.style.width=s+'px'; V.char.style.height=s+'px';
   }
 
@@ -198,7 +226,7 @@
     computeCenters();
   }
 
-  /* アイテム配置 */
+  /* アイテム配置（中央に表示） */
   const MAC={pink:"public/assets/stage1/macaron_pink.png", blue:"public/assets/stage1/macaron_blue.png", green:"public/assets/stage1/macaron_green.png", purple:"public/assets/stage1/macaron_purple.png"};
   const NOTE_EMO=['♪','♫','♬'];
   const macSlots={}, notesSet=new Set();
@@ -222,18 +250,18 @@
 
   function setCharBy(col){ V.char.src = col? CHAR[col] : CHAR.start; }
   function renderChar(){ const p=centersPx[pos]; if(!p) return; const half=(V.char.getBoundingClientRect().width||64)/2;
-    V.char.style.left=(p.x-half)+'px'; V.char.style.top=(p.y-half+charOffsetY)+'px'; V.posTag.textContent=`位置: ${pos}/25`; }
+    V.char.style.left=(p.x-half)+'px'; V.char.style.top=(p.y-half)+'px'; V.posTag.textContent=`位置: ${pos}/25`; }
   function updateHUD(){ const mc=Object.values(gotMac).filter(v=>v).length; V.notesTag.textContent=`音符: ${gotNotes.size}/5`; V.macTag.textContent=`マカロン: ${mc}/4`;
     gid('cntPink').textContent=gotMac.pink?1:0; gid('cntBlue').textContent=gotMac.blue?1:0; gid('cntGreen').textContent=gotMac.green?1:0; gid('cntPurple').textContent=gotMac.purple?1:0; }
   function allMacCollected(){ return gotMac.pink && gotMac.blue && gotMac.green && gotMac.purple; }
 
-  /* ルーレット */
+  /* ルーレット：ポインタ右に合わせて停止角度を計算（基準角=0°） */
   const WHEEL_COLORS=['#ff7ab6','#6aa6ff','#ffd166','#7ee6a2','#caa6ff','#ff9f6e'];
-  const slicePaths=[], labelTexts=[]; const hitPath = document.getElementById('hitSector');
+  const slicePaths=[], labelTexts=[]; const hitPath=document.getElementById('hitSector');
   (function buildWheel(){
     const slices=V.wheel.querySelector('#slices'), labels=V.wheel.querySelector('#labels');
     for(let i=0;i<6;i++){
-      const a0=(-90+i*60)*Math.PI/180, a1=(-90+(i+1)*60)*Math.PI/180;
+      const a0=(-90+i*60)*Math.PI/180, a1=(-90+(i+1)*60)*Math.PI/180; /* 描画は従来通りでOK */
       const x0=50+48*Math.cos(a0), y0=50+48*Math.sin(a0), x1=50+48*Math.cos(a1), y1=50+48*Math.sin(a1);
       const p=document.createElementNS('http://www.w3.org/2000/svg','path');
       p.setAttribute('d',`M50,50 L${x0},${y0} A48,48 0 0 1 ${x1},${y1} Z`);
@@ -241,11 +269,9 @@
       const mid=(-90+(i+0.5)*60)*Math.PI/180; const lx=50+30*Math.cos(mid), ly=50+30*Math.sin(mid);
       const t=document.createElementNS('http://www.w3.org/2000/svg','text'); t.setAttribute('x',lx); t.setAttribute('y',ly); t.textContent=(i+1); labels.appendChild(t); labelTexts.push(t);
     }
-    hitPath.classList.remove('show');
   })();
-
-  function sectorPathFor(idx){
-    const a0=(-90+idx*60)*Math.PI/180, a1=(-90+(idx+1)*60)*Math.PI/180;
+  function sectorPathFor(idx){ /* 右ポインタ基準(0°)で当たり領域を描画 */
+    const base=0; const a0=(base+idx*60)*Math.PI/180, a1=(base+(idx+1)*60)*Math.PI/180;
     const R=48, r=16;
     const x0o=50+R*Math.cos(a0), y0o=50+R*Math.sin(a0);
     const x1o=50+R*Math.cos(a1), y1o=50+R*Math.sin(a1);
@@ -253,12 +279,7 @@
     const x0i=50+r*Math.cos(a0), y0i=50+r*Math.sin(a0);
     return `M${x0o},${y0o} A${R},${R} 0 0 1 ${x1o},${y1o} L${x1i},${y1i} A${r},${r} 0 0 0 ${x0i},${y0i} Z`;
   }
-
-  function clearHit(){
-    slicePaths.forEach(p=>p.classList.remove('slice-hit'));
-    labelTexts.forEach(t=>t.classList.remove('label-hit'));
-    hitPath.classList.remove('show');
-  }
+  function clearHit(){ slicePaths.forEach(p=>p.classList.remove('slice-hit')); labelTexts.forEach(t=>t.classList.remove('label-hit')); hitPath.classList.remove('show'); }
   function setSpinEnabled(on){ V.wheel.classList.toggle('locked',!on); V.movingFlag.classList.toggle('hidden',on); }
 
   V.wheelBox.addEventListener('click', ()=>{
@@ -269,7 +290,8 @@
     V.spinNum.textContent=`出目：${steps}`;
 
     const idx=steps-1;
-    const centerAngle=-90+(idx+0.5)*60;
+    const base=0;                            // 右ポインタ基準
+    const centerAngle=base+(idx+0.5)*60;     // セクション中央角
     const rev=3+Math.floor(Math.random()*4);
     const finalAngle=rev*360-centerAngle;
 
@@ -308,7 +330,6 @@
       if(note){ note.classList.add('collected'); }
     }
   }
-
   function moveWithLoop(steps){
     if(steps<=0){ setSpinEnabled(true); return; }
     moving=true; let remain=steps;
@@ -320,14 +341,13 @@
         clearInterval(timer);
         collectOnArrive(pos);
         updateHUD();
-
         if(pos===N && allMacCollected()){ finish(); }
         else{ moving=false; setSpinEnabled(true); V.spinNum.textContent='タップでルーレット'; }
       }
     },280);
   }
 
-  /* ゴール演出 */
+  /* ゴール演出（Happy Birthday） */
   let audioCtx;
   function ctx(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
   function toneSeq(seq){ const ac=ctx(); let t=ac.currentTime+0.02;
@@ -346,6 +366,7 @@
     const ms=happyBirthday(); setTimeout(()=>{ V.overlay.classList.remove('show'); showCover(); }, Math.max(6000, ms)); }
 
   /* 初期化 */
+  const macSlots={}, notesSet=new Set(); // ←上で使うのでここに（重複宣言しない）
   function resetAll(){
     pos=1; moving=false; finished=false;
     ['pink','blue','green','purple'].forEach(k=>gotMac[k]=false);
